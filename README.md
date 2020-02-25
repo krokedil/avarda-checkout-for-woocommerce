@@ -1,0 +1,1 @@
+# Avarda Checkout for WooCommerce plugin
