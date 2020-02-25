@@ -1,8 +1,8 @@
 <?php // phpcs:ignore
 /**
- * Plugin Name:     Avarda for WooCommerce
+ * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
- * Description:     Provides a Avarda gateway for WooCommerce.
+ * Description:     Provides a Avarda Checkout gateway for WooCommerce.
  * Version:         0.0.1
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 3.0
- * WC tested up to: 3.9.1
+ * WC tested up to: 3.9.2
  *
  * Copyright:       © 2016-2020 Krokedil.
  * License:         GNU General Public License v3.0

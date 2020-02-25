@@ -19,7 +19,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 	 */
 	public function __construct() {
 		$this->id                 = 'ACO';
-		$this->method_title       = __( '{plugin-name}', 'avarda-checkout-for-woocommerce' );
+		$this->method_title       = __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
 		$this->icon               = '';
 		$this->method_description = __( 'Allows payments through ' . $this->method_title . '.', 'avarda-checkout-for-woocommerce' ); // phpcs:ignore
 
@@ -30,10 +30,10 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->enabled          = $this->get_option( 'enabled' );
-		$this->title            = $this->get_option( 'title' );
-		$this->description      = $this->get_option( 'description' );
-		$this->debug            = $this->get_option( 'debug' );
+		$this->enabled     = $this->get_option( 'enabled' );
+		$this->title       = $this->get_option( 'title' );
+		$this->description = $this->get_option( 'description' );
+		$this->debug       = $this->get_option( 'debug' );
 
 		// Supports.
 		$this->supports = array(
@@ -87,7 +87,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 	public function process_refund( $order_id, $amount = null, $reasson = '' ) {
 		$order = wc_get_order( $order_id );
 		// Refund full amount.
-		
+
 		// Run logic here.
 	}
 
@@ -109,7 +109,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 	public function show_thank_you_snippet( $order_id ) {
 		// Check if order is subscription.
 		$order = wc_get_order( $order_id );
-		
+
 		// Show snippet.
 		ACO_wc_show_snippet();
 
