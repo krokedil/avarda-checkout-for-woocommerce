@@ -41,6 +41,15 @@ class Avarda_Checkout_For_WooCommerce_Request {
 	 * @return void
 	 */
 	public function set_enviroment() {
+		$live_enviroment = 'https://online.avarda.org/checkout2/';
+		$test_enviroment = 'https://stage.avarda.org/checkout2/';
+		$avarda_settings = get_option( 'woocommerce_avarda_checkout_settings' );
+
+		if ( 'no' === $avarda_settings['testmode'] ) {
+			$this->enviroment = $live_enviroment;
+		} else {
+			$this->enviroment = $test_enviroment;
+		}
 	}
 
 	/**
