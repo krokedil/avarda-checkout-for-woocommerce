@@ -98,6 +98,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include AVARDA_CHECKOUT_PATH . '/includes/avarda-checkout-for-woocommerce-form-fields.php';
+		error_log( var_export( $this->form_fields, true ) );
 	}
 
 	/**
@@ -129,8 +130,8 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
  * @param  array $methods All registered payment methods.
  * @return array $methods All registered payment methods.
  */
-function add_avarda_checkout_method( $methods ) {
+function add_aco_method( $methods ) {
 	$methods[] = 'Avarda_Checkout_For_WooCommerce_Gateway';
 	return $methods;
 }
-add_filter( 'woocommerce_payment_gateways', 'add_avarda_checkout_method' );
+add_filter( 'woocommerce_payment_gateways', 'add_aco_method' );

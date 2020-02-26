@@ -113,7 +113,16 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function include_files() {
+			// Includes Classes.
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-ajax.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-callbacks.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-gateway.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-logger.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-order-management.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-sessions.php';
 
+			// Helpers
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-avarda-checkout-for-woocommerce-helper-headers.php';
 		}
 
 		/**
