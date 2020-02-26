@@ -18,7 +18,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'ACO';
+		$this->id                 = 'aco';
 		$this->method_title       = __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
 		$this->icon               = '';
 		$this->method_description = __( 'Allows payments through ' . $this->method_title . '.', 'avarda-checkout-for-woocommerce' ); // phpcs:ignore
@@ -111,14 +111,14 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Show snippet.
-		ACO_wc_show_snippet();
+		aco_wc_show_snippet();
 
 		// Clear sessionStorage.
-		echo '<script>sessionStorage.removeItem("ACORequiredFields")</script>';
-		echo '<script>sessionStorage.removeItem("ACOFieldData")</script>';
+		echo '<script>sessionStorage.removeItem("acoRequiredFields")</script>';
+		echo '<script>sessionStorage.removeItem("acoFieldData")</script>';
 
 		// Unset sessions.
-		ACO_wc_unset_sessions();
+		aco_wc_unset_sessions();
 	}
 }
 
@@ -129,8 +129,8 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
  * @param  array $methods All registered payment methods.
  * @return array $methods All registered payment methods.
  */
-function add_Avarda_Checkout_method( $methods ) {
+function add_avarda_checkout_method( $methods ) {
 	$methods[] = 'Avarda_Checkout_For_WooCommerce_Gateway';
 	return $methods;
 }
-add_filter( 'woocommerce_payment_gateways', 'add_Avarda_Checkout_method' );
+add_filter( 'woocommerce_payment_gateways', 'add_avarda_checkout_method' );

@@ -1,5 +1,5 @@
 jQuery(function($) {
-	const ACO_wc = {
+	const aco_wc = {
 		bodyEl: $('body'),
 		checkoutFormSelector: 'form.checkout',
 
@@ -11,15 +11,15 @@ jQuery(function($) {
 		// Payment method
 		paymentMethodEl: $('input[name="payment_method"]'),
 		paymentMethod: '',
-		selectAnotherSelector: '#ACO-select-other',
+		selectAnotherSelector: '#aco-select-other',
 
 		// Address data.
 		addressData: [],
 
 		// Extra checkout fields.
 		blocked: false,
-		extraFieldsSelectorText: 'div#ACO-extra-checkout-fields input[type="text"], div#ACO-extra-checkout-fields input[type="password"], div#ACO-extra-checkout-fields textarea, div#ACO-extra-checkout-fields input[type="email"], div#ACO-extra-checkout-fields input[type="tel"]',
-		extraFieldsSelectorNonText: 'div#ACO-extra-checkout-fields select, div#ACO-extra-checkout-fields input[type="radio"], div#ACO-extra-checkout-fields input[type="checkbox"], div#ACO-extra-checkout-fields input.checkout-date-picker, input#terms input[type="checkbox"]',
+		extraFieldsSelectorText: 'div#aco-extra-checkout-fields input[type="text"], div#aco-extra-checkout-fields input[type="password"], div#aco-extra-checkout-fields textarea, div#aco-extra-checkout-fields input[type="email"], div#aco-extra-checkout-fields input[type="tel"]',
+		extraFieldsSelectorNonText: 'div#aco-extra-checkout-fields select, div#aco-extra-checkout-fields input[type="radio"], div#aco-extra-checkout-fields input[type="checkbox"], div#aco-extra-checkout-fields input.checkout-date-picker, input#terms input[type="checkbox"]',
 
 
 		/*
@@ -33,9 +33,9 @@ jQuery(function($) {
 		 * Check if our gateway is the selected gateway.
 		 */
 		checkIfSelected: function() {
-			if (ACO_wc.paymentMethodEl.length > 0) {
-				ACO_wc.paymentMethod = ACO_wc.paymentMethodEl.filter(':checked').val();
-				if( 'Avarda_Checkout' === ACO_wc.paymentMethod ) {
+			if (aco_wc.paymentMethodEl.length > 0) {
+				aco_wc.paymentMethod = aco_wc.paymentMethodEl.filter(':checked').val();
+				if( 'Avarda_Checkout' === aco_wc.paymentMethod ) {
 					return true;
 				}
 			} 
@@ -46,7 +46,7 @@ jQuery(function($) {
 		changeFromACO: function(e) {
 			e.preventDefault();
 
-			$(ACO_wc.checkoutFormSelector).block({
+			$(aco_wc.checkoutFormSelector).block({
 				message: null,
 				overlayCSS: {
 					background: '#fff',
@@ -58,10 +58,10 @@ jQuery(function($) {
 				type: 'POST',
 				dataType: 'json',
 				data: {
-					ACO: false,
-					nonce: ACO_wc_params.change_payment_method_nonce
+					aco: false,
+					nonce: aco_wc_params.change_payment_method_nonce
 				},
-				url: ACO_wc_params.change_payment_method_url,
+				url: aco_wc_params.change_payment_method_url,
 				success: function (data) {},
 				error: function (data) {},
 				complete: function (data) {
@@ -72,9 +72,9 @@ jQuery(function($) {
 
 		// When payment method is changed to ACO in regular WC Checkout page.
 		maybeChangeToACO: function() {
-			if ( 'ACO' === $(this).val() ) {
+			if ( 'aco' === $(this).val() ) {
 
-				$(ACO_wc.checkoutFormSelector).block({
+				$(aco_wc.checkoutFormSelector).block({
 					message: null,
 					overlayCSS: {
 						background: '#fff',
@@ -87,11 +87,11 @@ jQuery(function($) {
 				$.ajax({
 					type: 'POST',
 					data: {
-						ACO: true,
-						nonce: ACO_wc_params.change_payment_method_nonce
+						aco: true,
+						nonce: aco_wc_params.change_payment_method_nonce
 					},
 					dataType: 'json',
-					url: ACO_wc_params.change_payment_method_url,
+					url: aco_wc_params.change_payment_method_url,
 					success: function (data) {},
 					error: function (data) {},
 					complete: function (data) {
@@ -106,7 +106,7 @@ jQuery(function($) {
 		 */
 		updateOrderComment: function() {
 			let val = $('#order_comments').val();
-			localStorage.setItem( 'ACO_wc_order_comment', val );
+			localStorage.setItem( 'aco_wc_order_comment', val );
 		},
 
 		/**
@@ -124,7 +124,7 @@ jQuery(function($) {
 						let field = $('*[name="' + name + '"]');
 						let required = ( $('p#' + name + '_field').hasClass('validate-required') ? true : false );
 						// Only keep track of non standard WooCommerce checkout fields
-						if ($.inArray(name, ACO_wc_params.standard_woo_checkout_fields) == '-1' && name.indexOf('[qty]') < 0 && name.indexOf( 'shipping_method' ) < 0 && name.indexOf( 'payment_method' ) < 0 ) {
+						if ($.inArray(name, aco_wc_params.standard_woo_checkout_fields) == '-1' && name.indexOf('[qty]') < 0 && name.indexOf( 'shipping_method' ) < 0 && name.indexOf( 'payment_method' ) < 0 ) {
 							// Only keep track of required fields for validation.
 							if ( required === true ) {
 								requiredFields.push(name);
@@ -147,9 +147,9 @@ jQuery(function($) {
 						}
 					}
 				}
-				sessionStorage.setItem( 'ACORequiredFields', JSON.stringify( requiredFields ) );
-				sessionStorage.setItem( 'ACOFieldData', JSON.stringify( fieldData ) );
-				ACO_wc.validateRequiredFields();
+				sessionStorage.setItem( 'acoRequiredFields', JSON.stringify( requiredFields ) );
+				sessionStorage.setItem( 'acoFieldData', JSON.stringify( fieldData ) );
+				aco_wc.validateRequiredFields();
 		},
 
 		/**
@@ -157,8 +157,8 @@ jQuery(function($) {
 		 */
 		validateRequiredFields: function() {
 			// Get data from session storage.
-			let requiredFields = JSON.parse( sessionStorage.getItem( 'ACORequiredFields' ) );
-			let fieldData = JSON.parse( sessionStorage.getItem( 'ACOFieldData' ) );
+			let requiredFields = JSON.parse( sessionStorage.getItem( 'acoRequiredFields' ) );
+			let fieldData = JSON.parse( sessionStorage.getItem( 'acoFieldData' ) );
 			// Check if all data is set for required fields.
 			let allValid = true;
 			if ( requiredFields !== null ) {
@@ -169,7 +169,7 @@ jQuery(function($) {
 					}
 				}
 			}
-			ACO_wc.maybeFreezeIframe( allValid );
+			aco_wc.maybeFreezeIframe( allValid );
 		},
 
 		/**
@@ -179,12 +179,12 @@ jQuery(function($) {
 		 */
 		maybeFreezeIframe: function( allValid ) {
 			if ( true === allValid ) {
-				ACO_wc.blocked = false;
-				$('#ACO-required-fields-notice').remove();
+				aco_wc.blocked = false;
+				$('#aco-required-fields-notice').remove();
 				// Unblock iframe
-			} else 	if( ! $('#ACO-required-fields-notice').length ) { // Only if we dont have an error message already.
-				ACO_wc.blocked = true;
-				ACO_wc.maybePrintValidationMessage();
+			} else 	if( ! $('#aco-required-fields-notice').length ) { // Only if we dont have an error message already.
+				aco_wc.blocked = true;
+				aco_wc.maybePrintValidationMessage();
 				// Block iframe
 			}
 		},
@@ -193,8 +193,8 @@ jQuery(function($) {
 		 * Maybe prints the validation error message.
 		 */
 		maybePrintValidationMessage: function() {
-			if ( true === ACO_wc.blocked && ! $('#ACO-required-fields-notice').length ) {
-				$('form.checkout').prepend( '<div id="ACO-required-fields-notice" class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview"><ul class="woocommerce-error" role="alert"><li>' +  ACO_wc_params.required_fields_text + '</li></ul></div>' );
+			if ( true === aco_wc.blocked && ! $('#aco-required-fields-notice').length ) {
+				$('form.checkout').prepend( '<div id="aco-required-fields-notice" class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview"><ul class="woocommerce-error" role="alert"><li>' +  aco_wc_params.required_fields_text + '</li></ul></div>' );
 				var etop = $('form.checkout').offset().top;
 				$('html, body').animate({
 					scrollTop: etop
@@ -206,7 +206,7 @@ jQuery(function($) {
 		 * Sets the form fields values from the session storage.
 		 */
 		setFormFieldValues: function() {
-			let form_data = JSON.parse( sessionStorage.getItem( 'ACOFieldData' ) );
+			let form_data = JSON.parse( sessionStorage.getItem( 'acoFieldData' ) );
 			if( form_data !== null ) {
 				$.each( form_data, function( name, value ) {
 					let field = $('*[name="' + name + '"]');
@@ -235,15 +235,15 @@ jQuery(function($) {
 		 */
 		moveExtraCheckoutFields: function() {
 			// Move order comments.
-			$('.woocommerce-additional-fields').appendTo('#ACO-extra-checkout-fields');
+			$('.woocommerce-additional-fields').appendTo('#aco-extra-checkout-fields');
 
 			let form = $('form[name="checkout"] input, form[name="checkout"] select, textarea');
 			for ( i = 0; i < form.length; i++ ) {
 				let name = form[i]['name'];
 				// Check if this is a standard field.
-				if ( $.inArray( name, ACO_wc_params.standard_woo_checkout_fields ) === -1 ) {
+				if ( $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) === -1 ) {
 					// This is not a standard Woo field, move to our div.
-					$('p#' + name + '_field').appendTo('#ACO-extra-checkout-fields');
+					$('p#' + name + '_field').appendTo('#aco-extra-checkout-fields');
 				}
 			}
 		},
@@ -253,23 +253,23 @@ jQuery(function($) {
 		 */
 		init: function() {
 			// Check if payson is the selected payment method before we do anything.
-			if( ACO_wc.checkIfPaysonSelected() ) {
-				$(document).ready( ACO_wc.documentReady() );
+			if( aco_wc.checkIfPaysonSelected() ) {
+				$(document).ready( aco_wc.documentReady() );
 			
 				// Change from ACO.
-				ACO_wc.bodyEl.on('click', ACO_wc.selectAnotherSelector, ACO_wc.changeFromACO);
+				aco_wc.bodyEl.on('click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO);
 
 				// Catch changes to order notes.
-				ACO_wc.bodyEl.on('change', '#order_comments', ACO_wc.updateOrderComment);
+				aco_wc.bodyEl.on('change', '#order_comments', aco_wc.updateOrderComment);
 
 				// Extra checkout fields.
-				ACO_wc.bodyEl.on('blur', ACO_wc.extraFieldsSelectorText, ACO_wc.checkFormData);
-				ACO_wc.bodyEl.on('change', ACO_wc.extraFieldsSelectorNonText, ACO_wc.checkFormData);
-				ACO_wc.bodyEl.on('click', 'input#terms', ACO_wc.checkFormData);
+				aco_wc.bodyEl.on('blur', aco_wc.extraFieldsSelectorText, aco_wc.checkFormData);
+				aco_wc.bodyEl.on('change', aco_wc.extraFieldsSelectorNonText, aco_wc.checkFormData);
+				aco_wc.bodyEl.on('click', 'input#terms', aco_wc.checkFormData);
 
 			}
-			ACO_wc.bodyEl.on('change', 'input[name="payment_method"]', ACO_wc.maybeChangeToACO);
+			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 		},
 	}
-	ACO_wc.init();
+	aco_wc.init();
 });

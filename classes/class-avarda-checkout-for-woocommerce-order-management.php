@@ -29,13 +29,12 @@ class Avarda_Checkout_For_WooCommerce_Order_Management {
 	 */
 	public function cancel_reservation( $order_id ) {
 		$order = wc_get_order( $order_id );
-		// If this order wasn't created using ACO payment method, bail.
-		if ( 'ACO' != $order->get_payment_method() ) {
+		// If this order wasn't created using aco payment method, bail.
+		if ( 'aco' != $order->get_payment_method() ) {
 			return;
 		}
 
 		// Add logic here.
-
 	}
 
 	/**
@@ -46,8 +45,8 @@ class Avarda_Checkout_For_WooCommerce_Order_Management {
 	 */
 	public function activate_reservation( $order_id ) {
 		$order = wc_get_order( $order_id );
-		// If this order wasn't created using ACO payment method, bail.
-		if ( 'ACO' != $order->get_payment_method() ) {
+		// If this order wasn't created using aco payment method, bail.
+		if ( 'aco' != $order->get_payment_method() ) {
 			return;
 		}
 

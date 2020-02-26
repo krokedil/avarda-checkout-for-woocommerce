@@ -24,8 +24,7 @@ class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
 	 * Hook in methods - uses WordPress ajax handlers (admin-ajax).
 	 */
 	public static function add_ajax_events() {
-		$ajax_events = array(
-		);
+		$ajax_events = array();
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			if ( $nopriv ) {
@@ -36,23 +35,23 @@ class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
 		}
 	}
 
-	public static function ACO_wc_change_payment_method() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'ACO_wc_change_payment_method' ) ) {
+	public static function aco_wc_change_payment_method() {
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_change_payment_method' ) ) {
 			wp_send_json_error( 'bad_nonce' );
 			exit;
 		}
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if ( 'false' === $_POST['ACO'] ) {
+		if ( 'false' === $_POST['aco'] ) {
 			// Set chosen payment method to first gateway that is not ours for WooCommerce.
 			$first_gateway = reset( $available_gateways );
-			if ( 'ACO' !== $first_gateway->id ) {
+			if ( 'aco' !== $first_gateway->id ) {
 				WC()->session->set( 'chosen_payment_method', $first_gateway->id );
 			} else {
 				$second_gateway = next( $available_gateways );
 				WC()->session->set( 'chosen_payment_method', $second_gateway->id );
 			}
 		} else {
-			WC()->session->set( 'chosen_payment_method', 'ACO' );
+			WC()->session->set( 'chosen_payment_method', 'aco' );
 		}
 		WC()->payment_gateways()->set_current_gateway( $available_gateways );
 		$redirect = wc_get_checkout_url();
@@ -68,8 +67,8 @@ class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
 	 *
 	 * @return void
 	 */
-	public static function ACO_wc_checkout_error() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'ACO_wc_checkout_error' ) ) { // phpcs: ignore.
+	public static function aco_wc_checkout_error() {
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_checkout_error' ) ) { // phpcs: ignore.
 			wp_send_json_error( 'bad_nonce' );
 			exit;
 		}
@@ -83,7 +82,7 @@ class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
 			$error_message = 'Error message could not be retreived';
 		}
 		// Create the order and send redirect url.
-		//Create the WC Order here:
+		// Create the WC Order here:
 		// $order_id     = ;
 		$order        = wc_get_order( $order_id );
 		$redirect_url = $order->get_checkout_order_received_url();

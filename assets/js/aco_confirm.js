@@ -1,18 +1,18 @@
 jQuery(function($) {
-	const ACO_wc = {
+	const aco_wc = {
 		/*
 		 * Document ready function. 
 		 * Runs on the $(document).ready event.
 		 */
 		documentReady: function() {
 			// Set extra fields values.
-			ACO_wc.setFormFieldValues();
+			aco_wc.setFormFieldValues();
 			
 			// Set the WooCommerce order comment.
-			ACO_wc.setOrderComment();
+			aco_wc.setOrderComment();
 
 			// Submit the form.
-			ACO_wc.submit();
+			aco_wc.submit();
 		},
 
 		/*
@@ -29,10 +29,10 @@ jQuery(function($) {
 			let error_message = $( ".woocommerce-NoticeGroup-checkout" ).text();
 			$.ajax({
 				type: 'POST',
-				url: ACO_wc_params.checkout_error_url,
+				url: aco_wc_params.checkout_error_url,
 				data: {
 					error_message: error_message,
-					nonce: ACO_wc_params.checkout_error_nonce,
+					nonce: aco_wc_params.checkout_error_nonce,
 				},
 				dataType: 'json',
 				success: function(data) {
@@ -51,15 +51,15 @@ jQuery(function($) {
 		 * Sets the order comment, and removes the local storage after.
 		 */
 		setOrderComment: function() {
-			$('#order_comments').val( localStorage.getItem( 'ACO_wc_order_comment' ) );
-			localStorage.removeItem( 'ACO_wc_order_comment' );
+			$('#order_comments').val( localStorage.getItem( 'aco_wc_order_comment' ) );
+			localStorage.removeItem( 'aco_wc_order_comment' );
 		},
 
 		/**
 		 * Sets the form fields values from the session storage.
 		 */
 		setFormFieldValues: function() {
-			var form_data = JSON.parse( sessionStorage.getItem( 'ACOFieldData' ) );
+			var form_data = JSON.parse( sessionStorage.getItem( 'acoFieldData' ) );
 			$.each( form_data, function( name, value ) {
 				var field = $('*[name="' + name + '"]');
 				var saved_value = value;
@@ -85,16 +85,16 @@ jQuery(function($) {
 		 * Initiates the script and sets the triggers for the functions.
 		 */
 		init: function() {
-			$(document).ready( ACO_wc.documentReady() );
+			$(document).ready( aco_wc.documentReady() );
 
 			// On checkout error.
-			//$(document).on( 'checkout_error', ACO_wc.checkoutError() );
+			//$(document).on( 'checkout_error', aco_wc.checkoutError() );
 			$( document ).on( 'checkout_error', function () {
-				ACO_wc.checkoutError();
+				aco_wc.checkoutError();
 			});
 		},
 	}
-	ACO_wc.init();
-	let ACO_process_text = ACO_wc_params.modal_text;
-	$( 'body' ).append( $( '<div class="ACO-modal"><div class="ACO-modal-content">' + ACO_process_text + '</div></div>' ) );
+	aco_wc.init();
+	let aco_process_text = aco_wc_params.modal_text;
+	$( 'body' ).append( $( '<div class="aco-modal"><div class="aco-modal-content">' + aco_process_text + '</div></div>' ) );
 });

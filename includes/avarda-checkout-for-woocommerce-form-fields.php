@@ -65,4 +65,4 @@ $settings = array(
 		'description' => sprintf( __( 'Log ' . $this->method_title . ' events in <code>%s</code>', 'avarda-checkout-for-woocommerce' ), wc_get_log_file_path( 'avarda_checkout' ) ), // phpcs:ignore
 	),
 );
-return apply_filters( 'avarda_checkout_settings', $settings );
+return apply_filters( 'aco_settings', $settings );

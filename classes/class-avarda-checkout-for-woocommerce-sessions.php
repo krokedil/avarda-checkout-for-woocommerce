@@ -65,9 +65,9 @@ class Avarda_Checkout_For_WooCommerce_Sessions {
 	 * @return void
 	 */
 	public function set_session_from_id() {
-		if ( isset( $_GET['ACO_session_id'] ) ) { // phpcs: ignore.
+		if ( isset( $_GET['aco_session_id'] ) ) { // phpcs: ignore.
 			$sessions_handler = new WC_Session_Handler();
-			$session_data     = $sessions_handler->get_session( $_GET['ACO_session_id'] );
+			$session_data     = $sessions_handler->get_session( $_GET['aco_session_id'] );
 			if ( ! empty( $session_data ) ) {
 				WC()->session = $sessions_handler;
 				foreach ( $session_data as $key => $value ) {
@@ -90,7 +90,7 @@ class Avarda_Checkout_For_WooCommerce_Sessions {
 	 * @return void
 	 */
 	public function maybe_set_wc_cart( $cart ) {
-		if ( isset( $_GET['ACO_session_id'] ) ) { // phpcs: ignore.
+		if ( isset( $_GET['aco_session_id'] ) ) { // phpcs: ignore.
 			WC()->cart = $cart;
 		}
 	}

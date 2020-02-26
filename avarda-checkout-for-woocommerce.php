@@ -104,7 +104,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Classes.
 
-			do_action( 'ACO_initiated' );
+			do_action( 'aco_initiated' );
 		}
 
 		/**
@@ -138,7 +138,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return string Setting link
 		 */
 		public function get_setting_link() {
-			$section_slug = 'ACO';
+			$section_slug = 'aco';
 			return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
 		}
 
