@@ -23,9 +23,8 @@ class ACO_Request {
 	/**
 	 * Class constructor.
 	 */
-	public function __construct( $order_id, $auth = false ) {
-		$this->order_id = $order_id;
-		$this->auth     = $auth;
+	public function __construct( $auth = false ) {
+		$this->auth = $auth;
 		$this->set_environment_variables();
 	}
 
@@ -106,7 +105,7 @@ class ACO_Request {
 		if ( $this->auth ) {
 			return '';
 		} else {
-			$token = aco_maybe_create_token( $this->order_id );
+			$token = aco_maybe_create_token();
 			if ( is_wp_error( $token ) ) {
 				wp_die( esc_html( $token ) );
 			}

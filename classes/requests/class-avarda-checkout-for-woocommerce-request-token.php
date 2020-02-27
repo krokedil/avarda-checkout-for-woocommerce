@@ -16,12 +16,10 @@ class ACO_Request_Token extends ACO_Request {
 
 	/**
 	 * Class constructor.
-	 *
-	 * @param int $order_id WooCommerce order id.
 	 */
-	public function __construct( $order_id ) {
+	public function __construct() {
 		// Run parent constructor and set auth to true.
-		parent::__construct( $order_id, true );
+		parent::__construct( true );
 	}
 	/**
 	 * Makes the request.
