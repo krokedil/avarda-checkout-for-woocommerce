@@ -13,8 +13,7 @@
 function aco_maybe_create_token() {
 	$token = get_transient( 'aco_auth_token' );
 	if ( false === $token ) {
-		$request  = new ACO_Request_Token();
-		$response = $request->request();
+		$response = ACO_WC()->create_token->request();
 		if ( is_wp_error( $response ) || ! isset( $response['token'] ) ) {
 			return $response;
 		}

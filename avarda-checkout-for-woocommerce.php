@@ -100,6 +100,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Set variabled for shorthand access to classes.
 
+			// Requests.
+			$this->request            = new ACO_Request();
+			$this->create_token       = new ACO_Request_Token();
+			$this->initialize_payment = new ACO_Request_Initialize_Payment();
+
 			// Request Helpers.
 
 			// Classes.

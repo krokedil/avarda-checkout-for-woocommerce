@@ -36,6 +36,18 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	}
 
 	/**
+	 * Gets the request body.
+	 *
+	 * @return array
+	 */
+	public function get_body() {
+		return array(
+			'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
+			'items'    => 'helper function generating items', // TODO.
+		);
+	}
+
+	/**
 	 * Gets the request args for the API call.
 	 *
 	 * @return array
@@ -44,12 +56,7 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		return array(
 			'headers' => $this->get_headers(),
 			'method'  => 'POST',
-			'body'    => wp_json_encode(
-				array(
-					'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
-					'items'    => 'helper function generating items', // TODO
-				)
-			),
+			'body'    => wp_json_encode( $this->get_body() ),
 		);
 	}
 }
