@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Order management class.
  */
-class Avarda_Checkout_For_WooCommerce_Order_Management {
+class ACO_Order_Management {
 	/**
 	 * Class constructor.
 	 */

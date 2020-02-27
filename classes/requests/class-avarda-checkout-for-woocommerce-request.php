@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Main request class
  */
-class Avarda_Checkout_For_WooCommerce_Request {
+class ACO_Request {
 	/**
 	 * The request enviroment.
 	 *
@@ -41,8 +41,8 @@ class Avarda_Checkout_For_WooCommerce_Request {
 	 * @return void
 	 */
 	public function set_enviroment() {
-		$live_enviroment = 'https://online.avarda.org/checkout2/';
-		$test_enviroment = 'https://stage.avarda.org/checkout2/';
+		$live_enviroment = 'https://avdonl-p-checkout.avarda.org';
+		$test_enviroment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
 		$avarda_settings = get_option( 'woocommerce_aco_settings' );
 
 		if ( 'no' === $avarda_settings['testmode'] ) {

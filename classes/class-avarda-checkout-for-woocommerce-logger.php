@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Logger class.
  */
-class Avarda_Checkout_For_WooCommerce_Logger {
+class ACO_Logger {
 	/**
 	 * Log message string
 	 *

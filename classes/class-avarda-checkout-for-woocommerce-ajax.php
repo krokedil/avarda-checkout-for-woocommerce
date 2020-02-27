@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Ajax class.
  */
-class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
+class ACO_AJAX extends WC_AJAX {
 	/**
 	 * Hook in ajax handlers.
 	 */
@@ -90,4 +90,4 @@ class Avarda_Checkout_For_WooCommerce_AJAX extends WC_AJAX {
 		wp_die();
 	}
 }
-Avarda_Checkout_For_WooCommerce_AJAX::init();
+ACO_AJAX::init();

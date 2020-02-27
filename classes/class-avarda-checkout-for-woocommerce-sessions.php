@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Sessions class.
  */
-class Avarda_Checkout_For_WooCommerce_Sessions {
+class ACO_Sessions {
 	/**
 	 * The session id.
 	 *

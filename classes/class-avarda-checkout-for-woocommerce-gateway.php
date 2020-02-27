@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Gateway class.
  */
-class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
+class ACO_Gateway extends WC_Payment_Gateway {
 
 	/**
 	 * Class constructor.
@@ -131,7 +131,7 @@ class Avarda_Checkout_For_WooCommerce_Gateway extends WC_Payment_Gateway {
  * @return array $methods All registered payment methods.
  */
 function add_aco_method( $methods ) {
-	$methods[] = 'Avarda_Checkout_For_WooCommerce_Gateway';
+	$methods[] = 'ACO_Gateway';
 	return $methods;
 }
 add_filter( 'woocommerce_payment_gateways', 'add_aco_method' );

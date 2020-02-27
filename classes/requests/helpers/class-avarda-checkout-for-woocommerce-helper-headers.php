@@ -8,7 +8,7 @@
 /**
  * Class to generate headers for requests.
  */
-class Avarda_Checkout_For_WooCommerce_Helper_Headers {
+class ACO_Helper_Headers {
 	/**
 	 * The request headers.
 	 *

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Callback class.
  */
-class Avarda_Checkout_For_WooCommerce_Callbacks {
+class ACO_Callbacks {
 	/**
 	 * Class constructor.
 	 */
@@ -84,4 +84,4 @@ class Avarda_Checkout_For_WooCommerce_Callbacks {
 		}
 	}
 }
-new Avarda_Checkout_For_WooCommerce_Callbacks();
+new ACO_Callbacks();
