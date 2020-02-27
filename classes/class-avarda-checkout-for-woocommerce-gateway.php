@@ -98,7 +98,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include AVARDA_CHECKOUT_PATH . '/includes/avarda-checkout-for-woocommerce-form-fields.php';
-		error_log( var_export( $this->form_fields, true ) );
 	}
 
 	/**

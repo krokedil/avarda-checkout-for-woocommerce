@@ -23,8 +23,10 @@ class ACO_Request {
 	/**
 	 * Class constructor.
 	 */
-	public function __construct() {
-		$this->set_enviroment();
+	public function __construct( $order_id, $auth = false ) {
+		$this->order_id = $order_id;
+		$this->auth     = $auth;
+		$this->set_environment_variables();
 	}
 
 	/**
@@ -33,6 +35,10 @@ class ACO_Request {
 	 * @return array
 	 */
 	public function get_headers() {
+		return array(
+			'Authorization' => $this->calculate_auth(),
+			'Content-Type'  => $this->content_type,
+		);
 	}
 
 	/**
@@ -51,6 +57,21 @@ class ACO_Request {
 			$this->enviroment = $test_enviroment;
 		}
 	}
+
+	/**
+	 * Sets the environment.
+	 *
+	 * @return void
+	 */
+	public function set_environment_variables() {
+		$this->payer_settings = get_option( 'woocommerce_aco_settings' );
+		$this->client_id      = $this->payer_settings['agent_id'];
+		$this->client_secret  = $this->payer_settings['api_key'];
+		$this->testmode       = $this->payer_settings['testmode'];
+		$this->content_type   = ( $this->auth ) ? 'application/json\r\n' : 'application/json';
+		$this->base_url       = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
+	}
+
 
 	/**
 	 * Checks response for any error.
@@ -74,5 +95,22 @@ class ACO_Request {
 			return new WP_Error( wp_remote_retrieve_response_code( $response ), $response['response']['message'] . $error_message, $data );
 		}
 		return json_decode( wp_remote_retrieve_body( $response ), true );
+	}
+
+	/**
+	 * Calculates the auth needed for the different requests.
+	 *
+	 * @return string
+	 */
+	public function calculate_auth() {
+		if ( $this->auth ) {
+			return '';
+		} else {
+			$token = aco_maybe_create_token( $this->order_id );
+			if ( is_wp_error( $token ) ) {
+				wp_die( esc_html( $token ) );
+			}
+			return 'Bearer ' . $token;
+		}
 	}
 }
