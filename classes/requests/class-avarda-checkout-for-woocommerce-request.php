@@ -63,12 +63,12 @@ class ACO_Request {
 	 * @return void
 	 */
 	public function set_environment_variables() {
-		$this->payer_settings = get_option( 'woocommerce_aco_settings' );
-		$this->client_id      = $this->payer_settings['agent_id'];
-		$this->client_secret  = $this->payer_settings['api_key'];
-		$this->testmode       = $this->payer_settings['testmode'];
-		$this->content_type   = ( $this->auth ) ? 'application/json\r\n' : 'application/json';
-		$this->base_url       = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
+		$this->avarda_settings = get_option( 'woocommerce_aco_settings' );
+		$this->client_id       = $this->avarda_settings['agent_id'];
+		$this->client_secret   = $this->avarda_settings['api_key'];
+		$this->testmode        = $this->avarda_settings['testmode'];
+		$this->content_type    = ( $this->auth ) ? 'application/json\r\n' : 'application/json';
+		$this->base_url        = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
 	}
 
 
