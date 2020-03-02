@@ -113,6 +113,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public function include_files() {
 			// Classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-ajax.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-api.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-gateway.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-logger.php';
@@ -120,11 +121,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-sessions.php';
 
 			// Requests.
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request-token.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request-initialize-payment.php';
-
-			// Helpers.
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-avarda-checkout-for-woocommerce-helper-headers.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/avarda-checkout-for-woocommerce-functions.php';
