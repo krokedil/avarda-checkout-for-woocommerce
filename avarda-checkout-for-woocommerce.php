@@ -98,16 +98,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Load scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 
-			// Set variabled for shorthand access to classes.
-
-			// Requests.
-			$this->request            = new ACO_Request();
-			$this->create_token       = new ACO_Request_Token();
-			$this->initialize_payment = new ACO_Request_Initialize_Payment();
-
-			// Request Helpers.
-
-			// Classes.
+			// Set class variables.
+			$this->api    = new ACO_API();
+			$this->logger = new ACO_Logger();
 
 			do_action( 'aco_initiated' );
 		}
