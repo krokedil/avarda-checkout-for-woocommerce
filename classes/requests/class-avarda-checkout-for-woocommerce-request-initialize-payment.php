@@ -43,7 +43,15 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	public function get_body() {
 		return array(
 			'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
-			'items'    => 'helper function generating items', // TODO.
+			'items'    => array(
+				array(
+					'description' => 'Test Item Description',
+					'notes'       => 'Additional Notes',
+					'amount'      => 50,
+					'taxCode'     => '20',
+					'taxAmount'   => 10,
+				),
+			), // TODO: Helper function for getting items.
 		);
 	}
 
