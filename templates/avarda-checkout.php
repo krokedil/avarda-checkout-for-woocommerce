@@ -24,9 +24,9 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 			<?php do_action( 'aco_wc_after_order_review' ); ?>
 		</div>
 		<div id="aco-iframe">
-			<?php do_action( 'aco_wc_before_snippet' ); ?>
-			<?php aco_wc_show_snippet(); ?>
-			<?php do_action( 'aco_wc_after_snippet' ); ?>
+			<?php do_action( 'aco_wc_before_avarda_checkout_form' ); ?>
+			<?php aco_wc_show_checkout_form(); ?>
+			<?php do_action( 'aco_wc_after_avarda_checkout_form' ); ?>
 		</div>
 	</div>
 	<?php do_action( 'aco_wc_after_wrapper' ); ?>
