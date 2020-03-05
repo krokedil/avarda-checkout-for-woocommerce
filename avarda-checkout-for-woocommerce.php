@@ -128,7 +128,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request-initialize-payment.php';
 
 			// Request Helpers.
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-avarda-checkout-for-woocommerce-request-helper-cart.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-avarda-checkout-for-woocommerce-helper-cart.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/avarda-checkout-for-woocommerce-functions.php';

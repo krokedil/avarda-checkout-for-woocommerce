@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function aco_maybe_create_token() {
 	$token = get_transient( 'aco_auth_token' );
-	if ( false == $token ) {
+	if ( false === $token ) {
 		$avarda_payment = ACO_WC()->api->request_token();
 		if ( ! $avarda_payment ) {
 			return;
