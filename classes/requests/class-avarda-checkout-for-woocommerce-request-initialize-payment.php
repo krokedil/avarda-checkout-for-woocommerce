@@ -22,7 +22,6 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	public function request() {
 		$request_url  = $this->base_url . '/api/partner/payments';
 		$request_args = apply_filters( 'aco_initialize_payment_args', $this->get_request_args() );
-		error_log( 'req arg ' . var_export( $request_args, true ) );
 
 		$response = wp_remote_request( $request_url, $request_args );
 		$code     = wp_remote_retrieve_response_code( $response );
@@ -43,15 +42,8 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	public function get_body() {
 		return array(
 			'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
-			'items'    => array(
-				array(
-					'description' => 'Test Item Description',
-					'notes'       => 'Additional Notes',
-					'amount'      => 50,
-					'taxCode'     => '20',
-					'taxAmount'   => 10,
-				),
-			), // TODO: Helper function for getting items.
+			'mode'     => 'B2C', // TODO: Logic for using correct value depending on customer type.
+			'items'    => ACO_WC()->cart_items->get_cart_items(),
 		);
 	}
 
