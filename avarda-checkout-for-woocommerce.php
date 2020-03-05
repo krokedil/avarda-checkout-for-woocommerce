@@ -113,25 +113,25 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function include_files() {
 			// Classes.
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-ajax.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-api.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-callbacks.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-gateway.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-logger.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-order-management.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-sessions.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-avarda-checkout-for-woocommerce-templates.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-ajax.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-api.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-gateway.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-sessions.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 
 			// Requests.
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request-token.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-avarda-checkout-for-woocommerce-request-initialize-payment.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request-token.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request-initialize-payment.php';
 
 			// Request Helpers.
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-avarda-checkout-for-woocommerce-helper-cart.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
 
 			// Includes.
-			include_once AVARDA_CHECKOUT_PATH . '/includes/avarda-checkout-for-woocommerce-functions.php';
+			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';
 
 		}
 
