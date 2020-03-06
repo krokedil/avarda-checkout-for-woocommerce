@@ -102,77 +102,6 @@ jQuery(function($) {
 		},
 
 		/**
-		 * Updates the order comment local storage.
-		 */
-		updateOrderComment: function() {
-			let val = $('#order_comments').val();
-			localStorage.setItem( 'aco_wc_order_comment', val );
-		},
-
-		/**
-		 * Checks for form Data on the page, and sets the checkout fields session storage.
-		 */
-		checkFormData: function() {
-			let form = $('form[name="checkout"] input, form[name="checkout"] select, textarea');
-				let requiredFields = [];
-				let fieldData = {};
-				// Get all form fields.
-				for ( i = 0; i < form.length; i++ ) { 
-					// Check if the form has a name set.
-					if ( form[i]['name'] !== '' ) {
-						let name    = form[i]['name'];
-						let field = $('*[name="' + name + '"]');
-						let required = ( $('p#' + name + '_field').hasClass('validate-required') ? true : false );
-						// Only keep track of non standard WooCommerce checkout fields
-						if ($.inArray(name, aco_wc_params.standard_woo_checkout_fields) == '-1' && name.indexOf('[qty]') < 0 && name.indexOf( 'shipping_method' ) < 0 && name.indexOf( 'payment_method' ) < 0 ) {
-							// Only keep track of required fields for validation.
-							if ( required === true ) {
-								requiredFields.push(name);
-							}
-							// Get the value from the field.
-							let value = '';
-							if( field.is(':checkbox') ) {
-								if( field.is(':checked') ) {
-									value = form[i].value;
-								}
-							} else if( field.is(':radio') ) {
-								if( field.is(':checked') ) {
-									value = $( 'input[name="' + name + '"]:checked').val();
-								}
-							} else {
-								value = form[i].value
-							}
-							// Set field data with values.
-							fieldData[name] = value;
-						}
-					}
-				}
-				sessionStorage.setItem( 'acoRequiredFields', JSON.stringify( requiredFields ) );
-				sessionStorage.setItem( 'acoFieldData', JSON.stringify( fieldData ) );
-				aco_wc.validateRequiredFields();
-		},
-
-		/**
-		 * Validates the required fields, checks if they have a value set.
-		 */
-		validateRequiredFields: function() {
-			// Get data from session storage.
-			let requiredFields = JSON.parse( sessionStorage.getItem( 'acoRequiredFields' ) );
-			let fieldData = JSON.parse( sessionStorage.getItem( 'acoFieldData' ) );
-			// Check if all data is set for required fields.
-			let allValid = true;
-			if ( requiredFields !== null ) {
-				for( i = 0; i < requiredFields.length; i++ ) {
-					fieldName = requiredFields[i];
-					if ( '' === fieldData[fieldName] ) {
-						allValid = false;
-					}
-				}
-			}
-			aco_wc.maybeFreezeIframe( allValid );
-		},
-
-		/**
 		 * Maybe freezes the iframe to prevent anyone from completing the order before filling in all required fields.
 		 * 
 		 * @param {boolean} allValid 
@@ -186,47 +115,6 @@ jQuery(function($) {
 				aco_wc.blocked = true;
 				aco_wc.maybePrintValidationMessage();
 				// Block iframe
-			}
-		},
-
-		/**
-		 * Maybe prints the validation error message.
-		 */
-		maybePrintValidationMessage: function() {
-			if ( true === aco_wc.blocked && ! $('#aco-required-fields-notice').length ) {
-				$('form.checkout').prepend( '<div id="aco-required-fields-notice" class="woocommerce-NoticeGroup woocommerce-NoticeGroup-updateOrderReview"><ul class="woocommerce-error" role="alert"><li>' +  aco_wc_params.required_fields_text + '</li></ul></div>' );
-				var etop = $('form.checkout').offset().top;
-				$('html, body').animate({
-					scrollTop: etop
-				}, 1000);
-			}
-		},
-
-		/**
-		 * Sets the form fields values from the session storage.
-		 */
-		setFormFieldValues: function() {
-			let form_data = JSON.parse( sessionStorage.getItem( 'acoFieldData' ) );
-			if( form_data !== null ) {
-				$.each( form_data, function( name, value ) {
-					let field = $('*[name="' + name + '"]');
-					let saved_value = value;
-					// Check if field is a checkbox
-					if( field.is(':checkbox') ) {
-						if( saved_value !== '' ) {
-							field.prop('checked', true);
-						}
-					} else if( field.is(':radio') ) {
-						for ( x = 0; x < field.length; x++ ) {
-							if( field[x].value === value ) {
-								$(field[x]).prop('checked', true);
-							}
-						}
-					} else {
-						field.val( saved_value );
-					}
-
-				});
 			}
 		},
 
