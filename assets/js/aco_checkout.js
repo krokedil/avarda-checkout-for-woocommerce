@@ -27,6 +27,31 @@ jQuery(function($) {
 		 * Runs on the $(document).ready event.
 		 */
 		documentReady: function() {
+			aco_wc.ACOCheckoutForm();
+			
+		},
+
+		ACOCheckoutForm: function() {
+			(function(e,t,n,a,s,c,o,i,r){e[a]=e[a]||function(){(e[a].q=e[a].q||[
+			]).push(arguments)};e[a].i=s;i=t.createElement(n);i.async=1
+			;i.src=o+"?v="+c+"&ts="+1*new Date;r=t.getElementsByTagName(n)[0]
+			;r.parentNode.insertBefore(i,r)})(window,document,"script",
+			"avardaCheckoutInit","avardaCheckout","1.0.0",
+			"https://avdonl0s0checkout0fe.blob.core.windows.net/frontend/static/js/main.js"
+			);
+	
+			window.avardaCheckoutInit({
+				"accessToken": aco_wc_params.aco_jwt_token,
+				"rootElementId": "checkout-form",
+				"redirectUrl": "redirectUrlToOrderReceived", // TODO
+				"styles": {},
+				"disableFocus": true,
+				"beforeSubmitCallback": aco_wc.handleCallback
+			});
+		},
+
+		handleCallback: function(callback) {
+			
 		},
 
 		/*
@@ -35,7 +60,7 @@ jQuery(function($) {
 		checkIfSelected: function() {
 			if (aco_wc.paymentMethodEl.length > 0) {
 				aco_wc.paymentMethod = aco_wc.paymentMethodEl.filter(':checked').val();
-				if( 'Avarda_Checkout' === aco_wc.paymentMethod ) {
+				if( 'aco' === aco_wc.paymentMethod ) {
 					return true;
 				}
 			} 
@@ -140,8 +165,8 @@ jQuery(function($) {
 		 * Initiates the script and sets the triggers for the functions.
 		 */
 		init: function() {
-			// Check if payson is the selected payment method before we do anything.
-			if( aco_wc.checkIfPaysonSelected() ) {
+			// Check if Avarda is the selected payment method before we do anything.
+			if( aco_wc.checkIfSelected() ) {
 				$(document).ready( aco_wc.documentReady() );
 			
 				// Change from ACO.
