@@ -52,6 +52,20 @@ class ACO_API {
 	}
 
 	/**
+	 * Gets an Avarda Checkout payment.
+	 *
+	 * @return mixed
+	 */
+	public function request_get_payment() {
+		$aco_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+
+		$request  = new ACO_Request_Get_Payment();
+		$response = $request->request( $aco_purchase_id );
+
+		return $this->check_for_api_error( $response );
+	}
+
+	/**
 	 * Checks for WP Errors and returns either the response as array or a false.
 	 *
 	 * @param array $response The response from the request.

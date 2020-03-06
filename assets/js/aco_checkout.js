@@ -51,7 +51,11 @@ jQuery(function($) {
 		},
 
 		handleCallback: function(callback) {
-			
+			// Sucess.
+			callback.beforeSubmitContinue();
+
+			// Fail.
+			// callback.beforeSubmitAbort();
 		},
 
 		/*
