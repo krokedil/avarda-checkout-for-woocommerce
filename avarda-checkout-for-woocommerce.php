@@ -98,12 +98,27 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Load scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
 
+			add_action( 'aco_before_load_scripts', array( $this, 'aco_maybe_initialize_payment' ) );
+
 			// Set class variables.
 			$this->api        = new ACO_API();
 			$this->logger     = new ACO_Logger();
 			$this->cart_items = new ACO_Helper_Cart();
 
 			do_action( 'aco_initiated' );
+		}
+
+
+		/**
+		 * Mayne initialize payment.
+		 *
+		 * @return void
+		 */
+		public function aco_maybe_initialize_payment() {
+			// Creates jwt token if we do not have session var set with jwt token.
+			if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+				aco_wc_initialize_payment();
+			}
 		}
 
 		/**
@@ -167,6 +182,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function load_scripts() {
 			if ( is_checkout() ) {
+					do_action( 'aco_before_load_scripts' );
+
 					// Checkout script.
 					wp_register_script(
 						'aco_wc',
