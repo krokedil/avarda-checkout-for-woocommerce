@@ -24,7 +24,10 @@ class ACO_AJAX extends WC_AJAX {
 	 * Hook in methods - uses WordPress ajax handlers (admin-ajax).
 	 */
 	public static function add_ajax_events() {
-		$ajax_events = array();
+		$ajax_events = array(
+			'aco_wc_update_checkout'    => true,
+			'aco_wc_get_avarda_payment' => true,
+		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			if ( $nopriv ) {
@@ -88,6 +91,30 @@ class ACO_AJAX extends WC_AJAX {
 		$redirect_url = $order->get_checkout_order_received_url();
 		wp_send_json_success( $redirect_url );
 		wp_die();
+	}
+	/**
+	 * Gets the Avarda payment from session.
+	 *
+	 * @return void
+	 */
+	public static function aco_wc_get_avarda_payment() {
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_get_avarda_payment' ) ) { // Input var okay.
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$avarda_payment = ACO_WC()->api->request_get_payment( WC()->session->get( 'aco_wc_purchase_id' ) );
+		if ( ! $avarda_payment ) {
+			wp_send_json_error( $avarda_payment );
+			wp_die();
+		}
+		wp_send_json_success(
+			array(
+				'customer_data' => $avarda_payment,
+			)
+		);
+		wp_die();
+
 	}
 }
 ACO_AJAX::init();

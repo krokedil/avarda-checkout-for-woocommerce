@@ -56,9 +56,7 @@ class ACO_API {
 	 *
 	 * @return mixed
 	 */
-	public function request_get_payment() {
-		$aco_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
-
+	public function request_get_payment( $aco_purchase_id ) {
 		$request  = new ACO_Request_Get_Payment();
 		$response = $request->request( $aco_purchase_id );
 

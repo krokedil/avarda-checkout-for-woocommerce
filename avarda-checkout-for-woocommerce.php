@@ -188,8 +188,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 						'update_order_nonce'           => wp_create_nonce( 'aco_wc_update_checkout' ),
 						'change_payment_method_url'    => WC_AJAX::get_endpoint( 'aco_wc_change_payment_method' ),
 						'change_payment_method_nonce'  => wp_create_nonce( 'aco_wc_change_payment_method' ),
-						'get_avarda_order_url'         => WC_AJAX::get_endpoint( 'kco_wc_get_avarda_order' ),
-						'get_avarda_order_nonce'       => wp_create_nonce( 'kco_wc_get_avarda_order' ),
+						'get_avarda_payment_url'       => WC_AJAX::get_endpoint( 'aco_wc_get_avarda_payment' ),
+						'get_avarda_payment_nonce'     => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
 						'required_fields_text'         => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
 						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
 					);
