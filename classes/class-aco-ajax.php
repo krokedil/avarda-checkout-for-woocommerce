@@ -92,6 +92,70 @@ class ACO_AJAX extends WC_AJAX {
 		wp_send_json_success( $redirect_url );
 		wp_die();
 	}
+
+	public static function aco_wc_update_checkout() {
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+
+		if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
+
+			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+
+			// Set empty return array for errors.
+			$return = array();
+
+			// Check if we have a avarda purchase id.
+			if ( empty( $avarda_purchase_id ) ) {
+				wc_add_notice( 'Avarda purchase id is missing.', 'error' );
+				wp_send_json_error();
+				wp_die();
+			} else {
+				// Get the Avarda order from Avarda.
+				$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+				// Check if we got a wp_error.
+				if ( ! $avarda_order ) {
+					wp_send_json_error();
+					wp_die();
+				}
+
+				// Get the Avarda order object.
+				// Calculate cart totals.
+				WC()->cart->calculate_fees();
+				WC()->cart->calculate_totals();
+
+				// Check if order needs payment.
+				if ( apply_filters( 'aco_check_if_needs_payment', true ) ) {
+					if ( ! WC()->cart->needs_payment() && 'Initialized' === $avarda_order['state'] ) {
+						$return['redirect_url'] = wc_get_checkout_url();
+						wp_send_json_error( $return );
+						wp_die();
+					}
+				}
+
+				// Check if payment state is Initialized.
+				if ( 'Initialized' === $avarda_order['state'] ) {
+					// If it is, update order.
+					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+					// If the update failed - reload the checkout page and display the error.
+					if ( false === $avarda_order ) {
+						wp_send_json_error();
+						wp_die();
+					}
+				} /*
+				elseif ( 'checkout_complete' !== $avarda_order['state'] ) {
+					// Checkout is not completed or incomplete. Send to cart and display error.
+					$return['redirect_url'] = add_query_arg( 'aco-order', 'error', wc_get_cart_url() );
+					wp_send_json_error( $return );
+					wp_die();
+				} */
+			}
+		}
+		// Everything is okay if we get here. Send empty success and kill wp.
+		wp_send_json_success();
+		wp_die();
+
+	}
+
 	/**
 	 * Gets the Avarda payment from session.
 	 *
