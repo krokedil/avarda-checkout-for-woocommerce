@@ -43,7 +43,7 @@ jQuery(function($) {
 			window.avardaCheckoutInit({
 				"accessToken": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
-				"redirectUrl": "redirectUrlToOrderReceived", // TODO
+				"redirectUrl": "redirectUrlToOrderReceived", // TODO: Get the order received url from hash change url param.
 				"styles": {},
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleCallback
@@ -51,11 +51,43 @@ jQuery(function($) {
 		},
 
 		handleCallback: function(callback) {
+			aco_wc.getAvardaPayment();
 			// Sucess.
-			callback.beforeSubmitContinue();
+			//callback.beforeSubmitContinue();
 
 			// Fail.
 			// callback.beforeSubmitAbort();
+		},
+
+		getAvardaPayment: function() {
+			$.ajax({
+				type: 'POST',
+				url: aco_wc_params.get_avarda_payment_url,
+				data: {
+					nonce: aco_wc_params.get_avarda_payment_nonce
+				},
+				dataType: 'json',
+				success: function(data) {
+				},
+				error: function(data) {
+					return false;
+				},
+				complete: function(data) {
+					aco_wc.setCustomerData( data.responseJSON.data );
+					// Check Terms checkbox, if it exists.
+					if ($("form.checkout #terms").length > 0) {
+						$("form.checkout #terms").prop("checked", true);
+					}
+					$('form.checkout').submit();
+					return true;
+				}
+			});
+		},
+
+		setCustomerData: function( data ) {
+			// do stuff
+			console.log('customer dataa');
+			console.log(data);
 		},
 
 		/*
