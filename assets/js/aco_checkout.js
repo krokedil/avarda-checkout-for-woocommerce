@@ -90,6 +90,39 @@ jQuery(function($) {
 			console.log(data);
 		},
 
+		updateAvardaPayment: function() {
+			$('.woocommerce-checkout-review-order-table').block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+			$.ajax({
+				type: 'POST',
+				url: aco_wc_params.update_payment_url,
+				data: {
+					nonce: aco_wc_params.update_payment_nonce
+				},
+				dataType: 'json',
+				success: function(data) {
+				},
+				error: function(data) {
+				},
+				complete: function(data) {
+					console.log(data.responseJSON);
+					if (true === data.responseJSON.success) {
+						$('.woocommerce-checkout-review-order-table').unblock();							
+					} else {
+						if( '' !== data.responseJSON.data.redirect_url ) {
+							console.log('Cart do not need payment. Reloading checkout.');
+							window.location.href = data.responseJSON.data.redirect_url;
+						}
+					}
+				}
+			});
+		},
+
 		/*
 		 * Check if our gateway is the selected gateway.
 		 */
@@ -210,6 +243,8 @@ jQuery(function($) {
 
 				// Catch changes to order notes.
 				aco_wc.bodyEl.on('change', '#order_comments', aco_wc.updateOrderComment);
+
+				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
 
 				// Extra checkout fields.
 				aco_wc.bodyEl.on('blur', aco_wc.extraFieldsSelectorText, aco_wc.checkFormData);
