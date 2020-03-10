@@ -63,6 +63,12 @@ class ACO_API {
 		return $this->check_for_api_error( $response );
 	}
 
+	public function request_update_payment( $aco_purchase_id ) {
+		$request  = new ACO_Request_Update_Payment();
+		$response = $request->request( $aco_purchase_id );
+		return $this->check_for_api_error( $response );
+	}
+
 	/**
 	 * Checks for WP Errors and returns either the response as array or a false.
 	 *
