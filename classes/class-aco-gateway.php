@@ -127,9 +127,9 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		if ( $order_id && $avarda_order ) {
 
 			// Set WC order transaction ID.
-			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_key( $avarda_order['purchaseId'] ) );
+			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
-			update_post_meta( $order_id, '_transaction_id', sanitize_key( $avarda_order['purchaseId'] ) );
+			update_post_meta( $order_id, '_transaction_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
 			$environment = $this->testmode ? 'test' : 'live';
 			update_post_meta( $order_id, '_wc_avarda_environment', $environment );

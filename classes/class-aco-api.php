@@ -54,6 +54,7 @@ class ACO_API {
 	/**
 	 * Gets an Avarda Checkout payment.
 	 *
+	 * @param string $aco_purchase_id Avarda purchase id.
 	 * @return mixed
 	 */
 	public function request_get_payment( $aco_purchase_id ) {
@@ -63,6 +64,12 @@ class ACO_API {
 		return $this->check_for_api_error( $response );
 	}
 
+	/**
+	 * Updates an Avarda Checkout payment.
+	 *
+	 * @param string $aco_purchase_id Avarda purchase id.
+	 * @return mixed
+	 */
 	public function request_update_payment( $aco_purchase_id ) {
 		$request  = new ACO_Request_Update_Payment();
 		$response = $request->request( $aco_purchase_id );
