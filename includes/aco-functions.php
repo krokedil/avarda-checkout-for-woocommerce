@@ -63,6 +63,29 @@ function aco_wc_show_checkout_form() {
 	<?php
 }
 
+/**
+ * Confirms and finishes the Avarda Order for processing.
+ *
+ * @param int    $order_id The WooCommerce Order id.
+ * @param string $avarda_purchase_id The Avarda purchase id.
+ * @return void
+ */
+function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
+	if ( $order_id ) {
+		$order        = wc_get_order( $order_id );
+		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+		if ( 'Completed' === $avarda_order['state'] ) {
+			// Payment complete and set transaction id.
+			// translators: Avarda purchase ID.
+			$note = sprintf( __( 'Payment via Avarda Checkout. Purchase ID: %s', 'avarda-checkout-for-woocommerce' ), sanitize_text_field( $avarda_order['purchaseId'] ) );
+			$order->add_order_note( $note );
+			$order->payment_complete( $avarda_purchase_id );
+			do_action( 'aco_wc_payment_complete', $order_id, $avarda_order );
+		}
+	}
+}
+
 
 /**
  * Unsets the sessions used by the plguin.
