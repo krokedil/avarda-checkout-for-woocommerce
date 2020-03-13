@@ -63,6 +63,17 @@ function aco_wc_show_checkout_form() {
 	<?php
 }
 
+
+/**
+ * Unsets the sessions used by the plguin.
+ *
+ * @return void
+ */
+function aco_wc_unset_sessions() {
+	WC()->session->__unset( 'aco_wc_purchase_id' );
+	WC()->session->__unset( 'aco_wc_jwt' );
+}
+
 /**
  * Prints error message as notices.
  *
