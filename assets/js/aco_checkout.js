@@ -137,6 +137,22 @@ jQuery(function($) {
 			});
 		},
 
+		hashChange: function() {
+			console.log('hashchange');
+			var currentHash = location.hash;
+            var splittedHash = currentHash.split("=");
+            console.log(splittedHash[0]);
+            console.log(splittedHash[1]);
+            if(splittedHash[0] === "#avarda-success"){
+                var response = JSON.parse( atob( splittedHash[1] ) );
+                console.log('response.return_url');
+                console.log(response.return_url);
+                sessionStorage.setItem( 'avardaRedirectUrl', response.return_url );
+
+				$('form.checkout').removeClass( 'processing' ).unblock();
+            }
+		},
+
 		/*
 		 * Check if our gateway is the selected gateway.
 		 */
@@ -258,13 +274,16 @@ jQuery(function($) {
 				// Catch changes to order notes.
 				aco_wc.bodyEl.on('change', '#order_comments', aco_wc.updateOrderComment);
 
+				// Update avarda payment.
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
 
 				// Extra checkout fields.
 				aco_wc.bodyEl.on('blur', aco_wc.extraFieldsSelectorText, aco_wc.checkFormData);
 				aco_wc.bodyEl.on('change', aco_wc.extraFieldsSelectorNonText, aco_wc.checkFormData);
 				aco_wc.bodyEl.on('click', 'input#terms', aco_wc.checkFormData);
-
+				
+				// hashchange.
+				$( window ).on('hashchange', aco_wc.hashChange);
 			}
 			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 		},
