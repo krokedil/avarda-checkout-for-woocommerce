@@ -70,12 +70,23 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		// Run logic here.
-
-		return array(
-			'result'   => 'success',
-			'redirect' => $this->get_return_url( $order ),
-		);
+		// Regular purchase.
+		// 1. Process the payment.
+		// 2. Redirect to order received page.
+		if ( $this->process_payment_handler( $order_id ) ) {
+			$response = array(
+				'return_url' => $this->get_return_url( $order ),
+				'time'       => microtime(),
+			);
+			return array(
+				'result'   => 'success',
+				'redirect' => '#avarda-success=' . base64_encode( wp_json_encode( $response ) ),
+			);
+		} else {
+			return array(
+				'result' => 'error',
+			);
+		}
 	}
 
 	/**
