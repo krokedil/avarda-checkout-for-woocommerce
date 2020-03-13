@@ -54,7 +54,9 @@ function aco_wc_initialize_payment() {
  * Avarda checkout form.
  */
 function aco_wc_show_checkout_form() {
-	$avarda_payment = aco_wc_initialize_payment();
+	if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+		aco_wc_initialize_payment();
+	}
 	?>
 	<div id="checkout-form">
 	</div>

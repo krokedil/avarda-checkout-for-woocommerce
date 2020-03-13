@@ -22,8 +22,8 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	public function request( $aco_purchase_id ) {
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/items';
 		$request_args = apply_filters( 'aco_update_payment_args', $this->get_request_args() );
-		$response = wp_remote_request( $request_url, $request_args );
-		$code = wp_remote_retrieve_response_code( $response );
+		$response     = wp_remote_request( $request_url, $request_args );
+		$code         = wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
 		$log = ACO_Logger::format_log( '', 'PUT', 'ACO update payment', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );

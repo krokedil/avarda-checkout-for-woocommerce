@@ -34,6 +34,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$this->title       = $this->get_option( 'title' );
 		$this->description = $this->get_option( 'description' );
 		$this->debug       = $this->get_option( 'debug' );
+		$this->testmode    = 'yes' === $this->get_option( 'testmode' );
 
 		// Supports.
 		$this->supports = array(
@@ -43,7 +44,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'show_thank_you_snippet' ) );
+		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'avarda_thank_you' ) );
 	}
 
 	/**
@@ -101,17 +102,17 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Shows the snippet on the thankyou page.
+	 * Shows the avarda thankyou on the wc thankyou page.
 	 *
 	 * @param string $order_id The WooCommerce order id.
 	 * @return void
 	 */
-	public function show_thank_you_snippet( $order_id ) {
+	public function avarda_thank_you( $order_id ) {
 		// Check if order is subscription.
 		$order = wc_get_order( $order_id );
 
-		// Show snippet.
-		aco_wc_show_snippet();
+		// Show avarda checkout form.
+		aco_wc_show_checkout_form();
 
 		// Clear sessionStorage.
 		echo '<script>sessionStorage.removeItem("acoRequiredFields")</script>';
