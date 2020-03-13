@@ -32,6 +32,9 @@ jQuery(function($) {
 		},
 
 		ACOCheckoutForm: function() {
+			/* var avardaRedirectUrl = ( null !== sessionStorage.getItem( 'avardaRedirectUrl' ) ) ? sessionStorage.getItem( 'avardaRedirectUrl' ) : '';
+			console.log('aco redirect url');
+			console.log(avardaRedirectUrl); */
 			(function(e,t,n,a,s,c,o,i,r){e[a]=e[a]||function(){(e[a].q=e[a].q||[
 			]).push(arguments)};e[a].i=s;i=t.createElement(n);i.async=1
 			;i.src=o+"?v="+c+"&ts="+1*new Date;r=t.getElementsByTagName(n)[0]
@@ -43,20 +46,22 @@ jQuery(function($) {
 			window.avardaCheckoutInit({
 				"accessToken": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
-				"redirectUrl": "redirectUrlToOrderReceived", // TODO: Get the order received url from hash change url param.
+				"redirectUrl": '',
 				"styles": {},
 				"disableFocus": true,
-				"beforeSubmitCallback": aco_wc.handleCallback
+				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
 			});
 		},
 
-		handleCallback: function(callback) {
-			aco_wc.getAvardaPayment();
-			// Sucess.
-			//callback.beforeSubmitContinue();
 
-			// Fail.
-			// callback.beforeSubmitAbort();
+		handleBeforeSubmitCallback: function(callback) {
+			if ( false === aco_wc.getAvardaPayment() ) {
+				// Fail.
+				callback.beforeSubmitAbort();
+			} else {
+				// Sucess.
+				callback.beforeSubmitContinue();
+			}
 		},
 
 		getAvardaPayment: function() {
@@ -85,9 +90,18 @@ jQuery(function($) {
 		},
 
 		setCustomerData: function( data ) {
-			// do stuff
-			console.log('customer dataa');
 			console.log(data);
+
+			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName );
+			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName );
+			$( '#billing_company' ).val( ( data.customer_data.companyName ? data.customer_data.companyName : '' ) );
+			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 );
+			$( '#billing_address_2' ).val( ( data.customer_data.invoicingAddress.address2 ? data.customer_data.invoicingAddress.address2 : '' ) );
+			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city );
+			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip );
+			$( '#billing_phone' ).val( data.customer_data.phone );
+			$( '#billing_email' ).val( data.customer_data.email );
+			$( '#billing_country' ).val( data.customer_data.invoicingAddress.country.toUpperCase() );
 		},
 
 		updateAvardaPayment: function() {
