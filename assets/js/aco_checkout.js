@@ -50,9 +50,19 @@ jQuery(function($) {
 				"styles": {},
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
+				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
 			});
 		},
 
+		handleCompletedPurchaseCallback: function(callback){
+			console.log('payment-completed');
+            var redirectUrl = sessionStorage.getItem( 'avardaRedirectUrl' );
+            console.log(redirectUrl);
+            if( redirectUrl ) {
+                window.location.href = redirectUrl;
+			}
+			callback.unmount();
+		},
 
 		handleBeforeSubmitCallback: function(callback) {
 			if ( false === aco_wc.getAvardaPayment() ) {
