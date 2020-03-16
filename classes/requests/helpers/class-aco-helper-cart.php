@@ -173,7 +173,7 @@ class ACO_Helper_Cart {
 							'description' => substr( $method->label, 0, 35 ), // String.
 							'notes'       => substr( 'shipping|' . $method->id, 0, 35 ), // String.
 							'amount'      => 0, // Float.
-							'taxCode'     => (string) ( array_sum( $method->taxes ) / $method->cost * 100 ), // String.
+							'taxCode'     => '0', // String.
 							'taxAmount'   => 0, // Float.
 						);
 					}

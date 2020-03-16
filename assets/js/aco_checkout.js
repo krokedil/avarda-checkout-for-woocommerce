@@ -136,6 +136,7 @@ jQuery(function($) {
 				complete: function(data) {
 					console.log(data.responseJSON);
 					if (true === data.responseJSON.success) {
+						window.avardaCheckout.refreshForm();
 						$('.woocommerce-checkout-review-order-table').unblock();							
 					} else {
 						if( '' !== data.responseJSON.data.redirect_url ) {

@@ -125,29 +125,20 @@ class ACO_AJAX extends WC_AJAX {
 
 				// Check if order needs payment.
 				if ( apply_filters( 'aco_check_if_needs_payment', true ) ) {
-					if ( ! WC()->cart->needs_payment() && 'Initialized' === $avarda_order['state'] ) {
+					if ( ! WC()->cart->needs_payment() ) {
 						$return['redirect_url'] = wc_get_checkout_url();
 						wp_send_json_error( $return );
 						wp_die();
 					}
 				}
 
-				// Check if payment state is Initialized.
-				if ( 'Initialized' === $avarda_order['state'] ) {
-					// If it is, update order.
-					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-					// If the update failed - reload the checkout page and display the error.
-					if ( false === $avarda_order ) {
-						wp_send_json_error();
-						wp_die();
-					}
-				} /*
-				elseif ( 'checkout_complete' !== $avarda_order['state'] ) {
-					// Checkout is not completed or incomplete. Send to cart and display error.
-					$return['redirect_url'] = add_query_arg( 'aco-order', 'error', wc_get_cart_url() );
-					wp_send_json_error( $return );
+				// Update order.
+				$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+				// If the update failed - reload the checkout page and display the error.
+				if ( false === $avarda_order ) {
+					wp_send_json_error();
 					wp_die();
-				} */
+				}
 			}
 		}
 		// Everything is okay if we get here. Send empty success and kill wp.
