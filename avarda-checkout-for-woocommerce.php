@@ -2,7 +2,7 @@
 /**
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
- * Description:     Provides a Avarda Checkout gateway for WooCommerce.
+ * Description:     Provides an Avarda Checkout gateway for WooCommerce.
  * Version:         0.0.1
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/

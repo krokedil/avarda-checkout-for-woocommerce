@@ -32,9 +32,6 @@ jQuery(function($) {
 		},
 
 		ACOCheckoutForm: function() {
-			/* var avardaRedirectUrl = ( null !== sessionStorage.getItem( 'avardaRedirectUrl' ) ) ? sessionStorage.getItem( 'avardaRedirectUrl' ) : '';
-			console.log('aco redirect url');
-			console.log(avardaRedirectUrl); */
 			(function(e,t,n,a,s,c,o,i,r){e[a]=e[a]||function(){(e[a].q=e[a].q||[
 			]).push(arguments)};e[a].i=s;i=t.createElement(n);i.async=1
 			;i.src=o+"?v="+c+"&ts="+1*new Date;r=t.getElementsByTagName(n)[0]
@@ -65,13 +62,18 @@ jQuery(function($) {
 		},
 
 		handleBeforeSubmitCallback: function(callback) {
-			if ( false === aco_wc.getAvardaPayment() ) {
-				// Fail.
-				callback.beforeSubmitAbort();
-			} else {
-				// Sucess.
-				callback.beforeSubmitContinue();
-			}
+			aco_wc.getAvardaPayment();
+			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
+				if ( false === bool ) {
+					// Fail.
+					console.log('fail');
+					callback.beforeSubmitAbort();
+				} else {
+					// Success.
+					console.log('success');
+					callback.beforeSubmitContinue();
+				}
+			});
 		},
 
 		getAvardaPayment: function() {
@@ -102,16 +104,16 @@ jQuery(function($) {
 		setCustomerData: function( data ) {
 			console.log(data);
 
-			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName );
-			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName );
+			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName ? data.customer_data.invoicingAddress.firstName : '' );
+			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName ? data.customer_data.invoicingAddress.lastName : '' );
 			$( '#billing_company' ).val( ( data.customer_data.companyName ? data.customer_data.companyName : '' ) );
-			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 );
+			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 ? data.customer_data.invoicingAddress.address1 : '' );
 			$( '#billing_address_2' ).val( ( data.customer_data.invoicingAddress.address2 ? data.customer_data.invoicingAddress.address2 : '' ) );
-			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city );
-			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip );
-			$( '#billing_phone' ).val( data.customer_data.phone );
-			$( '#billing_email' ).val( data.customer_data.email );
-			$( '#billing_country' ).val( data.customer_data.invoicingAddress.country.toUpperCase() );
+			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city ? data.customer_data.invoicingAddress.city : '' );
+			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '' );
+			$( '#billing_phone' ).val( data.customer_data.phone ? data.customer_data.phone : '' );
+			$( '#billing_email' ).val( data.customer_data.email ? data.customer_data.email : '' );
+			$( '#billing_country' ).val( data.customer_data.invoicingAddress.country ? data.customer_data.invoicingAddress.country.toUpperCase() : '' );
 		},
 
 		updateAvardaPayment: function() {
@@ -155,13 +157,18 @@ jQuery(function($) {
             console.log(splittedHash[0]);
             console.log(splittedHash[1]);
             if(splittedHash[0] === "#avarda-success"){
+				$( 'body' ).trigger( 'aco_order_validation', true );
                 var response = JSON.parse( atob( splittedHash[1] ) );
                 console.log('response.return_url');
                 console.log(response.return_url);
-                sessionStorage.setItem( 'avardaRedirectUrl', response.return_url );
+				sessionStorage.setItem( 'avardaRedirectUrl', response.return_url );
 
 				$('form.checkout').removeClass( 'processing' ).unblock();
             }
+		},
+
+		errorDetected: function() {
+			$( 'body' ).trigger( 'aco_order_validation', false );
 		},
 
 		/*
@@ -293,8 +300,10 @@ jQuery(function($) {
 				aco_wc.bodyEl.on('change', aco_wc.extraFieldsSelectorNonText, aco_wc.checkFormData);
 				aco_wc.bodyEl.on('click', 'input#terms', aco_wc.checkFormData);
 				
-				// hashchange.
+				// Hashchange.
 				$( window ).on('hashchange', aco_wc.hashChange);
+				// Error detected.
+				$( document.body ).on( 'checkout_error', aco_wc.errorDetected );
 			}
 			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 		},
