@@ -117,7 +117,7 @@ class ACO_Helper_Cart {
 	}
 
 	/**
-	 * Undocumented function
+	 * Gets the products SKU.
 	 *
 	 * @param object $product The WooCommerce Product.
 	 * @return string

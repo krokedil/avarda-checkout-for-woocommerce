@@ -101,9 +101,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			add_action( 'aco_before_load_scripts', array( $this, 'aco_maybe_initialize_payment' ) );
 
 			// Set class variables.
-			$this->api        = new ACO_API();
-			$this->logger     = new ACO_Logger();
-			$this->cart_items = new ACO_Helper_Cart();
+			$this->api              = new ACO_API();
+			$this->logger           = new ACO_Logger();
+			$this->cart_items       = new ACO_Helper_Cart();
+			$this->order_items      = new ACO_Helper_Order();
+			$this->order_management = new ACO_Order_Management();
 
 			do_action( 'aco_initiated' );
 		}
@@ -143,10 +145,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-initialize-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/get/class-aco-request-get-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/order-management/post/class-aco-request-activate-order.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-order.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';

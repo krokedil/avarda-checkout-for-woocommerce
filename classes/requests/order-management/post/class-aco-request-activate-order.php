@@ -63,7 +63,7 @@ class ACO_Request_Activate_Order extends ACO_Request {
 		return array(
 			'headers' => $this->get_headers(),
 			'method'  => 'POST',
-			'body'    => wp_json_encode( $this->get_body() ),
+			'body'    => wp_json_encode( $this->get_body( $order_id ) ),
 		);
 	}
 }
