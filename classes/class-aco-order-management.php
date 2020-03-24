@@ -50,6 +50,67 @@ class ACO_Order_Management {
 			return;
 		}
 
-		// Add logic here
+		// Check Avarda settings to see if we have the ordermanagement enabled.
+		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
+		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
+		if ( ! $order_management ) {
+			return;
+		}
+
+		$subscription = $this->check_if_subscription( $order );
+		// If this is a free subscription then stop here.
+		if ( $subscription && 0 >= $order->get_total() ) {
+			return;
+		}
+
+		// Check if we have a purchase id.
+		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		if ( empty( $purchase_id ) ) {
+			$order->add_order_note( __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
+			$order->set_status( 'on-hold' );
+			return;
+		}
+
+		// If this reservation was already activated, do nothing.
+		if ( get_post_meta( $order_id, '_avarda_reservation_activated', true ) ) {
+			$order->add_order_note( __( 'Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already activated.', 'avarda-checkout-for-woocommerce' ) );
+			$order->set_status( 'on-hold' );
+			return;
+		}
+
+		// TODO: Should we do different request if order is subcription?
+		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_activate_order( $order_id ) : ACO_WC()->api->request_activate_order( $order_id );
+
+		if ( false === $avarda_order ) {
+			// If error save error message.
+			$code          = $avarda_order->get_error_code();
+			$message       = $avarda_order->get_error_message();
+			$text          = __( 'Avarda API Error on Avarda activate order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+			$formated_text = sprintf( $text, $code, $message );
+			$order->add_order_note( $formated_text );
+			$order->set_status( 'on-hold' );
+		} else {
+			// Add time stamp, used to prevent duplicate activations for the same order.
+			update_post_meta( $order_id, '_avarda_reservation_activated', current_time( 'mysql' ) );
+			$order->add_order_note( __( 'Avarda reservation was successfully activated.', 'avarda-checkout-for-woocommerce' ) );
+		}
+
+	}
+
+
+	/**
+	 * Checks if the order is a subscription order or not
+	 *
+	 * @param object $order WC_Order object.
+	 * @return boolean
+	 */
+	public function check_if_subscription( $order ) {
+		if ( class_exists( 'WC_Subscriptions_Order' ) && wcs_order_contains_renewal( $order ) ) {
+			return true;
+		}
+		if ( class_exists( 'WC_Subscriptions_Order' ) && wcs_order_contains_subscription( $order ) ) {
+			return true;
+		}
+		return false;
 	}
 }
