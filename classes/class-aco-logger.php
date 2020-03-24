@@ -26,8 +26,8 @@ class ACO_Logger {
 	 * @param string $data The data string.
 	 */
 	public static function log( $data ) {
-		$payson_settings = get_option( 'woocommerce_avarda-checkout_settings' );
-		if ( 'yes' === $payson_settings['debug'] ) {
+		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+		if ( 'yes' === $avarda_settings['debug'] ) {
 			$message = self::format_data( $data );
 			if ( empty( self::$log ) ) {
 				self::$log = new WC_Logger();
