@@ -64,5 +64,11 @@ $settings = array(
 		'default'     => 'no',
 		'description' => sprintf( __( 'Log ' . $this->method_title . ' events in <code>%s</code>', 'avarda-checkout-for-woocommerce' ), wc_get_log_file_path( 'avarda_checkout' ) ), // phpcs:ignore
 	),
+	'two_column_checkout'        => array(
+		'title'   => __( 'Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
+		'type'    => 'checkbox',
+		'label'   => __( 'Enable Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
+		'default' => 'yes',
+	),
 );
 return apply_filters( 'aco_settings', $settings );
