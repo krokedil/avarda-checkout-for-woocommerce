@@ -94,13 +94,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @param string $order_id The WooCommerce order ID.
 	 * @param float  $amount The amount to be refunded.
-	 * @param string $reasson The reasson given for the refund.
+	 * @param string $reason The reason given for the refund.
 	 */
-	public function process_refund( $order_id, $amount = null, $reasson = '' ) {
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		// Refund full amount.
-
-		// Run logic here.
+		if ( $amount === $order->get_total() ) {
+			return ACO_WC()->order_management->refund_full_payment( $order_id );
+		}
 	}
 
 	/**

@@ -139,6 +139,69 @@ class ACO_Order_Management {
 
 	}
 
+	/**
+	 * Refunds the full amount.
+	 *
+	 * @param string $order_id The WooCommerce order id.
+	 * @return boolean
+	 */
+	public function refund_full_payment( $order_id ) {
+		$order = wc_get_order( $order_id );
+		// If this order wasn't created using aco payment method, bail.
+		if ( 'aco' != $order->get_payment_method() ) {
+			return;
+		}
+
+		// Check Avarda settings to see if we have the ordermanagement enabled.
+		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
+		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
+		if ( ! $order_management ) {
+			return;
+		}
+
+		// Check if we have a purchase id.
+		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		if ( empty( $purchase_id ) ) {
+			$order->add_order_note( __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
+			$order->set_status( 'on-hold' );
+			return;
+		}
+
+		$subscription = $this->check_if_subscription( $order );
+
+		// Get the Avarda order.
+		// TODO: Should we do different request if order is subcription?
+		$avarda_order_tmp = ( $subscription ) ? ACO_WC()->api->request_get_payment( $purchase_id ) : ACO_WC()->api->request_get_payment( $purchase_id );
+		if ( false === $avarda_order_tmp ) {
+			// If error save error message.
+			$code          = $avarda_order_tmp->get_error_code();
+			$message       = $avarda_order_tmp->get_error_message();
+			$text          = __( 'Avarda API Error on get avarda order before refund: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+			$formated_text = sprintf( $text, $code, $message );
+			$order->add_order_note( $formated_text );
+			return false;
+		}
+
+		if ( 'Completed' === $avarda_order_tmp['state'] ) {
+			$avarda_order = ACO_WC()->api->request_refund_order( $order_id );
+			if ( false === $avarda_order ) {
+				// If error save error message and return false.
+				// TODO: Print error message.
+				$code          = $avarda_order->get_error_code();
+				$message       = $avarda_order->get_error_message();
+				$text          = __( 'Avarda API Error on Avarda refund: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+				$formated_text = sprintf( $text, $code, $message );
+				$order->add_order_note( $formated_text );
+				return false;
+			}
+			$order->add_order_note( __( 'Avarda Checkout order was successfully refunded.', 'avarda-checkout-for-woocommerce' ) );
+			return true;
+		}
+		$order->add_order_note( __( 'Avarda Checkout order could not be refunded.', 'avarda-checkout-for-woocommerce' ) );
+		return false;
+
+	}
+
 
 	/**
 	 * Checks if the order is a subscription order or not

@@ -47,12 +47,18 @@ class ACO_Request_Refund_Order extends ACO_Request {
 		$order           = wc_get_order( $order_id );
 		$order_number    = $order->get_order_number();
 		$aco_purchase_id = $order->get_transaction_id();
+		$order_refunds   = $order->get_refunds();
 
+		foreach ( $order_refunds as $order_refund ) {
+			if ( method_exists( $order_refund, 'get_reason' ) && $order_refund->get_reason() ) {
+				$refund_reason = (string) $order_refund->get_reason();
+			}
+		}
 		return array(
 			'orderReference' => $order_number,
 			'tranId'         => $aco_purchase_id,
-			'note'           => 'reason',
-			'amount'         => '',
+			'note'           => 'Reason: ' . $refund_reason,
+			'amount'         => $order->get_total(),
 		);
 	}
 
