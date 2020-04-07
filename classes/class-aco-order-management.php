@@ -62,7 +62,7 @@ class ACO_Order_Management {
 		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_cancel_order( $order_id ) : ACO_WC()->api->request_cancel_order( $order_id );
 
 		// Check if we were successful.
-		if ( false === $avarda_order ) {
+		if ( is_wp_error( $avarda_order ) ) {
 			// If error save error message.
 			$code          = $avarda_order->get_error_code();
 			$message       = $avarda_order->get_error_message();
@@ -123,7 +123,7 @@ class ACO_Order_Management {
 		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_activate_order( $order_id ) : ACO_WC()->api->request_activate_order( $order_id );
 
 		// Check if we were successful.
-		if ( false === $avarda_order ) {
+		if ( is_wp_error( $avarda_order ) ) {
 			// If error save error message.
 			$code          = $avarda_order->get_error_code();
 			$message       = $avarda_order->get_error_message();
@@ -171,8 +171,8 @@ class ACO_Order_Management {
 
 		// Get the Avarda order.
 		// TODO: Should we do different request if order is subcription?
-		$avarda_order_tmp = ( $subscription ) ? ACO_WC()->api->request_get_payment( $purchase_id ) : ACO_WC()->api->request_get_payment( $purchase_id );
-		if ( false === $avarda_order_tmp ) {
+		$avarda_order_tmp = ( $subscription ) ? ACO_WC()->api->request_get_payment( $purchase_id, true ) : ACO_WC()->api->request_get_payment( $purchase_id, true );
+		if ( is_wp_error( $avarda_order_tmp ) ) {
 			// If error save error message.
 			$code          = $avarda_order_tmp->get_error_code();
 			$message       = $avarda_order_tmp->get_error_message();
@@ -184,9 +184,8 @@ class ACO_Order_Management {
 
 		if ( 'Completed' === $avarda_order_tmp['state'] ) {
 			$avarda_order = ACO_WC()->api->request_refund_order( $order_id );
-			if ( false === $avarda_order ) {
+			if ( is_wp_error( $avarda_order ) ) {
 				// If error save error message and return false.
-				// TODO: Print error message.
 				$code          = $avarda_order->get_error_code();
 				$message       = $avarda_order->get_error_message();
 				$text          = __( 'Avarda API Error on Avarda refund: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';

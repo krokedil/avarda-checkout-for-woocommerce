@@ -55,13 +55,19 @@ class ACO_API {
 	 * Gets an Avarda Checkout payment.
 	 *
 	 * @param string $aco_purchase_id Avarda purchase id.
+	 * @param bool   $admin Whether request is made from admin or not.
 	 * @return mixed
 	 */
-	public function request_get_payment( $aco_purchase_id ) {
+	public function request_get_payment( $aco_purchase_id, $admin = false ) {
 		$request  = new ACO_Request_Get_Payment();
 		$response = $request->request( $aco_purchase_id );
 
-		return $this->check_for_api_error( $response );
+		// Check if the request was made from admin and not at checkout.
+		if ( $admin ) {
+			return $response;
+		} else {
+			return $this->check_for_api_error( $response );
+		}
 	}
 
 	/**
@@ -85,7 +91,7 @@ class ACO_API {
 	public function request_activate_order( $order_id ) {
 		$request  = new ACO_Request_Activate_Order();
 		$response = $request->request( $order_id );
-		return $this->check_for_api_error( $response );
+		return $response;
 	}
 
 	/**
@@ -97,7 +103,7 @@ class ACO_API {
 	public function request_cancel_order( $order_id ) {
 		$request  = new ACO_Request_Cancel_Order();
 		$response = $request->request( $order_id );
-		return $this->check_for_api_error( $response );
+		return $response;
 	}
 
 	/**
@@ -109,7 +115,7 @@ class ACO_API {
 	public function request_refund_order( $order_id ) {
 		$request  = new ACO_Request_Refund_Order();
 		$response = $request->request( $order_id );
-		return $this->check_for_api_error( $response );
+		return $response;
 	}
 
 	/**

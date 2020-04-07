@@ -90,17 +90,23 @@ class ACO_Request {
 	 * @return object|array
 	 */
 	public function process_response( $response, $request_args = array(), $request_url = '' ) {
-		// Check the status code.
+		// Check if response is a WP_Error, and return it back if it is.
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// Check the status code, if its not between 200 and 299 then its an error.
 		if ( wp_remote_retrieve_response_code( $response ) < 200 || wp_remote_retrieve_response_code( $response ) > 299 ) {
 			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
-			$error_message = ' ';
+			$error_message = '';
 			// Get the error messages.
-			if ( null !== json_decode( $response['body'], true )['errors'] ) {
-				foreach ( json_decode( $response['body'], true )['errors'] as $error ) {
-					$error_message = $error_message . '<br>' . $error['message'];
+			if ( null !== json_decode( $response['body'], true ) ) {
+				$errors = json_decode( $response['body'], true );
+				foreach ( $errors['error_messages'] as $error ) {
+					$error_message = $error_message . ' ' . $error;
 				}
 			}
-			return new WP_Error( wp_remote_retrieve_response_code( $response ), $response['response']['message'] . $error_message, $data );
+			return new WP_Error( wp_remote_retrieve_response_code( $response ), $response['body'] . $error_message, $data );
 		}
 		return json_decode( wp_remote_retrieve_body( $response ), true );
 	}

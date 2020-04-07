@@ -108,21 +108,6 @@ function aco_extract_error_message( $wp_error ) {
 }
 
 /**
- * Maybe shows error messages if any are set.
- *
- * @return void
- */
-/*
- function aco_maybe_show_validation_error_message() { TODO
-	if ( isset( $_GET['aco_validation_error'] ) && is_checkout() ) {
-		$errors = json_decode( base64_decode( $_GET['aco_validation_error'] ), true );
-		foreach ( $errors as $error ) {
-			wc_add_notice( $error, 'error' );
-		}
-	}
-} */
-
-/**
  * Shows select another payment method button in Avarda Checkout page.
  */
 function aco_wc_show_another_gateway_button() {

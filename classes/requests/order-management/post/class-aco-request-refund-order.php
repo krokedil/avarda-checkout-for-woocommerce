@@ -57,7 +57,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 		return array(
 			'orderReference' => $order_number,
 			'tranId'         => $aco_purchase_id,
-			'note'           => 'Reason: ' . $refund_reason,
+			'note'           => isset( $refund_reason ) ? 'Reason: ' . $refund_reason : '',
 			'amount'         => $order->get_total(),
 		);
 	}
