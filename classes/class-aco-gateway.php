@@ -122,11 +122,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function process_payment_handler( $order_id ) {
 		// Get the Avarda order ID.
 		$order = wc_get_order( $order_id );
-		if ( is_object( $order ) && $order->get_transaction_id() ) {
-			$avarda_purchase_id = $order->get_transaction_id();
-		} else {
-			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
-		}
+
+		$avarda_purchase_id = $this->get_avarda_purchase_id( $order );
 
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		if ( ! $avarda_order ) {
@@ -195,6 +192,22 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				aco_wc_unset_sessions();
 			}
 		}
+	}
+
+	/**
+	 * Get Avarda purchase id.
+	 *
+	 * @param WC_Order $order The WC order.
+	 * @return string $avarda_purchase_id The Avarda purchase id.
+	 */
+	public function get_avarda_purchase_id( $order ) {
+		$avarda_purchase_id = '';
+		if ( is_object( $order ) && $order->get_transaction_id() ) {
+			$avarda_purchase_id = $order->get_transaction_id();
+		} else {
+			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		}
+		return $avarda_purchase_id;
 	}
 
 }
