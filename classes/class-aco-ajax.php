@@ -25,8 +25,9 @@ class ACO_AJAX extends WC_AJAX {
 	 */
 	public static function add_ajax_events() {
 		$ajax_events = array(
-			'aco_wc_update_checkout'    => true,
-			'aco_wc_get_avarda_payment' => true,
+			'aco_wc_update_checkout'                => true,
+			'aco_wc_get_avarda_payment'             => true,
+			'aco_wc_iframe_shipping_address_change' => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
@@ -145,6 +146,66 @@ class ACO_AJAX extends WC_AJAX {
 		wp_send_json_success();
 		wp_die();
 
+	}
+
+	/**
+	 * Shipping address change.
+	 *
+	 * @return void
+	 */
+	public static function aco_wc_iframe_shipping_address_change() {
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+
+		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+
+		// Check if we have a Avarda purchase id.
+		if ( empty( $avarda_purchase_id ) ) {
+			wc_add_notice( 'Avarda purchase id is missing.', 'error' );
+			wp_send_json_error();
+			wp_die();
+		}
+
+		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$customer_data = array();
+
+		$zip     = isset( $_REQUEST['address']['zip'] ) ? sanitize_key( wp_unslash( $_REQUEST['address']['zip'] ) ) : '';
+		$country = isset( $_REQUEST['address']['country'] ) ? strtoupper( sanitize_key( wp_unslash( $_REQUEST['address']['country'] ) ) ) : '';
+
+		if ( ! empty( $zip ) ) {
+			$customer_data['billing_postcode']  = $zip;
+			$customer_data['shipping_postcode'] = $zip;
+		}
+
+		if ( ! empty( $country ) ) {
+			$customer_data['billing_country']  = $country;
+			$customer_data['shipping_country'] = $country;
+		}
+
+		WC()->customer->set_props( $customer_data );
+		WC()->customer->save();
+
+		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
+
+		$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+
+		if ( false === $avarda_order ) {
+			wp_send_json_error();
+			wp_die();
+		}
+
+		wp_send_json_success(
+			array(
+				'customer_zip'     => $zip,
+				'customer_country' => $country,
+			)
+		);
+		wp_die();
 	}
 
 	/**
