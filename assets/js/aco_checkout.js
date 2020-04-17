@@ -105,16 +105,16 @@ jQuery(function($) {
 		},
 
 		handleCompletedPurchaseCallback: function(callback){
-			console.log('payment-completed');
+			console.log('avarda-payment-completed');
             var redirectUrl = sessionStorage.getItem( 'avardaRedirectUrl' );
             console.log(redirectUrl);
             if( redirectUrl ) {
-                window.location.href = redirectUrl;
+               window.location.href = redirectUrl;
 			}
 			callback.unmount();
 		},
 
-		handleBeforeSubmitCallback: function(callback) {
+		handleBeforeSubmitCallback: function(data, callback) {
 			aco_wc.getAvardaPayment();
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
 				if ( false === bool ) {
@@ -155,16 +155,26 @@ jQuery(function($) {
 		setCustomerData: function( data ) {
 			console.log(data);
 
-			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName ? data.customer_data.invoicingAddress.firstName : '' );
-			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName ? data.customer_data.invoicingAddress.lastName : '' );
+			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName ? data.customer_data.invoicingAddress.firstName : '.' );
+			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName ? data.customer_data.invoicingAddress.lastName : '.' );
 			$( '#billing_company' ).val( ( data.customer_data.companyName ? data.customer_data.companyName : '' ) );
-			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 ? data.customer_data.invoicingAddress.address1 : '' );
+			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 ? data.customer_data.invoicingAddress.address1 : '.' );
 			$( '#billing_address_2' ).val( ( data.customer_data.invoicingAddress.address2 ? data.customer_data.invoicingAddress.address2 : '' ) );
-			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city ? data.customer_data.invoicingAddress.city : '' );
-			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '' );
-			$( '#billing_phone' ).val( data.customer_data.phone ? data.customer_data.phone : '' );
-			$( '#billing_email' ).val( data.customer_data.email ? data.customer_data.email : '' );
-			$( '#billing_country' ).val( data.customer_data.invoicingAddress.country ? data.customer_data.invoicingAddress.country.toUpperCase() : '' );
+			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city ? data.customer_data.invoicingAddress.city : '.' );
+			$( '#billing_phone' ).val( data.customer_data.phone ? data.customer_data.phone : '.' );
+			$( '#billing_email' ).val( data.customer_data.email ? data.customer_data.email : '.' );
+
+			if ( null !== data.customer_data.deliveryAddress ) {
+				// Check Ship to different address, if it exists.
+				if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
+					$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
+				}
+				$( '#shipping_first_name' ).val( data.customer_data.deliveryAddress.firstName ? data.customer_data.deliveryAddress.firstName : '.' );
+				$( '#shipping_last_name' ).val( data.customer_data.deliveryAddress.lastName ? data.customer_data.deliveryAddress.lastName : '.' );
+				$( '#shipping_address_1' ).val( data.customer_data.deliveryAddress.address1 ? data.customer_data.deliveryAddress.address1 : '.' );
+				$( '#shipping_address_2' ).val( ( data.customer_data.deliveryAddress.address2 ? data.customer_data.deliveryAddress.address2 : '' ) );
+				$( '#shipping_city' ).val( data.customer_data.deliveryAddress.city ? data.customer_data.deliveryAddress.city : '.' );
+			} 
 		},
 
 		updateAvardaPayment: function() {
@@ -192,6 +202,7 @@ jQuery(function($) {
 						window.avardaCheckout.refreshForm();
 						$('.woocommerce-checkout-review-order-table').unblock();							
 					} else {
+						console.log('error');
 						if( '' !== data.responseJSON.data.redirect_url ) {
 							console.log('Cart do not need payment. Reloading checkout.');
 							window.location.href = data.responseJSON.data.redirect_url;
@@ -209,10 +220,10 @@ jQuery(function($) {
             console.log(splittedHash[1]);
             if(splittedHash[0] === "#avarda-success"){
 				$( 'body' ).trigger( 'aco_order_validation', true );
-                var response = JSON.parse( atob( splittedHash[1] ) );
-                console.log('response.return_url');
-                console.log(response.return_url);
-				sessionStorage.setItem( 'avardaRedirectUrl', response.return_url );
+				var response = JSON.parse( atob( splittedHash[1] ) );
+                console.log('response.redirect_url');
+                console.log(response.redirect_url);
+				sessionStorage.setItem( 'avardaRedirectUrl', response.redirect_url );
 
 				$('form.checkout').removeClass( 'processing' ).unblock();
             }
