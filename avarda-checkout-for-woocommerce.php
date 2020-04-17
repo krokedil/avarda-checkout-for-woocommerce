@@ -276,6 +276,60 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			}
 		}
 
+		/**
+		 * Populates the wc order address.
+		 *
+		 * @param WC_Order $order The WC Order.
+		 * @param string   $avarda_purchase_id The Avarda purchase id.
+		 * @return void
+		 */
+		public function populate_wc_order( $order, $avarda_purchase_id ) {
+			// Get the Avarda order from Avarda.
+			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+			$invoicing_address = $avarda_order['invoicingAddress'];
+			$delivery_address  = $avarda_order['deliveryAddress'];
+
+			$shipping_data = array(
+				'first_name' => isset( $delivery_address['firstName'] ) ? $delivery_address['firstName'] : $invoicing_address['firstName'],
+				'last_name'  => isset( $delivery_address['lastName'] ) ? $delivery_address['lastName'] : $invoicing_address['lastName'],
+				'country'    => isset( $delivery_address['country'] ) ? $delivery_address['country'] : $invoicing_address['country'],
+				'address1'   => isset( $delivery_address['address1'] ) ? $delivery_address['address1'] : $invoicing_address['address1'],
+				'address2'   => isset( $delivery_address['address2'] ) ? $delivery_address['address2'] : $invoicing_address['address2'],
+				'city'       => isset( $delivery_address['city'] ) ? $delivery_address['city'] : $invoicing_address['city'],
+				'zip'        => isset( $delivery_address['zip'] ) ? $delivery_address['zip'] : $invoicing_address['zip'],
+			);
+
+			// First name.
+			$order->set_billing_first_name( sanitize_text_field( $invoicing_address['firstName'] ) );
+			$order->set_shipping_first_name( sanitize_text_field( $shipping_data['first_name'] ) );
+			// Last name.
+			$order->set_billing_last_name( sanitize_text_field( $invoicing_address['lastName'] ) );
+			$order->set_shipping_last_name( sanitize_text_field( $shipping_data['last_name'] ) );
+			// Country.
+			$order->set_billing_country( strtoupper( sanitize_text_field( $invoicing_address['country'] ) ) );
+			$order->set_shipping_country( strtoupper( sanitize_text_field( $shipping_data['country'] ) ) );
+			// Street address1.
+			$order->set_billing_address_1( sanitize_text_field( $invoicing_address['address1'] ) );
+			$order->set_shipping_address_1( sanitize_text_field( $shipping_data['address1'] ) );
+			// Street address2.
+			$order->set_billing_address_2( sanitize_text_field( $invoicing_address['address2'] ) );
+			$order->set_shipping_address_2( sanitize_text_field( $shipping_data['address2'] ) );
+			// City.
+			$order->set_billing_city( sanitize_text_field( $invoicing_address['city'] ) );
+			$order->set_shipping_city( sanitize_text_field( $shipping_data['city'] ) );
+			// Postcode.
+			$order->set_billing_postcode( sanitize_text_field( $invoicing_address['zip'] ) );
+			$order->set_shipping_postcode( sanitize_text_field( $shipping_data['zip'] ) );
+			// Phone.
+			$order->set_billing_phone( sanitize_text_field( $avarda_order['phone'] ) );
+			// Email.
+			$order->set_billing_email( sanitize_text_field( $avarda_order['email'] ) );
+
+			// Save order.
+			$order->save();
+
+		}
 	}
 	Avarda_Checkout_For_WooCommerce::get_instance();
 
