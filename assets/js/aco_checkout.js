@@ -53,7 +53,46 @@ jQuery(function($) {
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
 				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
+				"deliveryAddressChangedCallback": aco_wc.handleDeliveryAddressChangedCallback,
 			});
+		},
+
+		handleDeliveryAddressChangedCallback: function(address, callback) {
+			console.log( 'shipping_address_change' );
+			$( '.woocommerce-checkout-review-order-table' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+			$.ajax(
+				{
+					url: aco_wc_params.iframe_shipping_address_change_url,
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						address: address,
+						nonce: aco_wc_params.iframe_shipping_address_change_nonce
+					},
+					success: function( response ) {
+						console.log( response );
+
+						aco_wc.setCustomerDeliveryData( response.data );
+						
+						// All good refresh aco form and trigger update_checkout event.
+						callback.refreshForm();
+
+						$( 'body' ).trigger( 'update_checkout' );
+					},
+					error: function( response ) {
+						console.log( response );
+					},
+					complete: function( response ) {
+						$( '.woocommerce-checkout-review-order-table' ).unblock();
+					}
+				}
+			);
 		},
 
 		handleCompletedPurchaseCallback: function(callback){
@@ -71,11 +110,9 @@ jQuery(function($) {
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
 				if ( false === bool ) {
 					// Fail.
-					console.log('fail');
 					callback.beforeSubmitAbort();
 				} else {
 					// Success.
-					console.log('success');
 					callback.beforeSubmitContinue();
 				}
 			});
