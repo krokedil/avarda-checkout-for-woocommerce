@@ -95,6 +95,15 @@ jQuery(function($) {
 			);
 		},
 
+		setCustomerDeliveryData: function( data ) {
+			console.log(data);
+			$( '#billing_postcode' ).val( data.customer_zip ? data.customer_zip : '' );
+			$( '#billing_country' ).val( data.customer_country ? data.customer_country : '' );
+
+			$( '#shipping_postcode' ).val( data.customer_zip ? data.customer_zip : '' );
+			$( '#shipping_country' ).val( data.customer_country ? data.customer_country : '' ); 
+		},
+
 		handleCompletedPurchaseCallback: function(callback){
 			console.log('payment-completed');
             var redirectUrl = sessionStorage.getItem( 'avardaRedirectUrl' );
