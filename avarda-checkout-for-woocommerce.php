@@ -51,6 +51,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public function __construct() {
 			// Initiate the plugin.
 			add_action( 'plugins_loaded', array( $this, 'init' ) );
+			add_action( 'wp_head', array( $this, 'redirect_to_thankyou' ) );
 		}
 
 		/**
@@ -239,6 +240,42 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				wp_enqueue_style( 'aco' );
 			}
 		}
+
+		/**
+		 * Redirects the customer to the proper thank you page.
+		 *
+		 * @return void
+		 */
+		public function redirect_to_thankyou() {
+			if ( isset( $_GET['aco_confirm'] ) && isset( $_GET['aco_purchase_id'] ) ) {
+				$avarda_purchase_id = $_GET['aco_purchase_id'];
+
+				// Find relevant order in Woo.
+				$query_args = array(
+					'fields'      => 'ids',
+					'post_type'   => wc_get_order_types(),
+					'post_status' => array_keys( wc_get_order_statuses() ),
+					'meta_key'    => '_wc_avarda_purchase_id',
+					'meta_value'  => $avarda_purchase_id,
+				);
+
+				$orders = get_posts( $query_args );
+				if ( ! $orders ) {
+					// If no order is found, bail. @TODO Add a fallback order creation here?
+					wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
+					return;
+				}
+				$order_id = $orders[0];
+				$order    = wc_get_order( $order_id );
+				// Populate wc order address.
+				$this->populate_wc_order( $order, $avarda_purchase_id );
+
+				// Redirect and exit.
+				header( 'Location:' . $order->get_checkout_order_received_url() );
+				exit;
+			}
+		}
+
 	}
 	Avarda_Checkout_For_WooCommerce::get_instance();
 
