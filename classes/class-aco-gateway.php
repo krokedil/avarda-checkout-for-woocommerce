@@ -68,15 +68,23 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order = wc_get_order( $order_id );
-
+		$order              = wc_get_order( $order_id );
+		$avarda_purchase_id = $this->get_avarda_purchase_id( $order );
 		// Regular purchase.
 		// 1. Process the payment.
-		// 2. Redirect to order received page.
+		// 2. Redirect to confirmation page.
 		if ( $this->process_payment_handler( $order_id ) ) {
-			$response = array(
-				'return_url' => $this->get_return_url( $order ),
-				'time'       => microtime(),
+			$confirmation_url = add_query_arg(
+				array(
+					'aco_confirm'     => 'yes',
+					'aco_purchase_id' => $avarda_purchase_id,
+					'wc_order_id'     => $order_id,
+				),
+				wc_get_checkout_url()
+			);
+			$response         = array(
+				'redirect_url' => $confirmation_url,
+				'time'         => microtime(),
 			);
 			return array(
 				'result'   => 'success',
