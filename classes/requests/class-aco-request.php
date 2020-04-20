@@ -121,13 +121,21 @@ class ACO_Request {
 			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
 			$error_message = '';
 			// Get the error messages.
+			if ( null !== $response['response'] ) {
+				$aco_error_code    = isset( $response['response']['code'] ) ? $response['response']['code'] . ' ' : '';
+				$aco_error_message = isset( $response['response']['message'] ) ? $response['response']['message'] . ' ' : '';
+				$error_message     = $aco_error_code . $aco_error_message;
+			}
+
 			if ( null !== json_decode( $response['body'], true ) ) {
 				$errors = json_decode( $response['body'], true );
-				foreach ( $errors as $error ) {
-					$error_message = $error_message . ' ' . $error;
+				foreach ( $errors as $error => $aco_error_messages ) {
+					foreach ( $aco_error_messages as $aco_error_message ) {
+						$error_message .= $aco_error_message . ' ';
+					}
 				}
 			}
-			return new WP_Error( wp_remote_retrieve_response_code( $response ), $response['body'] . $error_message, $data );
+			return new WP_Error( wp_remote_retrieve_response_code( $response ), $error_message, $data );
 		}
 		return json_decode( wp_remote_retrieve_body( $response ), true );
 	}
