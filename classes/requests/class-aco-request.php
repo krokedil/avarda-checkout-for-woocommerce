@@ -74,10 +74,31 @@ class ACO_Request {
 	 */
 	public function set_environment_variables() {
 		$this->avarda_settings = get_option( 'woocommerce_aco_settings' );
-		$this->client_id       = $this->avarda_settings['merchant_id'];
-		$this->client_secret   = $this->avarda_settings['api_key'];
-		$this->testmode        = $this->avarda_settings['testmode'];
-		$this->base_url        = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
+
+		switch ( get_woocommerce_currency() ) {
+			case 'SEK':
+				$this->client_id     = $this->avarda_settings['merchant_id_se'];
+				$this->client_secret = $this->avarda_settings['api_key_se'];
+				break;
+			case 'NOK':
+				$this->client_id     = $this->avarda_settings['merchant_id_no'];
+				$this->client_secret = $this->avarda_settings['api_key_no'];
+				break;
+			case 'DKK':
+				$this->client_id     = $this->avarda_settings['merchant_id_dk'];
+				$this->client_secret = $this->avarda_settings['api_key_dk'];
+				break;
+			case 'EUR':
+				$this->client_id     = $this->avarda_settings['merchant_id_fi'];
+				$this->client_secret = $this->avarda_settings['api_key_fi'];
+				break;
+			default:
+				$this->client_id     = $this->avarda_settings['merchant_id_se'];
+				$this->client_secret = $this->avarda_settings['api_key_se'];
+				break;
+		}
+		$this->testmode = $this->avarda_settings['testmode'];
+		$this->base_url = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
 	}
 
 
@@ -102,7 +123,7 @@ class ACO_Request {
 			// Get the error messages.
 			if ( null !== json_decode( $response['body'], true ) ) {
 				$errors = json_decode( $response['body'], true );
-				foreach ( $errors['error_messages'] as $error ) {
+				foreach ( $errors as $error ) {
 					$error_message = $error_message . ' ' . $error;
 				}
 			}

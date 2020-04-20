@@ -33,18 +33,6 @@ $settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 	),
-	'merchant_id'                => array(
-		'title'       => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
-		'type'        => 'text',
-		'description' => __( '', 'avarda-checkout-for-woocommerce' ), // phpcs:ignore
-		'default'     => '',
-	),
-	'api_key'                    => array(
-		'title'       => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
-		'type'        => 'text',
-		'description' => __( '', 'avarda-checkout-for-woocommerce' ), // phpcs:ignore
-		'default'     => '',
-	),
 	'testmode'                   => array(
 		'title'   => __( 'Testmode', 'avarda-checkout-for-woocommerce' ),
 		'type'    => 'checkbox',
@@ -69,6 +57,74 @@ $settings = array(
 		'type'    => 'checkbox',
 		'label'   => __( 'Enable Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
 		'default' => 'yes',
+	),
+	// SE.
+	'credentials_se'             => array(
+		'title' => 'API Credentials Sweden',
+		'type'  => 'title',
+	),
+	'merchant_id_se'             => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_se'                 => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	// NO.
+	'credentials_no'             => array(
+		'title' => 'API Credentials Norway',
+		'type'  => 'title',
+	),
+	'merchant_id_no'             => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_no'                 => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	// DK.
+	'credentials_dk'             => array(
+		'title' => 'API Credentials Denmark',
+		'type'  => 'title',
+	),
+	'merchant_id_dk'             => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_dk'                 => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	// FI.
+	'credentials_fi'             => array(
+		'title' => 'API Credentials Finland',
+		'type'  => 'title',
+	),
+	'merchant_id_fi'             => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_fi'                 => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
 	),
 );
 return apply_filters( 'aco_settings', $settings );
