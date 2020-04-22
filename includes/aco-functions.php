@@ -14,14 +14,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function aco_maybe_create_token() {
-	$token = get_transient( 'aco_auth_token' );
-	if ( false === $token ) {
+	$token    = get_transient( 'aco_auth_token' );
+	$currency = get_transient( 'aco_currency' );
+	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
 		$avarda_payment = ACO_WC()->api->request_token();
 		if ( ! $avarda_payment ) {
 			return;
 		}
 		// Set transient with 55minute life time.
 		set_transient( 'aco_auth_token', $avarda_payment['token'], 55 * MINUTE_IN_SECONDS );
+		set_transient( 'aco_currency', get_woocommerce_currency(), 55 * MINUTE_IN_SECONDS );
 		$token = $avarda_payment['token'];
 	}
 	return $token;
