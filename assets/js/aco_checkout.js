@@ -48,7 +48,7 @@ jQuery(function($) {
 			window.avardaCheckoutInit({
 				"accessToken": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
-				"redirectUrl": '',
+				"redirectUrl": aco_wc_params.aco_redirect_url,
 				"styles": {},
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,

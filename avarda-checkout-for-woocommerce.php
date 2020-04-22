@@ -221,6 +221,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 						'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
 						'required_fields_text'         => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
 						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
+						'aco_redirect_url'             => wc_get_checkout_url(),
 						'aco_checkout_layout'          => $aco_two_column_checkout,
 					);
 
