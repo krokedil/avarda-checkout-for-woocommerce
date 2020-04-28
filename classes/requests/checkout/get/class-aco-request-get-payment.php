@@ -27,7 +27,7 @@ class ACO_Request_Get_Payment extends ACO_Request {
 		$code     = wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( '', 'GET', 'ACO get payment', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log = ACO_Logger::format_log( $aco_purchase_id, 'GET', 'ACO get payment', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );

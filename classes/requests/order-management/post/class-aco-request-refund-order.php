@@ -2,6 +2,8 @@
 /**
  * Refund order request class
  *
+ * Class for WooCommerce edit order.
+ *
  * @package Avarda_Checkout/Classes/Post/Requests
  */
 
@@ -30,7 +32,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 		$code         = wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( '', 'POST', 'ACO refund order', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log = ACO_Logger::format_log( $aco_purchase_id, 'POST', 'ACO refund order', $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );
@@ -44,20 +46,11 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body( $order_id ) {
-		$order           = wc_get_order( $order_id );
-		$order_number    = $order->get_order_number();
-		$aco_purchase_id = $order->get_transaction_id();
-		$order_refunds   = $order->get_refunds();
+		$order        = wc_get_order( $order_id );
+		$order_number = $order->get_order_number();
 
-		foreach ( $order_refunds as $order_refund ) {
-			if ( method_exists( $order_refund, 'get_reason' ) && $order_refund->get_reason() ) {
-				$refund_reason = (string) $order_refund->get_reason();
-			}
-		}
 		return array(
 			'orderReference' => $order_number,
-			'tranId'         => $aco_purchase_id,
-			'note'           => isset( $refund_reason ) ? 'Reason: ' . $refund_reason : '',
 			'amount'         => $order->get_total(),
 		);
 	}
