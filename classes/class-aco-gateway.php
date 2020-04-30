@@ -106,10 +106,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
-		// Refund full amount.
-		if ( $amount === $order->get_total() ) {
-			return ACO_WC()->order_management->refund_full_payment( $order_id );
-		}
+		// Refund.
+		return ACO_WC()->order_management->refund_payment( $order_id, $amount = null, $reason = '' );
 	}
 
 	/**
@@ -136,6 +134,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
 			update_post_meta( $order_id, '_transaction_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
+
+			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
 
 			$environment = $this->testmode ? 'test' : 'live';
 			update_post_meta( $order_id, '_wc_avarda_environment', $environment );
