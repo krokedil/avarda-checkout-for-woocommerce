@@ -140,12 +140,14 @@ class ACO_Order_Management {
 	}
 
 	/**
-	 * Refunds the full amount.
+	 * WooCommerce Refund.
 	 *
-	 * @param string $order_id The WooCommerce order id.
+	 * @param string $order_id The WooCommerce order ID.
+	 * @param float  $amount The amount to be refunded.
+	 * @param string $reason The reason given for the refund.
 	 * @return boolean
 	 */
-	public function refund_full_payment( $order_id ) {
+	public function refund_payment( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		// If this order wasn't created using aco payment method, bail.
 		if ( 'aco' != $order->get_payment_method() ) {
@@ -183,7 +185,9 @@ class ACO_Order_Management {
 		}
 
 		if ( 'Completed' === $avarda_order_tmp['state'] ) {
-			$avarda_order = ACO_WC()->api->request_refund_order( $order_id );
+			$refund_order_id = ACO_Helper_Create_Refund_Data::get_refunded_order( $order_id );
+			$refunded_items  = ACO_Helper_Create_Refund_Data::create_refund_data( $order_id, $refund_order_id, $amount, $reason );
+			$avarda_order    = ACO_WC()->api->request_return_order( $order_id, $refunded_items );
 			if ( is_wp_error( $avarda_order ) ) {
 				// If error save error message and return false.
 				$code          = $avarda_order->get_error_code();
