@@ -119,6 +119,19 @@ class ACO_API {
 	}
 
 	/**
+	 * Return an Avarda Checkout order.
+	 *
+	 * @param int   $order_id WC order id.
+	 * @param array $refunded_items The refunded items.
+	 * @return mixed
+	 */
+	public function request_return_order( $order_id, $refunded_items ) {
+		$request  = new ACO_Request_Return_Order();
+		$response = $request->request( $order_id, $refunded_items );
+		return $response;
+	}
+
+	/**
 	 * Checks for WP Errors and returns either the response as array or a false.
 	 *
 	 * @param array $response The response from the request.
