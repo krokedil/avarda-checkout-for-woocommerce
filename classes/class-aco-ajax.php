@@ -28,6 +28,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_update_checkout'                => true,
 			'aco_wc_get_avarda_payment'             => true,
 			'aco_wc_iframe_shipping_address_change' => true,
+			'aco_wc_change_payment_method'          => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
