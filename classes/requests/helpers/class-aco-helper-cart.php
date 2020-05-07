@@ -63,7 +63,7 @@ class ACO_Helper_Cart {
 		return array(
 			'description' => substr( $this->get_product_name( $cart_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
-			'amount'      => $this->get_product_unit_price( $cart_item ), // Float.
+			'amount'      => $this->get_product_price( $cart_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $cart_item ), // String.
 			'taxAmount'   => $cart_item['line_tax'], // Float.
 		);
@@ -83,14 +83,14 @@ class ACO_Helper_Cart {
 	}
 
 	/**
-	 * Gets the products unit price.
+	 * Gets the products price.
 	 *
 	 * @param object $cart_item The cart item.
 	 * @return float
 	 */
-	public function get_product_unit_price( $cart_item ) {
-		$item_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] ) / $cart_item['quantity'];
-		return round( $item_subtotal, 2 );
+	public function get_product_price( $cart_item ) {
+		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] );
+		return round( $items_subtotal, 2 );
 	}
 
 	/**
