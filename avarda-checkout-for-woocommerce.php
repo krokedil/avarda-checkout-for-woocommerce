@@ -290,6 +290,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Get the Avarda order from Avarda.
 			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
+			update_post_meta( $order->get_id(), '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
+
 			$invoicing_address = $avarda_order['invoicingAddress'];
 			$delivery_address  = $avarda_order['deliveryAddress'];
 
