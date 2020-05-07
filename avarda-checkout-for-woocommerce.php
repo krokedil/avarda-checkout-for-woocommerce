@@ -148,8 +148,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-cancel-order.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-return-order.php';
+			// include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php';
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
@@ -289,8 +289,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public function populate_wc_order( $order, $avarda_purchase_id ) {
 			// Get the Avarda order from Avarda.
 			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-
-			update_post_meta( $order->get_id(), '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
+			$order_id     = $order->get_id();
+			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
+			// update_post_meta( $order_id, '_avarda_payment_amount', sanitize_text_field( $avarda_order['price'] ) );
 
 			$invoicing_address = $avarda_order['invoicingAddress'];
 			$delivery_address  = $avarda_order['deliveryAddress'];
