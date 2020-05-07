@@ -80,10 +80,14 @@ jQuery(function($) {
 
 						aco_wc.setCustomerDeliveryData( response.data );
 						
-						// All good refresh aco form and trigger update_checkout event.
-						callback.refreshForm();
+						if ( 'yes' === response.data.update_needed ) {
+							// All good refresh aco form and trigger update_checkout event.
+							callback.refreshForm();
+							$( 'body' ).trigger( 'update_checkout' );
+						} else {
+							callback.deliveryAddressChangedContinue();
+						}
 
-						$( 'body' ).trigger( 'update_checkout' );
 					},
 					error: function( response ) {
 						console.log( response );

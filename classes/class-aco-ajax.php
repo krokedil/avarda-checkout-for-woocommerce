@@ -173,35 +173,42 @@ class ACO_AJAX extends WC_AJAX {
 		}
 
 		$customer_data = array();
+		$update_needed = 'no';
 
 		$zip     = isset( $_REQUEST['address']['zip'] ) ? sanitize_key( wp_unslash( $_REQUEST['address']['zip'] ) ) : '';
 		$country = isset( $_REQUEST['address']['country'] ) ? strtoupper( sanitize_key( wp_unslash( $_REQUEST['address']['country'] ) ) ) : '';
 
-		if ( ! empty( $zip ) ) {
-			$customer_data['billing_postcode']  = $zip;
-			$customer_data['shipping_postcode'] = $zip;
-		}
+		// Check if we have new country or zip.
+		if ( WC()->customer->get_billing_country() !== $country || WC()->customer->get_shipping_postcode() !== $zip ) {
+			$update_needed = 'yes';
 
-		if ( ! empty( $country ) ) {
-			$customer_data['billing_country']  = $country;
-			$customer_data['shipping_country'] = $country;
-		}
+			if ( ! empty( $zip ) ) {
+				$customer_data['billing_postcode']  = $zip;
+				$customer_data['shipping_postcode'] = $zip;
+			}
 
-		WC()->customer->set_props( $customer_data );
-		WC()->customer->save();
+			if ( ! empty( $country ) ) {
+				$customer_data['billing_country']  = $country;
+				$customer_data['shipping_country'] = $country;
+			}
 
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_totals();
+			WC()->customer->set_props( $customer_data );
+			WC()->customer->save();
 
-		$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+			WC()->cart->calculate_shipping();
+			WC()->cart->calculate_totals();
 
-		if ( false === $avarda_order ) {
-			wp_send_json_error();
-			wp_die();
+			$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+
+			if ( false === $avarda_order ) {
+				wp_send_json_error();
+				wp_die();
+			}
 		}
 
 		wp_send_json_success(
 			array(
+				'update_needed'    => $update_needed,
 				'customer_zip'     => $zip,
 				'customer_country' => $country,
 			)
