@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 3.0
- * WC tested up to: 3.9.2
+ * WC tested up to: 4.1.0
  *
  * Copyright:       © 2016-2020 Krokedil.
  * License:         GNU General Public License v3.0
@@ -52,6 +52,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Initiate the plugin.
 			add_action( 'plugins_loaded', array( $this, 'init' ) );
 			add_action( 'wp_head', array( $this, 'redirect_to_thankyou' ) );
+			add_action( 'plugins_loaded', array( $this, 'check_version' ) );
 		}
 
 		/**
@@ -335,6 +336,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Save order.
 			$order->save();
 
+		}
+		/**
+		 * Checks the plugin version.
+		 *
+		 * @return void
+		 */
+		public function check_version() {
+			require AVARDA_CHECKOUT_PATH . '/includes/plugin_update_check.php';
+			$KernlUpdater = new PluginUpdateChecker_2_0(
+				'https://kernl.us/api/v1/updates/5eb54681c57f8861e5314e4e/',
+				__FILE__,
+				'avarda-checkout-for-woocommerce',
+				1
+			);
 		}
 	}
 	Avarda_Checkout_For_WooCommerce::get_instance();
