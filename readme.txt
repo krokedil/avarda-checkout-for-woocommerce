@@ -31,5 +31,8 @@ More information on how to get started can be found in the [plugin documentation
 
 == CHANGELOG ==
 
+= 2020.05.08        - version 0.1.1 =
+* Tweak             - Updated readme file.
+
 = 2020.05.08        - version 0.1.0 =
 * Initial release.
