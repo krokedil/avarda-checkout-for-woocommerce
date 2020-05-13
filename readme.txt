@@ -31,6 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 == CHANGELOG ==
 
+= 2020.05.13        - version 0.1.2 =
+* Feature           - Added support for customizing the Avarda Checkout through a filter.
+* Fix               - Fix for endless spinning wheel at checkout if something went wrong in Avarda.
+
 = 2020.05.08        - version 0.1.1 =
 * Tweak             - Updated readme file.
 
