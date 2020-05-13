@@ -231,7 +231,7 @@ jQuery(function($) {
                 console.log('response.redirect_url');
                 console.log(response.redirect_url);
 				sessionStorage.setItem( 'avardaRedirectUrl', response.redirect_url );
-
+				$('form.checkout').removeClass( 'processing' ).unblock();
             }
 		},
 
