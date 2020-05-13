@@ -207,6 +207,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 					$standard_woo_checkout_fields = array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'account_username', 'account_password' );
 					$avarda_settings              = get_option( 'woocommerce_aco_settings' );
 					$aco_two_column_checkout      = ( 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+					$styles                       = new stdClass(); // empty object as default value.
+					$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
 
 					$params = array(
 						'ajax_url'                     => admin_url( 'admin-ajax.php' ),
@@ -226,6 +228,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
 						'aco_redirect_url'             => wc_get_checkout_url(),
 						'aco_checkout_layout'          => $aco_two_column_checkout,
+						'aco_checkout_style'           => $aco_custom_css_styles,
 					);
 
 					wp_localize_script(
