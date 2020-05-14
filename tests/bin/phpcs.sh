@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 if [[ ${RUN_PHPCS} == 1 ]]; then
 	CHANGED_FILES=`git diff --name-only --diff-filter=ACMR $TRAVIS_COMMIT_RANGE | grep \\\\.php | awk '{print}' ORS=' '`
-	IGNORE="/tests"
+	IGNORE="/tests,/includes/plugin_update_check.php"
 
 	if [ "$CHANGED_FILES" != "" ]; then
 		# Install wpcs globally:
