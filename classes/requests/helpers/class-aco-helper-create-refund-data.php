@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -14,9 +14,10 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Creates refund data
 	 *
-	 * @param int    $order_id
-	 * @param int    $amount
-	 * @param string $reason
+	 * @param int    $order_id Order id.
+	 * @param int    $refund_order_id Refund order id.
+	 * @param int    $amount Refund amount.
+	 * @param string $reason Refund reason.
 	 * @return array
 	 */
 	public static function create_refund_data( $order_id, $refund_order_id, $amount, $reason ) {
@@ -80,7 +81,7 @@ class ACO_Helper_Create_Refund_Data {
 			}
 		}
 
-			// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' );
+			// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
 			return $item_refund;
 
 	}
@@ -88,7 +89,7 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Gets refunded order
 	 *
-	 * @param int $order_id
+	 * @param int $order_id Order id.
 	 * @return string
 	 */
 	public static function get_refunded_order( $order_id ) {

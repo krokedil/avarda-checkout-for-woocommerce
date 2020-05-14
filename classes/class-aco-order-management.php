@@ -20,7 +20,7 @@ class ACO_Order_Management {
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_reservation' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
 		// Update an order.
-		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 );
+		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); For aco refund.
 	}
 
 	/**
@@ -207,6 +207,14 @@ class ACO_Order_Management {
 
 	}
 
+	/**
+	 * Update order.
+	 *
+	 * @param int     $order_id Order id.
+	 * @param array   $items Items.
+	 * @param boolean $action Action.
+	 * @return void
+	 */
 	public function update_order( $order_id, $items, $action = false ) {
 		$order = wc_get_order( $order_id );
 

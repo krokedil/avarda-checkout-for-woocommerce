@@ -21,7 +21,9 @@ class ACO_Request {
 	public $enviroment;
 
 	/**
-	 * Class constructor.
+	 * Class constructor
+	 *
+	 * @param boolean $auth Auth.
 	 */
 	public function __construct( $auth = false ) {
 		$this->auth = $auth;
