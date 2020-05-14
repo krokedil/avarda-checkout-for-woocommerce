@@ -134,11 +134,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-ajax.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-api.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-gateway.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-sessions.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 
 			// Requests.
