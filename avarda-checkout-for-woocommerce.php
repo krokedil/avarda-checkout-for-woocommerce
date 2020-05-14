@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         0.0.1
+ * Version:         0.1.2
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 3.0
- * WC tested up to: 3.9.2
+ * WC tested up to: 4.1.0
  *
  * Copyright:       © 2016-2020 Krokedil.
  * License:         GNU General Public License v3.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '0.0.1' );
+define( 'AVARDA_CHECKOUT_VERSION', '0.1.2' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://avdonl-p-checkout.avarda.org' );
@@ -52,6 +52,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Initiate the plugin.
 			add_action( 'plugins_loaded', array( $this, 'init' ) );
 			add_action( 'wp_head', array( $this, 'redirect_to_thankyou' ) );
+			add_action( 'plugins_loaded', array( $this, 'check_version' ) );
 		}
 
 		/**
@@ -133,11 +134,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-ajax.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-api.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-gateway.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-sessions.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 
 			// Requests.
@@ -148,8 +147,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-cancel-order.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-return-order.php';
+			// include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php'; For aco refund.
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
@@ -206,6 +205,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 					$standard_woo_checkout_fields = array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'account_username', 'account_password' );
 					$avarda_settings              = get_option( 'woocommerce_aco_settings' );
 					$aco_two_column_checkout      = ( 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+					$styles                       = new stdClass(); // empty object as default value.
+					$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
 
 					$params = array(
 						'ajax_url'                     => admin_url( 'admin-ajax.php' ),
@@ -225,6 +226,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
 						'aco_redirect_url'             => wc_get_checkout_url(),
 						'aco_checkout_layout'          => $aco_two_column_checkout,
+						'aco_checkout_style'           => $aco_custom_css_styles,
 					);
 
 					wp_localize_script(
@@ -251,7 +253,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function redirect_to_thankyou() {
 			if ( isset( $_GET['aco_confirm'] ) && isset( $_GET['aco_purchase_id'] ) ) {
-				$avarda_purchase_id = $_GET['aco_purchase_id'];
+				$avarda_purchase_id = isset( $_GET['aco_purchase_id'] ) ? sanitize_key( $_GET['aco_purchase_id'] ) : '';
 
 				// Find relevant order in Woo.
 				$query_args = array(
@@ -289,6 +291,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public function populate_wc_order( $order, $avarda_purchase_id ) {
 			// Get the Avarda order from Avarda.
 			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+			$order_id     = $order->get_id();
+			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
+			// update_post_meta( $order_id, '_avarda_payment_amount', sanitize_text_field( $avarda_order['price'] ) ); For aco refund.
 
 			$invoicing_address = $avarda_order['invoicingAddress'];
 			$delivery_address  = $avarda_order['deliveryAddress'];
@@ -332,6 +337,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Save order.
 			$order->save();
 
+		}
+		/**
+		 * Checks the plugin version.
+		 *
+		 * @return void
+		 */
+		public function check_version() {
+			require AVARDA_CHECKOUT_PATH . '/includes/plugin_update_check.php';
+			$KernlUpdater = new PluginUpdateChecker_2_0( // phpcs:ignore
+				'https://kernl.us/api/v1/updates/5eb54681c57f8861e5314e4e/',
+				__FILE__,
+				'avarda-checkout-for-woocommerce',
+				1
+			);
 		}
 	}
 	Avarda_Checkout_For_WooCommerce::get_instance();

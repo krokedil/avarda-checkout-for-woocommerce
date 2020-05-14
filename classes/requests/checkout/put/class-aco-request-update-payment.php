@@ -17,6 +17,7 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	/**
 	 * Makes the request.
 	 *
+	 * @param string $aco_purchase_id Avarda purchase id.
 	 * @return array
 	 */
 	public function request( $aco_purchase_id ) {

@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore
 /**
  * Refund order request class
  *
@@ -46,12 +46,13 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body( $order_id ) {
-		$order        = wc_get_order( $order_id );
-		$order_number = $order->get_order_number();
+		$order            = wc_get_order( $order_id );
+		$order_number     = $order->get_order_number();
+		$aco_total_amount = get_post_meta( $order_id, '_avarda_payment_amount', true );
 
 		return array(
 			'orderReference' => $order_number,
-			'amount'         => $order->get_total(),
+			'amount'         => round( $aco_total_amount - $order->get_total(), 2 ),
 		);
 	}
 

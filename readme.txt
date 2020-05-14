@@ -1,0 +1,42 @@
+=== Avarda Checkout for WooCommerce ===
+Contributors: krokedil, niklashogefjord
+Tags: ecommerce, e-commerce, woocommerce, avarda
+Requires at least: 4.5
+Tested up to: 5.4
+WC requires at least: 3.5.0
+WC tested up to: 4.1.0
+License: GPLv3
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+Stable tag: trunk
+
+Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
+
+
+== DESCRIPTION ==
+Avarda Checkout is an e-commerce checkout solution that gives you more than the individual purchase. The checkout is built to provide more repeat customers and an increased average order value.
+
+To get started with Avarda Checkout you need to [sign up](https://www.avarda.com/se/foretag/) for an account.
+
+More information on how to get started can be found in the [plugin documentation](https://docs.krokedil.com/collection/337-avarda-checkout).
+
+
+== INSTALLATION	 ==
+1. Download and unzip the latest release zip file.
+2. If you use the WordPress plugin uploader to install this plugin skip to step 4.
+3. Upload the entire plugin directory to your /wp-content/plugins/ directory.
+4. Activate the plugin through the 'Plugins' menu in WordPress Administration.
+5. Go WooCommerce Settings --> Payment Gateways and configure your Avarda Checkout settings.
+6. Read more about the configuration process in the [plugin documentation](https://docs.krokedil.com/collection/337-avarda-checkout).
+
+
+== CHANGELOG ==
+
+= 2020.05.13        - version 0.1.2 =
+* Feature           - Added support for customizing the Avarda Checkout through a filter.
+* Fix               - Fix for endless spinning wheel at checkout if something went wrong in Avarda.
+
+= 2020.05.08        - version 0.1.1 =
+* Tweak             - Updated readme file.
+
+= 2020.05.08        - version 0.1.0 =
+* Initial release.

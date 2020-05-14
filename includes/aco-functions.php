@@ -122,7 +122,7 @@ function aco_wc_show_another_gateway_button() {
 		?>
 		<p class="avarda-checkout-select-other-wrapper">
 			<a class="checkout-button button" href="#" id="avarda-checkout-select-other">
-				<?php echo $select_another_method_text; ?>
+				<?php echo esc_html( $select_another_method_text ); ?>
 			</a>
 		</p>
 		<?php

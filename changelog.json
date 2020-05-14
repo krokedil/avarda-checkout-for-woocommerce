@@ -1,0 +1,17 @@
+{
+    "0.1.0" : {
+         "description" : "<ul><li>Initial release.</li></ul>",
+         "requires" : "4.7.0",
+         "tested" : "5.4"
+    },
+    "0.1.1" : {
+        "description" : "<ul><li>Updated readme file.</li></ul>",
+        "requires" : "4.7.0",
+        "tested" : "5.4"
+   },
+   "0.1.2" : {
+     "description" : "<ul><li>Feature - Added support for customizing the Avarda Checkout through a filter.</li><li>Fix - Fix for endless spinning wheel at checkout if something went wrong in Avarda.</li></ul>",
+     "requires" : "4.7.0",
+     "tested" : "5.4"
+}
+}

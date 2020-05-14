@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore
 /**
  * Get order helper class.
  *
@@ -55,7 +55,7 @@ class ACO_Helper_Order {
 	public function get_order_item( $order, $order_item ) {
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
-			'amount'      => $this->get_product_unit_price( $order_item ), // Float.
+			'amount'      => $this->get_product_price( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => $this->get_product_tax_amount( $order, $order_item ), // Float.
 		);
@@ -73,14 +73,14 @@ class ACO_Helper_Order {
 	}
 
 	/**
-	 * Gets the products unit price.
+	 * Gets the products price.
 	 *
 	 * @param object $order_item The order item.
 	 * @return float
 	 */
-	public function get_product_unit_price( $order_item ) {
-		$item_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() ) / $order_item->get_quantity();
-		return round( $item_subtotal, 2 );
+	public function get_product_price( $order_item ) {
+		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
+		return round( $items_subtotal, 2 );
 	}
 
 	/**

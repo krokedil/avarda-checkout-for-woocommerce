@@ -11,7 +11,7 @@ jQuery(function($) {
 		// Payment method
 		paymentMethodEl: $('input[name="payment_method"]'),
 		paymentMethod: '',
-		selectAnotherSelector: '#aco-select-other',
+		selectAnotherSelector: '#avarda-checkout-select-other',
 
 		// Address data.
 		addressData: [],
@@ -28,7 +28,7 @@ jQuery(function($) {
 		 */
 		documentReady: function() {
 			aco_wc.ACOCheckoutForm();
-			
+
 			// Add two column class to checkout if Avarda setting in Woo is set.
 			if ( true === aco_wc_params.aco_checkout_layout.two_column ) {
 				$('form.checkout.woocommerce-checkout').addClass('aco-two-column-checkout-left');
@@ -49,7 +49,7 @@ jQuery(function($) {
 				"accessToken": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
 				"redirectUrl": aco_wc_params.aco_redirect_url,
-				"styles": {},
+				"styles": aco_wc_params.aco_checkout_style,
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
 				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
@@ -80,10 +80,14 @@ jQuery(function($) {
 
 						aco_wc.setCustomerDeliveryData( response.data );
 						
-						// All good refresh aco form and trigger update_checkout event.
-						callback.refreshForm();
+						if ( 'yes' === response.data.update_needed ) {
+							// All good refresh aco form and trigger update_checkout event.
+							callback.refreshForm();
+							$( 'body' ).trigger( 'update_checkout' );
+						} else {
+							callback.deliveryAddressChangedContinue();
+						}
 
-						$( 'body' ).trigger( 'update_checkout' );
 					},
 					error: function( response ) {
 						console.log( response );
@@ -116,6 +120,7 @@ jQuery(function($) {
 
 		handleBeforeSubmitCallback: function(data, callback) {
 			aco_wc.getAvardaPayment();
+
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
 				if ( false === bool ) {
 					// Fail.
@@ -161,6 +166,7 @@ jQuery(function($) {
 			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 ? data.customer_data.invoicingAddress.address1 : '.' );
 			$( '#billing_address_2' ).val( ( data.customer_data.invoicingAddress.address2 ? data.customer_data.invoicingAddress.address2 : '' ) );
 			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city ? data.customer_data.invoicingAddress.city : '.' );
+			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '11111' );
 			$( '#billing_phone' ).val( data.customer_data.phone ? data.customer_data.phone : '.' );
 			$( '#billing_email' ).val( data.customer_data.email ? data.customer_data.email : '.' );
 
@@ -174,6 +180,7 @@ jQuery(function($) {
 				$( '#shipping_address_1' ).val( data.customer_data.deliveryAddress.address1 ? data.customer_data.deliveryAddress.address1 : '.' );
 				$( '#shipping_address_2' ).val( ( data.customer_data.deliveryAddress.address2 ? data.customer_data.deliveryAddress.address2 : '' ) );
 				$( '#shipping_city' ).val( data.customer_data.deliveryAddress.city ? data.customer_data.deliveryAddress.city : '.' );
+				$( '#shipping_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '11111' );
 			} 
 		},
 
@@ -224,7 +231,6 @@ jQuery(function($) {
                 console.log('response.redirect_url');
                 console.log(response.redirect_url);
 				sessionStorage.setItem( 'avardaRedirectUrl', response.redirect_url );
-
 				$('form.checkout').removeClass( 'processing' ).unblock();
             }
 		},
@@ -356,11 +362,6 @@ jQuery(function($) {
 
 				// Update avarda payment.
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
-
-				// Extra checkout fields.
-				aco_wc.bodyEl.on('blur', aco_wc.extraFieldsSelectorText, aco_wc.checkFormData);
-				aco_wc.bodyEl.on('change', aco_wc.extraFieldsSelectorNonText, aco_wc.checkFormData);
-				aco_wc.bodyEl.on('click', 'input#terms', aco_wc.checkFormData);
 				
 				// Hashchange.
 				$( window ).on('hashchange', aco_wc.hashChange);
@@ -368,6 +369,7 @@ jQuery(function($) {
 				$( document.body ).on( 'checkout_error', aco_wc.errorDetected );
 			}
 			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
+			aco_wc.bodyEl.on( 'click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO );
 		},
 	}
 	aco_wc.init();
