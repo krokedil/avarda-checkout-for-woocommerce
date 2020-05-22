@@ -8,7 +8,7 @@ jQuery(function($) {
 		orderNotesSelector: 'textarea#order_comments',
 		orderNotesEl: $('textarea#order_comments'),
 
-		// Payment method
+		// Payment method.
 		paymentMethodEl: $('input[name="payment_method"]'),
 		paymentMethod: '',
 		selectAnotherSelector: '#avarda-checkout-select-other',
@@ -46,7 +46,7 @@ jQuery(function($) {
 			);
 	
 			window.avardaCheckoutInit({
-				"accessToken": aco_wc_params.aco_jwt_token,
+				"purchaseJwt": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
 				"redirectUrl": aco_wc_params.aco_redirect_url,
 				"styles": aco_wc_params.aco_checkout_style,
