@@ -253,7 +253,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function redirect_to_thankyou() {
 			if ( isset( $_GET['aco_confirm'] ) && isset( $_GET['aco_purchase_id'] ) ) {
-				$avarda_purchase_id = isset( $_GET['aco_purchase_id'] ) ? sanitize_key( $_GET['aco_purchase_id'] ) : '';
+				$avarda_purchase_id = isset( $_GET['aco_purchase_id'] ) ? sanitize_text_field( wp_unslash( $_GET['aco_purchase_id'] ) ) : '';
 
 				// Find relevant order in Woo.
 				$query_args = array(
@@ -295,8 +295,18 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
 			// update_post_meta( $order_id, '_avarda_payment_amount', sanitize_text_field( $avarda_order['price'] ) ); For aco refund.
 
-			$invoicing_address = $avarda_order['invoicingAddress'];
-			$delivery_address  = $avarda_order['deliveryAddress'];
+			$user_inputs       = array();
+			$invoicing_address = array();
+			$delivery_address  = array();
+			if ( 'B2C' === $avarda_order['mode'] ) {
+				$user_inputs       = $avarda_order['b2C']['userInputs'];
+				$invoicing_address = $avarda_order['b2C']['invoicingAddress'];
+				$delivery_address  = $avarda_order['b2C']['deliveryAddress'];
+			} elseif ( 'B2B' === $avarda_order['mode'] ) {
+				$user_inputs       = $avarda_order['b2B']['userInputs'];
+				$invoicing_address = $avarda_order['b2B']['invoicingAddress'];
+				$delivery_address  = $avarda_order['b2B']['deliveryAddress'];
+			}
 
 			$shipping_data = array(
 				'first_name' => isset( $delivery_address['firstName'] ) ? $delivery_address['firstName'] : $invoicing_address['firstName'],
@@ -330,9 +340,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$order->set_billing_postcode( sanitize_text_field( $invoicing_address['zip'] ) );
 			$order->set_shipping_postcode( sanitize_text_field( $shipping_data['zip'] ) );
 			// Phone.
-			$order->set_billing_phone( sanitize_text_field( $avarda_order['phone'] ) );
+			$order->set_billing_phone( sanitize_text_field( $user_inputs['phone'] ) );
 			// Email.
-			$order->set_billing_email( sanitize_text_field( $avarda_order['email'] ) );
+			$order->set_billing_email( sanitize_text_field( $user_inputs['email'] ) );
 
 			// Save order.
 			$order->save();
