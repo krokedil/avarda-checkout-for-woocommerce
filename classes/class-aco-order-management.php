@@ -186,7 +186,15 @@ class ACO_Order_Management {
 			return false;
 		}
 
-		if ( 'Completed' === $avarda_order_tmp['state'] ) {
+		// Check if B2C or B2B.
+		$aco_state = '';
+		if ( 'B2C' === $avarda_order_tmp['mode'] ) {
+			$aco_state = $avarda_order_tmp['b2C']['step']['current'];
+		} elseif ( 'B2B' === $avarda_order_tmp['mode'] ) {
+			$aco_state = $avarda_order_tmp['b2B']['step']['current'];
+		}
+
+		if ( 'Completed' === $aco_state ) {
 			$refund_order_id = ACO_Helper_Create_Refund_Data::get_refunded_order( $order_id );
 			$refunded_items  = ACO_Helper_Create_Refund_Data::create_refund_data( $order_id, $refund_order_id, $amount, $reason );
 			$avarda_order    = ACO_WC()->api->request_return_order( $order_id, $refunded_items );
@@ -259,7 +267,15 @@ class ACO_Order_Management {
 			return;
 		}
 
-		if ( 'Completed' === $avarda_order_tmp['state'] ) {
+		// Check if B2C or B2B.
+		$aco_state = '';
+		if ( 'B2C' === $$avarda_order_tmp['mode'] ) {
+			$aco_state = $$avarda_order_tmp['b2C']['step']['current'];
+		} elseif ( 'B2B' === $$avarda_order_tmp['mode'] ) {
+			$aco_state = $$avarda_order_tmp['b2B']['step']['current'];
+		}
+
+		if ( 'Completed' === $aco_state ) {
 			$avarda_order = ACO_WC()->api->request_refund_order( $order_id );
 			if ( is_wp_error( $avarda_order ) ) {
 				// If error save error message and return false.

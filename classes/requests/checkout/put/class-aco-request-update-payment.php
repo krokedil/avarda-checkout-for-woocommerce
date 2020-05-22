@@ -41,9 +41,7 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	 */
 	public function get_body() {
 		return array(
-			'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
-			'mode'     => 'B2C', // TODO: Logic for using correct value depending on customer type.
-			'items'    => ACO_WC()->cart_items->get_cart_items(),
+			'items' => ACO_WC()->cart_items->get_cart_items(),
 		);
 	}
 
