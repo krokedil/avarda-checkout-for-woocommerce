@@ -104,6 +104,18 @@ class ACO_AJAX extends WC_AJAX {
 					wp_die();
 				}
 
+				// Initialize new payment if current timed out.
+				$aco_state = '';
+				if ( 'B2C' === $avarda_order['mode'] ) {
+					$aco_state = $avarda_order['b2C']['step']['current'];
+				} elseif ( 'B2B' === $avarda_order['mode'] ) {
+					$aco_state = $avarda_order['b2B']['step']['current'];
+				}
+				if ( 'TimedOut' === $aco_state ) {
+					aco_wc_initialize_payment();
+					return;
+				}
+
 				// Get the Avarda order object.
 				// Calculate cart totals.
 				WC()->cart->calculate_fees();
