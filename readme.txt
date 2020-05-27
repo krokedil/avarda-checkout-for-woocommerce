@@ -34,6 +34,8 @@ More information on how to get started can be found in the [plugin documentation
 = 2020.05.13        - version 0.1.2 =
 * Feature           - Added support for customizing the Avarda Checkout through a filter.
 * Fix               - Fix for endless spinning wheel at checkout if something went wrong in Avarda.
+* Tweak             - Change the way plugin is fetching data from payment status request.
+* Enhancement       - Initialize new payment at checkout if current payment timed out.
 
 = 2020.05.08        - version 0.1.1 =
 * Tweak             - Updated readme file.
