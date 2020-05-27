@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore
 /**
  * Ajax class file.
  *
@@ -40,13 +40,20 @@ class ACO_AJAX extends WC_AJAX {
 		}
 	}
 
+	/**
+	 * Change payment method.
+	 *
+	 * @return void
+	 */
 	public static function aco_wc_change_payment_method() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_change_payment_method' ) ) {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_change_payment_method' ) ) {
 			wp_send_json_error( 'bad_nonce' );
 			exit;
 		}
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		if ( 'false' === $_POST['aco'] ) {
+		$aco_payment_method = isset( $_POST['aco'] ) ? sanitize_key( $_POST['aco'] ) : '';
+		if ( 'false' === $aco_payment_method ) {
 			// Set chosen payment method to first gateway that is not ours for WooCommerce.
 			$first_gateway = reset( $available_gateways );
 			if ( 'aco' !== $first_gateway->id ) {
@@ -68,33 +75,10 @@ class ACO_AJAX extends WC_AJAX {
 	}
 
 	/**
-	 * Creates a fallback order on Checkout error JS event.
+	 * Update checkout.
 	 *
 	 * @return void
 	 */
-	public static function aco_wc_checkout_error() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_checkout_error' ) ) { // phpcs: ignore.
-			wp_send_json_error( 'bad_nonce' );
-			exit;
-		}
-
-		// Get your order from the payment method here.
-
-		// Get error message.
-		if ( ! empty( $_POST['error_message'] ) ) { // Input var okay.
-			$error_message = 'Error message: ' . sanitize_text_field( trim( $_POST['error_message'] ) );
-		} else {
-			$error_message = 'Error message could not be retreived';
-		}
-		// Create the order and send redirect url.
-		// Create the WC Order here:
-		// $order_id     = ;
-		$order        = wc_get_order( $order_id );
-		$redirect_url = $order->get_checkout_order_received_url();
-		wp_send_json_success( $redirect_url );
-		wp_die();
-	}
-
 	public static function aco_wc_update_checkout() {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
@@ -166,8 +150,8 @@ class ACO_AJAX extends WC_AJAX {
 			wp_send_json_error();
 			wp_die();
 		}
-
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
 			wp_send_json_error( 'bad_nonce' );
 			exit;
 		}
@@ -222,7 +206,8 @@ class ACO_AJAX extends WC_AJAX {
 	 * @return void
 	 */
 	public static function aco_wc_get_avarda_payment() {
-		if ( ! wp_verify_nonce( $_POST['nonce'], 'aco_wc_get_avarda_payment' ) ) { // Input var okay.
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_get_avarda_payment' ) ) { // Input var okay.
 			wp_send_json_error( 'bad_nonce' );
 			exit;
 		}

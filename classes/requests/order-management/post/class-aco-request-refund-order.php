@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore
 /**
  * Refund order request class
  *

@@ -58,6 +58,21 @@ function aco_wc_initialize_payment() {
 function aco_wc_show_checkout_form() {
 	if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
 		aco_wc_initialize_payment();
+	} else {
+		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		// Initialize new payment if current timed out.
+		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		$aco_state      = '';
+		if ( 'B2C' === $avarda_payment['mode'] ) {
+			$aco_state = $avarda_payment['b2C']['step']['current'];
+		} elseif ( 'B2B' === $avarda_payment['mode'] ) {
+			$aco_state = $avarda_payment['b2B']['step']['current'];
+		}
+		if ( 'TimedOut' === $aco_state ) {
+			aco_wc_initialize_payment();
+		} else {
+			ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+		}
 	}
 	?>
 	<div id="checkout-form">
@@ -77,7 +92,15 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 		$order        = wc_get_order( $order_id );
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
-		if ( 'Completed' === $avarda_order['state'] ) {
+		// Check if B2C or B2B.
+		$aco_state = '';
+		if ( 'B2C' === $avarda_order['mode'] ) {
+			$aco_state = $avarda_order['b2C']['step']['current'];
+		} elseif ( 'B2B' === $avarda_order['mode'] ) {
+			$aco_state = $avarda_order['b2B']['step']['current'];
+		}
+
+		if ( 'Completed' === $aco_state ) {
 			// Payment complete and set transaction id.
 			// translators: Avarda purchase ID.
 			$note = sprintf( __( 'Payment via Avarda Checkout. Purchase ID: %s', 'avarda-checkout-for-woocommerce' ), sanitize_text_field( $avarda_order['purchaseId'] ) );
@@ -122,7 +145,7 @@ function aco_wc_show_another_gateway_button() {
 		?>
 		<p class="avarda-checkout-select-other-wrapper">
 			<a class="checkout-button button" href="#" id="avarda-checkout-select-other">
-				<?php echo $select_another_method_text; ?>
+				<?php echo esc_html( $select_another_method_text ); ?>
 			</a>
 		</p>
 		<?php

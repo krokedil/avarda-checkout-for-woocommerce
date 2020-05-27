@@ -8,7 +8,7 @@ jQuery(function($) {
 		orderNotesSelector: 'textarea#order_comments',
 		orderNotesEl: $('textarea#order_comments'),
 
-		// Payment method
+		// Payment method.
 		paymentMethodEl: $('input[name="payment_method"]'),
 		paymentMethod: '',
 		selectAnotherSelector: '#avarda-checkout-select-other',
@@ -28,7 +28,7 @@ jQuery(function($) {
 		 */
 		documentReady: function() {
 			aco_wc.ACOCheckoutForm();
-			
+
 			// Add two column class to checkout if Avarda setting in Woo is set.
 			if ( true === aco_wc_params.aco_checkout_layout.two_column ) {
 				$('form.checkout.woocommerce-checkout').addClass('aco-two-column-checkout-left');
@@ -46,15 +46,21 @@ jQuery(function($) {
 			);
 	
 			window.avardaCheckoutInit({
-				"accessToken": aco_wc_params.aco_jwt_token,
+				"purchaseJwt": aco_wc_params.aco_jwt_token,
 				"rootElementId": "checkout-form",
 				"redirectUrl": aco_wc_params.aco_redirect_url,
-				"styles": {},
+				"styles": aco_wc_params.aco_checkout_style,
 				"disableFocus": true,
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
 				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
 				"deliveryAddressChangedCallback": aco_wc.handleDeliveryAddressChangedCallback,
+				"sessionTimedOutCallback": aco_wc.handleSessionTimedOutCallback,
 			});
+		},
+
+		handleSessionTimedOutCallback: function(callback) {
+			console.log( 'session_timed_out' );
+			window.location.reload();
 		},
 
 		handleDeliveryAddressChangedCallback: function(address, callback) {
@@ -160,27 +166,39 @@ jQuery(function($) {
 		setCustomerData: function( data ) {
 			console.log(data);
 
-			$( '#billing_first_name' ).val( data.customer_data.invoicingAddress.firstName ? data.customer_data.invoicingAddress.firstName : '.' );
-			$( '#billing_last_name' ).val( data.customer_data.invoicingAddress.lastName ? data.customer_data.invoicingAddress.lastName : '.' );
-			$( '#billing_company' ).val( ( data.customer_data.companyName ? data.customer_data.companyName : '' ) );
-			$( '#billing_address_1' ).val( data.customer_data.invoicingAddress.address1 ? data.customer_data.invoicingAddress.address1 : '.' );
-			$( '#billing_address_2' ).val( ( data.customer_data.invoicingAddress.address2 ? data.customer_data.invoicingAddress.address2 : '' ) );
-			$( '#billing_city' ).val( data.customer_data.invoicingAddress.city ? data.customer_data.invoicingAddress.city : '.' );
-			$( '#billing_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '11111' );
-			$( '#billing_phone' ).val( data.customer_data.phone ? data.customer_data.phone : '.' );
-			$( '#billing_email' ).val( data.customer_data.email ? data.customer_data.email : '.' );
+			if ( 'B2C' === data.customer_data.mode ) {
+				userInputs = data.customer_data.b2C.userInputs;
+				invoicingAddress = data.customer_data.b2C.invoicingAddress;
+				deliveryAddress = data.customer_data.b2C.deliveryAddress;
+			} else if ( 'B2B' === data.customer_data.mode ) {
+				userInputs = data.customer_data.b2B.userInputs;
+				invoicingAddress = data.customer_data.b2B.invoicingAddress;
+				deliveryAddress = data.customer_data.b2B.deliveryAddress;
+				$( '#billing_company' ).val( ( invoicingAddress.name ? invoicingAddress.name : '' ) );
+			}
 
-			if ( null !== data.customer_data.deliveryAddress ) {
+			$( '#billing_first_name' ).val( invoicingAddress.firstName ? invoicingAddress.firstName : '.' );
+			$( '#billing_last_name' ).val( invoicingAddress.lastName ? invoicingAddress.lastName : '.' );
+			$( '#billing_address_1' ).val( invoicingAddress.address1 ? invoicingAddress.address1 : '.' );
+			$( '#billing_address_2' ).val( ( invoicingAddress.address2 ? invoicingAddress.address2 : '' ) );
+			$( '#billing_city' ).val( invoicingAddress.city ? invoicingAddress.city : '.' );
+			$( '#billing_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
+			$( '#billing_phone' ).val( userInputs.phone ? userInputs.phone : '.' );
+			$( '#billing_email' ).val( userInputs.email ? userInputs.email : '.' );
+
+			
+
+			if ( null !== deliveryAddress ) {
 				// Check Ship to different address, if it exists.
 				if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 					$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 				}
-				$( '#shipping_first_name' ).val( data.customer_data.deliveryAddress.firstName ? data.customer_data.deliveryAddress.firstName : '.' );
-				$( '#shipping_last_name' ).val( data.customer_data.deliveryAddress.lastName ? data.customer_data.deliveryAddress.lastName : '.' );
-				$( '#shipping_address_1' ).val( data.customer_data.deliveryAddress.address1 ? data.customer_data.deliveryAddress.address1 : '.' );
-				$( '#shipping_address_2' ).val( ( data.customer_data.deliveryAddress.address2 ? data.customer_data.deliveryAddress.address2 : '' ) );
-				$( '#shipping_city' ).val( data.customer_data.deliveryAddress.city ? data.customer_data.deliveryAddress.city : '.' );
-				$( '#shipping_postcode' ).val( data.customer_data.invoicingAddress.zip ? data.customer_data.invoicingAddress.zip : '11111' );
+				$( '#shipping_first_name' ).val( deliveryAddress.firstName ? deliveryAddress.firstName : '.' );
+				$( '#shipping_last_name' ).val( deliveryAddress.lastName ? deliveryAddress.lastName : '.' );
+				$( '#shipping_address_1' ).val( deliveryAddress.address1 ? deliveryAddress.address1 : '.' );
+				$( '#shipping_address_2' ).val( ( deliveryAddress.address2 ? deliveryAddress.address2 : '' ) );
+				$( '#shipping_city' ).val( deliveryAddress.city ? deliveryAddress.city : '.' );
+				$( '#shipping_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
 			} 
 		},
 
@@ -231,7 +249,7 @@ jQuery(function($) {
                 console.log('response.redirect_url');
                 console.log(response.redirect_url);
 				sessionStorage.setItem( 'avardaRedirectUrl', response.redirect_url );
-
+				$('form.checkout').removeClass( 'processing' ).unblock();
             }
 		},
 
