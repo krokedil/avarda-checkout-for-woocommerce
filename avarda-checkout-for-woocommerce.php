@@ -292,7 +292,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Get the Avarda order from Avarda.
 			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 			$order_id     = $order->get_id();
-			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethod'] ) );
+			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] ) );
 			// update_post_meta( $order_id, '_avarda_payment_amount', sanitize_text_field( $avarda_order['price'] ) ); For aco refund.
 
 			$user_inputs       = array();

@@ -54,7 +54,13 @@ jQuery(function($) {
 				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
 				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
 				"deliveryAddressChangedCallback": aco_wc.handleDeliveryAddressChangedCallback,
+				"sessionTimedOutCallback": aco_wc.handleSessionTimedOutCallback,
 			});
+		},
+
+		handleSessionTimedOutCallback: function(callback) {
+			console.log( 'session_timed_out' );
+			window.location.reload();
 		},
 
 		handleDeliveryAddressChangedCallback: function(address, callback) {

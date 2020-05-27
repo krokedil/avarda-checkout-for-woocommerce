@@ -58,6 +58,21 @@ function aco_wc_initialize_payment() {
 function aco_wc_show_checkout_form() {
 	if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
 		aco_wc_initialize_payment();
+	} else {
+		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		// Initialize new payment if current timed out.
+		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		$aco_state      = '';
+		if ( 'B2C' === $avarda_payment['mode'] ) {
+			$aco_state = $avarda_payment['b2C']['step']['current'];
+		} elseif ( 'B2B' === $avarda_payment['mode'] ) {
+			$aco_state = $avarda_payment['b2B']['step']['current'];
+		}
+		if ( 'TimedOut' === $aco_state ) {
+			aco_wc_initialize_payment();
+		} else {
+			ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+		}
 	}
 	?>
 	<div id="checkout-form">
