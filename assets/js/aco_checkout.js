@@ -27,6 +27,7 @@ jQuery(function($) {
 		 * Runs on the $(document).ready event.
 		 */
 		documentReady: function() {
+			aco_wc.moveExtraCheckoutFields();
 			aco_wc.ACOCheckoutForm();
 
 			// Add two column class to checkout if Avarda setting in Woo is set.
@@ -351,15 +352,21 @@ jQuery(function($) {
 		 */
 		moveExtraCheckoutFields: function() {
 			// Move order comments.
-			$('.woocommerce-additional-fields').appendTo('#aco-extra-checkout-fields');
+			$( '.woocommerce-additional-fields' ).appendTo( '#aco-extra-checkout-fields' );
 
-			let form = $('form[name="checkout"] input, form[name="checkout"] select, textarea');
+			var form = $( 'form[name="checkout"] input, form[name="checkout"] select, textarea' );
 			for ( i = 0; i < form.length; i++ ) {
-				let name = form[i]['name'];
+				var name = form[i].name;
+
 				// Check if this is a standard field.
-				if ( $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) === -1 ) {
+				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
+
 					// This is not a standard Woo field, move to our div.
-					$('p#' + name + '_field').appendTo('#aco-extra-checkout-fields');
+					if ( 0 < $( 'p#' + name + '_field' ).length ) {
+						$( 'p#' + name + '_field' ).appendTo( '#aco-extra-checkout-fields' );
+					} else {
+						$( 'input[name="' + name + '"]' ).closest( 'p' ).appendTo( '#aco-extra-checkout-fields' );
+					}
 				}
 			}
 		},

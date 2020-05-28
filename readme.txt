@@ -2,7 +2,7 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 4.5
-Tested up to: 5.4
+Tested up to: 5.4.1
 WC requires at least: 3.5.0
 WC tested up to: 4.1.0
 License: GPLv3
@@ -30,6 +30,8 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.05.28        - version 0.1.3 =
+* Fix               - Fix for extra checkout fields not showing up on checkout page.
 
 = 2020.05.13        - version 0.1.2 =
 * Feature           - Added support for customizing the Avarda Checkout through a filter.
