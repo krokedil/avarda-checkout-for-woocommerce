@@ -134,10 +134,12 @@ class ACO_Templates {
 	 * @return void
 	 */
 	public function add_extra_checkout_fields() {
+		do_action( 'aco_wc_before_extra_fields' );
 		?>
 		<div id="aco-extra-checkout-fields">
 		</div>
 		<?php
+		do_action( 'aco_wc_after_extra_fields' );
 	}
 }
 
