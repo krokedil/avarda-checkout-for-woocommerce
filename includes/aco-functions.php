@@ -70,7 +70,7 @@ function aco_wc_show_checkout_form() {
 		}
 		if ( 'TimedOut' === $aco_state ) {
 			aco_wc_initialize_payment();
-		} else {
+		} elseif ( ! ( 'Completed' === $aco_state || 'TimedOut' === $aco_state ) ) {
 			ACO_WC()->api->request_update_payment( $avarda_purchase_id );
 		}
 	}
