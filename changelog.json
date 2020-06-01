@@ -18,6 +18,11 @@
           "description" : "<ul><li>Fix - Fix for extra checkout fields not showing up on checkout page.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.4.1"
+     },
+     "0.1.4" : {
+          "description" : "<ul><li>Enhancement - Prevent doing update request when payment has state Completed or TimedOut.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.4.1" 
      }
 
 }
