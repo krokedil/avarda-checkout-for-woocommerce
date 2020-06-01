@@ -117,13 +117,19 @@ class ACO_AJAX extends WC_AJAX {
 						wp_die();
 					}
 				}
-
-				// Update order.
-				$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-				// If the update failed - reload the checkout page and display the error.
-				if ( false === $avarda_order ) {
-					wp_send_json_error();
-					wp_die();
+				if ( 'B2C' === $avarda_order['mode'] ) {
+					$aco_state = $avarda_order['b2C']['step']['current'];
+				} elseif ( 'B2B' === $avarda_order['mode'] ) {
+					$aco_state = $avarda_order['b2B']['step']['current'];
+				}
+				if ( ! ( 'Completed' === $aco_state || 'TimedOut' === $aco_state ) ) {
+					// Update order.
+					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+					// If the update failed - reload the checkout page and display the error.
+					if ( false === $avarda_order ) {
+						wp_send_json_error();
+						wp_die();
+					}
 				}
 			}
 		}
