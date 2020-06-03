@@ -23,6 +23,11 @@
           "description" : "<ul><li>Enhancement - Prevent doing update request when payment has state Completed or TimedOut.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.4.1" 
+     },
+     "0.1.5" : {
+          "description" : "<ul><li>Enhancement - Support for Swedish, Finnish and English language in the checkout.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.4.1" 
      }
 
 }

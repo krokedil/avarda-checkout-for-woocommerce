@@ -103,6 +103,26 @@ class ACO_Request {
 		$this->base_url = ( 'yes' === $this->testmode ) ? AVARDA_CHECKOUT_TEST_ENV : AVARDA_CHECKOUT_LIVE_ENV;
 	}
 
+	/**
+	 * Get the language for request.
+	 *
+	 * @return string $language The language.
+	 */
+	public function get_language() {
+		switch ( get_locale() ) {
+			case 'sv_SE':
+				$language = 'Swedish';
+				break;
+			case 'fi':
+				$language = 'Finnish';
+				break;
+			default:
+				$language = 'English';
+				break;
+		}
+		return $language;
+	}
+
 
 	/**
 	 * Checks response for any error.

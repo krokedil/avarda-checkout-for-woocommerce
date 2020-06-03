@@ -30,6 +30,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.06.03        - version 0.1.5 =
+* Enhancement       - Support for Swedish, Finnish and English language in the checkout.
+
 = 2020.06.01        - version 0.1.4 = 
 * Enhancement       - Prevent doing update request when payment has state Completed or TimedOut.
 
