@@ -41,7 +41,7 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	 */
 	public function get_body() {
 		return array(
-			'language' => 'English', // TODO: Supported values: English/Swedish/Finnish/Norwegian/Estonian/Danish.
+			'language' => $this->get_language(),
 			'mode'     => 'B2C', // TODO: Logic for using correct value depending on customer type.
 			'items'    => ACO_WC()->cart_items->get_cart_items(),
 		);
