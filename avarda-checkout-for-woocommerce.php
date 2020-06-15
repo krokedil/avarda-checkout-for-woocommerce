@@ -290,9 +290,10 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function populate_wc_order( $order, $avarda_purchase_id ) {
 			// Get the Avarda order from Avarda.
-			$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-			$order_id     = $order->get_id();
-			update_post_meta( $order_id, '_avarda_payment_method', sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] ) );
+			$avarda_order       = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+			$order_id           = $order->get_id();
+			$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
+			update_post_meta( $order_id, '_avarda_payment_method', $aco_payment_method );
 			// update_post_meta( $order_id, '_avarda_payment_amount', sanitize_text_field( $avarda_order['price'] ) ); For aco refund.
 
 			$user_inputs       = array();
@@ -317,6 +318,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				'city'       => isset( $delivery_address['city'] ) ? $delivery_address['city'] : $invoicing_address['city'],
 				'zip'        => isset( $delivery_address['zip'] ) ? $delivery_address['zip'] : $invoicing_address['zip'],
 			);
+
+			// Payment method.
+			// Translators: Avarda method name.
+			$method_title = sprintf( esc_html( __( 'Avarda Checkout (%s)', 'avarda-checkout-for-woocommerce' ) ), esc_html( $aco_payment_method ) );
+			$order->set_payment_method_title( $method_title );
 
 			// First name.
 			$order->set_billing_first_name( sanitize_text_field( $invoicing_address['firstName'] ) );
