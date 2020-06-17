@@ -20,7 +20,7 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	 * @return array
 	 */
 	public function request() {
-		$request_url  = $this->base_url . '/api/partner/payments';
+		$request_url  = $this->base_url . '/api/partner/payments/legacy';
 		$request_args = apply_filters( 'aco_initialize_payment_args', $this->get_request_args() );
 
 		$response = wp_remote_request( $request_url, $request_args );
