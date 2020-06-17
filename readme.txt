@@ -2,9 +2,9 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 4.5
-Tested up to: 5.4.1
+Tested up to: 5.4.2
 WC requires at least: 3.5.0
-WC tested up to: 4.1.1
+WC tested up to: 4.2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -30,6 +30,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.06.17        - version 0.1.6 =
+* Tweak             - Initialize payment request is using the Avarda legacy endpoint.
+* Enhancement       - Trigger event when Avarda Checkout form is loaded on checkout page.
+
 = 2020.06.03        - version 0.1.5 =
 * Enhancement       - Support for Swedish, Finnish and English language in the checkout.
 
