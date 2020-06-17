@@ -21,6 +21,23 @@ jQuery(function($) {
 		extraFieldsSelectorText: 'div#aco-extra-checkout-fields input[type="text"], div#aco-extra-checkout-fields input[type="password"], div#aco-extra-checkout-fields textarea, div#aco-extra-checkout-fields input[type="email"], div#aco-extra-checkout-fields input[type="tel"]',
 		extraFieldsSelectorNonText: 'div#aco-extra-checkout-fields select, div#aco-extra-checkout-fields input[type="radio"], div#aco-extra-checkout-fields input[type="checkbox"], div#aco-extra-checkout-fields input.checkout-date-picker, input#terms input[type="checkbox"]',
 
+		// Mutation observer.
+		observer: new MutationObserver(function(mutationsList) {
+			for ( var mutation of mutationsList ) {
+				if ( mutation.type == 'childList' ) {
+					if( mutation.addedNodes[0] ) {
+						if( 'avarda-checkout-custom-element' === mutation.target.localName ) {
+							console.log(mutation.target.localName);
+							$('body').trigger('aco_checkout_loaded');
+						}
+					}
+				}
+			}
+		}),
+		
+		config: {
+			attributes: false, childList: true, characterData: false, subtree:true,
+		},
 
 		/*
 		 * Document ready function. 
@@ -378,7 +395,9 @@ jQuery(function($) {
 			// Check if Avarda is the selected payment method before we do anything.
 			if( aco_wc.checkIfSelected() ) {
 				$(document).ready( aco_wc.documentReady() );
-			
+
+				aco_wc.observer.observe( document.querySelector( '#aco-iframe' ), aco_wc.config );
+
 				// Change from ACO.
 				aco_wc.bodyEl.on('click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO);
 
@@ -387,7 +406,7 @@ jQuery(function($) {
 
 				// Update avarda payment.
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
-				
+ 				
 				// Hashchange.
 				$( window ).on('hashchange', aco_wc.hashChange);
 				// Error detected.
