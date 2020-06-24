@@ -55,12 +55,15 @@ jQuery(function($) {
 		},
 
 		ACOCheckoutForm: function() {
+			// Stage or Prod javascript file url.
+			var acoJsUrl = ( aco_wc_params.aco_test_mode ) ? "https://avdonl0s0checkout0fe.blob.core.windows.net/frontend/static/js/main.js" : "https://avdonl0p0checkout0fe.blob.core.windows.net/frontend/static/js/main.js";
+
 			(function(e,t,n,a,s,c,o,i,r){e[a]=e[a]||function(){(e[a].q=e[a].q||[
 			]).push(arguments)};e[a].i=s;i=t.createElement(n);i.async=1
 			;i.src=o+"?v="+c+"&ts="+1*new Date;r=t.getElementsByTagName(n)[0]
 			;r.parentNode.insertBefore(i,r)})(window,document,"script",
 			"avardaCheckoutInit","avardaCheckout","1.0.0",
-			"https://avdonl0s0checkout0fe.blob.core.windows.net/frontend/static/js/main.js"
+			acoJsUrl
 			);
 	
 			window.avardaCheckoutInit({
