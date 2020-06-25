@@ -333,7 +333,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			);
 
 			// Set Avarda payment method title.
-			$method_title = $this->aco_get_payment_method_title( $avarda_order );
+			$method_title = $this->aco_get_payment_method_title( $order_id, $avarda_order );
 			$order->set_payment_method_title( $method_title );
 
 			// First name.
@@ -370,10 +370,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		/**
 		 * Get Avarda Checkout order payment method title.
 		 *
-		 * @param array $avarda_order The Avarda order.
+		 * @param string $order_id The WooCommerce order id.
+		 * @param array  $avarda_order The Avarda order.
 		 * @return string $method_title The payment method title.
 		 */
-		public function aco_get_payment_method_title( $avarda_order ) {
+		public function aco_get_payment_method_title( $order_id, $avarda_order ) {
 			$aco_payment_method = '';
 			if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 				$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
