@@ -99,6 +99,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Load scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
+			// Delete transient when aco settings is saved.
+			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'aco_delete_transients' ) );
 
 			add_action( 'aco_before_load_scripts', array( $this, 'aco_maybe_initialize_payment' ) );
 
@@ -112,6 +114,17 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			do_action( 'aco_initiated' );
 		}
 
+
+		/**
+		 * Delete transients when ACO settings is saved.
+		 *
+		 * @return void
+		 */
+		public function aco_delete_transients() {
+			// Need to clear transients if credentials is changed.
+			delete_transient( 'aco_auth_token' );
+			delete_transient( 'aco_currency' );
+		}
 
 		/**
 		 * Mayne initialize payment.
