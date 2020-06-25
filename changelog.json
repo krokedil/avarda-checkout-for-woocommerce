@@ -33,6 +33,11 @@
           "description" : "<ul><li>Tweak - Initialize payment request is using the Avarda legacy endpoint.</li><li>Enhancement - Trigger event when Avarda Checkout form is loaded on checkout page.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.4.2"
+     },
+     "0.1.7" : {
+          "description" : "<ul><li>Fix - Load correct JavaScript checkout file depending on if plugin is in testmode or not.</li><li>Fix - Delete request token transient when credentials is changed.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.4.2"
      }
 
 }

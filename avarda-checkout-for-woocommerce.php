@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         0.1.6
+ * Version:         0.1.7
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 3.0
- * WC tested up to: 4.2.0
+ * WC tested up to: 4.2.2
  *
  * Copyright:       © 2016-2020 Krokedil.
  * License:         GNU General Public License v3.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '0.1.6' );
+define( 'AVARDA_CHECKOUT_VERSION', '0.1.7' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://avdonl-p-checkout.avarda.org' );
@@ -99,6 +99,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Load scripts.
 			add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
+			// Delete transient when aco settings is saved.
+			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'aco_delete_transients' ) );
 
 			add_action( 'aco_before_load_scripts', array( $this, 'aco_maybe_initialize_payment' ) );
 
@@ -112,6 +114,17 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			do_action( 'aco_initiated' );
 		}
 
+
+		/**
+		 * Delete transients when ACO settings is saved.
+		 *
+		 * @return void
+		 */
+		public function aco_delete_transients() {
+			// Need to clear transients if credentials is changed.
+			delete_transient( 'aco_auth_token' );
+			delete_transient( 'aco_currency' );
+		}
 
 		/**
 		 * Mayne initialize payment.
@@ -204,7 +217,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 					$standard_woo_checkout_fields = array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', 'account_username', 'account_password', '_wp_http_referer' );
 					$avarda_settings              = get_option( 'woocommerce_aco_settings' );
-					$aco_two_column_checkout      = ( 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+					$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
+					$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
 					$styles                       = new stdClass(); // empty object as default value.
 					$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
 
@@ -225,6 +239,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 						'required_fields_text'         => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
 						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
 						'aco_redirect_url'             => wc_get_checkout_url(),
+						'aco_test_mode'                => $aco_test_mode,
 						'aco_checkout_layout'          => $aco_two_column_checkout,
 						'aco_checkout_style'           => $aco_custom_css_styles,
 					);
