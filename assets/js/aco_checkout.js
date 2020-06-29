@@ -198,14 +198,14 @@ jQuery(function($) {
 				$( '#billing_company' ).val( ( invoicingAddress.name ? invoicingAddress.name : '' ) );
 			}
 
-			$( '#billing_first_name' ).val( invoicingAddress.firstName ? invoicingAddress.firstName : '.' );
-			$( '#billing_last_name' ).val( invoicingAddress.lastName ? invoicingAddress.lastName : '.' );
-			$( '#billing_address_1' ).val( invoicingAddress.address1 ? invoicingAddress.address1 : '.' );
-			$( '#billing_address_2' ).val( ( invoicingAddress.address2 ? invoicingAddress.address2 : '' ) );
-			$( '#billing_city' ).val( invoicingAddress.city ? invoicingAddress.city : '.' );
+			$( '#billing_first_name' ).val( '.' );
+			$( '#billing_last_name' ).val( '.' );
+			$( '#billing_address_1' ).val( '.' );
+			$( '#billing_address_2' ).val( '' );
+			$( '#billing_city' ).val( '.' );
 			$( '#billing_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
-			$( '#billing_phone' ).val( userInputs.phone ? userInputs.phone : '.' );
-			$( '#billing_email' ).val( userInputs.email ? userInputs.email : '.' );
+			$( '#billing_phone' ).val( '.' );
+			$( '#billing_email' ).val( 'krokedil@krokedil.se' );
 
 			
 
@@ -214,11 +214,11 @@ jQuery(function($) {
 				if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 					$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 				}
-				$( '#shipping_first_name' ).val( deliveryAddress.firstName ? deliveryAddress.firstName : '.' );
-				$( '#shipping_last_name' ).val( deliveryAddress.lastName ? deliveryAddress.lastName : '.' );
-				$( '#shipping_address_1' ).val( deliveryAddress.address1 ? deliveryAddress.address1 : '.' );
-				$( '#shipping_address_2' ).val( ( deliveryAddress.address2 ? deliveryAddress.address2 : '' ) );
-				$( '#shipping_city' ).val( deliveryAddress.city ? deliveryAddress.city : '.' );
+				$( '#shipping_first_name' ).val( '.' );
+				$( '#shipping_last_name' ).val( '.' );
+				$( '#shipping_address_1' ).val( '.' );
+				$( '#shipping_address_2' ).val( '' );
+				$( '#shipping_city' ).val( '.' );
 				$( '#shipping_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
 			} 
 		},
@@ -403,9 +403,6 @@ jQuery(function($) {
 
 				// Change from ACO.
 				aco_wc.bodyEl.on('click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO);
-
-				// Catch changes to order notes.
-				aco_wc.bodyEl.on('change', '#order_comments', aco_wc.updateOrderComment);
 
 				// Update avarda payment.
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
