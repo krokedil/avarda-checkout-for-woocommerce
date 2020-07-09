@@ -30,6 +30,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.07.09        - version 0.1.8 =
+* Enhancement       - Avarda payment method title is added to the WooCommerce order.
+* Enhancement       - Added support for displaying the languages Norwegian and Danish in Avarda checkout.
+* Enhancement       - WooCommerce order number is now saved as the order reference in AvardaOnline.
+* Fix               - Fix for validating order correct in checkout.
+
 = 2020.06.25        - version 0.1.7 =
 * Fix               - Load correct javascript checkout file depending on if plugin is in testmode or not.
 * Fix               - Delete request token transient when credentials is changed.
