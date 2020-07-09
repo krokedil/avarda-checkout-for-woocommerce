@@ -116,6 +116,15 @@ class ACO_Request {
 			case 'fi':
 				$language = 'Finnish';
 				break;
+			case 'nb_NO':
+				$language = 'Norwegian';
+				break;
+			case 'nn_NO':
+				$language = 'Norwegian';
+				break;
+			case 'da_DK':
+				$language = 'Danish';
+				break;
 			default:
 				$language = 'English';
 				break;

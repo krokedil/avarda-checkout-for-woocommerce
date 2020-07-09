@@ -83,6 +83,19 @@ class ACO_API {
 	}
 
 	/**
+	 * Updates order reference.
+	 *
+	 * @param string $aco_purchase_id Avarda purchase id.
+	 * @param string $order_id WooCommerce order id.
+	 * @return mixed
+	 */
+	public function request_update_order_reference( $aco_purchase_id, $order_id ) {
+		$request  = new ACO_Request_Update_Order_Reference();
+		$response = $request->request( $aco_purchase_id, $order_id );
+		return $this->check_for_api_error( $response );
+	}
+
+	/**
 	 * Activates an Avarda Checkout order.
 	 *
 	 * @param int $order_id WC order id.
