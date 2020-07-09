@@ -101,6 +101,7 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 		}
 
 		if ( 'Completed' === $aco_state ) {
+			ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
 			// Payment complete and set transaction id.
 			// translators: Avarda purchase ID.
 			$note = sprintf( __( 'Payment via Avarda Checkout. Purchase ID: %s', 'avarda-checkout-for-woocommerce' ), sanitize_text_field( $avarda_order['purchaseId'] ) );
