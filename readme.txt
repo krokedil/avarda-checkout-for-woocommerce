@@ -4,7 +4,7 @@ Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 4.5
 Tested up to: 5.4.2
 WC requires at least: 3.5.0
-WC tested up to: 4.2.2
+WC tested up to: 4.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -30,6 +30,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.07.10        - version 0.1.9 =
+* Enhancement       - Added Swedish translation.
+
 = 2020.07.09        - version 0.1.8 =
 * Enhancement       - Avarda payment method title is added to the WooCommerce order.
 * Enhancement       - Added support for displaying the languages Norwegian and Danish in Avarda checkout.

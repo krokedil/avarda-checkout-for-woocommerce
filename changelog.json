@@ -43,6 +43,11 @@
           "description" : "<ul><li>Enhancement - Avarda payment method title is added to the WooCommerce order.</li><li>Enhancement - Added support for displaying the languages Norwegian and Danish in Avarda checkout.</li><li>Enhancement - WooCommerce order number is now saved as the order reference in AvardaOnline.</li><li>Fix - Fix for validating order correct in checkout.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.4.2"
+     },
+     "0.1.9" : {
+          "description" : "<ul><li>Enhancement - Added Swedish translation.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.4.2"
      }
 
 }
