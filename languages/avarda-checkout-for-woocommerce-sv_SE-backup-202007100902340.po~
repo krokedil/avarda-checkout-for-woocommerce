@@ -1,0 +1,294 @@
+# Copyright (C) 2020 avarda-checkout-for-woocommerce
+# This file is distributed under the same license as the avarda-checkout-for-woocommerce package.
+msgid ""
+msgstr ""
+"Project-Id-Version: avarda-checkout-for-woocommerce\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: Svenska\n"
+"Last-Translator: \n"
+"Report-Msgid-Bugs-To: http://krokedil.se\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:"
+"1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;"
+"esc_html_x:1,2c\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"POT-Creation-Date: 2020-07-10 07:00+0000\n"
+"PO-Revision-Date: 2020-07-10 08:56+0000\n"
+"Language: sv_SE\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Loco-Version: 2.4.0; wp-5.3.4"
+
+#: ../avarda-checkout-for-woocommerce.php:187
+msgid "Settings"
+msgstr "Inställningar"
+
+#: ../avarda-checkout-for-woocommerce.php:188
+msgid "Support"
+msgstr "Support"
+
+#: ../avarda-checkout-for-woocommerce.php:228
+msgid "Select another payment method"
+msgstr "Välj ett annat betalsätt"
+
+#: ../avarda-checkout-for-woocommerce.php:240
+msgid "Please fill in all required checkout fields."
+msgstr "Var vänlig och fyll i alla obligatoriska kassafält."
+
+#: ../avarda-checkout-for-woocommerce.php:387
+msgid "Avarda Invoice"
+msgstr "Avarda Faktura"
+
+#: ../avarda-checkout-for-woocommerce.php:390
+msgid "Avarda Loan"
+msgstr "Avarda Lån"
+
+#: ../avarda-checkout-for-woocommerce.php:393
+msgid "Avarda Card"
+msgstr "Avarda Kort"
+
+#: ../avarda-checkout-for-woocommerce.php:396
+msgid "Avarda Direct Payment"
+msgstr "Avarda Direkt Betalning"
+
+#: ../avarda-checkout-for-woocommerce.php:399
+msgid "Avarda Part Payment"
+msgstr "Avarda Delbetalning"
+
+#: ../avarda-checkout-for-woocommerce.php:402
+msgid "Avarda Swish"
+msgstr "Avarda Swish"
+
+#: ../avarda-checkout-for-woocommerce.php:405
+msgid "Avarda High Amount Loan"
+msgstr "Avarda Högt Belopp Lån"
+
+#: ../avarda-checkout-for-woocommerce.php:408
+msgid "Avarda PayPal"
+msgstr "Avarda PayPal"
+
+#: ../avarda-checkout-for-woocommerce.php:411
+msgid "Avarda Pay On Delivery"
+msgstr "Avarda Betala Vid Leverans"
+
+#: ../avarda-checkout-for-woocommerce.php:414
+msgid "Avarda B2B Invoice"
+msgstr "Avarda B2B Faktura"
+
+#: ../avarda-checkout-for-woocommerce.php:417
+msgid "Avarda Direct Invoice"
+msgstr "Avarda Direkt Faktura"
+
+#: ../avarda-checkout-for-woocommerce.php:420
+msgid "Avarda Masterpass"
+msgstr "Avarda Masterpass"
+
+#: ../avarda-checkout-for-woocommerce.php:423
+msgid "Avarda MobilePay"
+msgstr "Avarda MobilePay"
+
+#: ../avarda-checkout-for-woocommerce.php:426
+msgid "Avarda Vipps"
+msgstr "Avarda Vipps"
+
+#: ../avarda-checkout-for-woocommerce.php:429
+msgid "Avarda Zero Amount"
+msgstr "Avarda Nollbelopp"
+
+#: ../avarda-checkout-for-woocommerce.php:432,
+#: ../classes/class-aco-gateway.php:22
+msgid "Avarda Checkout"
+msgstr "Avarda Checkout"
+
+#: ../classes/class-aco-gateway.php:181
+msgid "Order finalized in thankyou page."
+msgstr "Ordern slutfördes på tacksidan."
+
+#: ../classes/class-aco-order-management.php:51
+msgid ""
+"Avarda Checkout reservation could not be cancelled. Missing Avarda purchase "
+"id."
+msgstr ""
+"Avarda Checkout reservationen kunde inte avbrytas. Avarda betalnings id "
+"saknas."
+
+#: ../classes/class-aco-order-management.php:58
+msgid ""
+"Could not cancel Avarda Checkout reservation, Avarda Checkout reservation is "
+"already cancelled."
+msgstr ""
+"Kan ej avbryta Avarda Checkout reservationen, Avarda Checkout reservationen "
+"är redan avbruten."
+
+#: ../classes/class-aco-order-management.php:71
+msgid "Avarda API Error on Avarda cancel order: "
+msgstr "Avarda API Error vid kancellering av Avarda order:"
+
+#: ../classes/class-aco-order-management.php:78
+msgid "Avarda reservation was successfully cancelled."
+msgstr "Avarda reservationen avbröts."
+
+#: ../classes/class-aco-order-management.php:111
+msgid ""
+"Avarda Checkout reservation could not be activated. Missing Avarda purchase "
+"id."
+msgstr ""
+"Avarda Checkout reservationen kunde inte aktiveras. Avarda betalnings id "
+"saknas."
+
+#: ../classes/class-aco-order-management.php:118
+msgid ""
+"Could not activate Avarda Checkout reservation, Avarda Checkout reservation "
+"is already activated."
+msgstr ""
+"Kan ej aktivera Avarda Checkout reservationen, Avarda Checkout reservationen "
+"är redan aktiverad."
+
+#: ../classes/class-aco-order-management.php:132
+msgid "Avarda API Error on Avarda activate order: "
+msgstr "Avarda API Error vid aktivering av Avarda order:"
+
+#: ../classes/class-aco-order-management.php:139
+msgid "Avarda reservation was successfully activated."
+msgstr "Avarda reservationen aktiverades."
+
+#: ../classes/class-aco-order-management.php:169
+msgid ""
+"Avarda Checkout order could not be refunded. Missing Avarda purchase id."
+msgstr ""
+"Avarda Checkout ordern kunde inte återbetalas. Avarda betalnings id saknas."
+
+#: ../classes/class-aco-order-management.php:183
+msgid "Avarda API Error on get avarda order before refund: "
+msgstr "Avarda API Error vid hämtning av Avarda order före återbetalning:"
+
+#: ../classes/class-aco-order-management.php:205
+msgid "Avarda API Error on Avarda refund: "
+msgstr "Avarda API Error vid återbetalning av Avarda order:"
+
+#: ../classes/class-aco-order-management.php:210
+msgid "Avarda Checkout order was successfully refunded."
+msgstr "Avarda Checkout ordern återbetalades."
+
+#: ../classes/class-aco-order-management.php:213
+msgid "Avarda Checkout order could not be refunded."
+msgstr "Avarda Checkout ordern kunde inte återbetalas."
+
+#: ../classes/class-aco-order-management.php:252
+msgid "Avarda Checkout order could not be updated. Missing Avarda purchase id."
+msgstr ""
+"Avarda Checkout order kunde inte uppdateras. Avarda betalnings id saknas."
+
+#: ../classes/class-aco-order-management.php:264
+msgid "Avarda API Error on get avarda order before update: "
+msgstr "Avarda API Error vid hämtning av Avarda order före uppdatering:"
+
+#: ../classes/class-aco-order-management.php:284
+msgid "Avarda API Error on Avarda update: "
+msgstr "Avarda API Error vid uppdatering av Avarda order:"
+
+#: ../classes/class-aco-order-management.php:289
+msgid "Avarda Checkout order was successfully updated."
+msgstr "Avarda Checkout ordern uppdaterades."
+
+#: ../classes/class-aco-order-management.php:293
+msgid "Avarda Checkout order could not be updated."
+msgstr "Avarda Checkout ordern kunde inte uppdateras."
+
+#: ../classes/requests/helpers/class-aco-helper-order.php:144,
+#: ../classes/requests/helpers/class-aco-helper-order.php:152
+msgid "Shipping"
+msgstr "Frakt"
+
+#: ../includes/aco-form-fields.php:10
+msgid "Enable/Disable"
+msgstr "Aktivera/Avaktivera"
+
+#: ../includes/aco-form-fields.php:16
+msgid "Title"
+msgstr "Titel"
+
+#: ../includes/aco-form-fields.php:18
+msgid "This controls the title which the user sees during checkout."
+msgstr "Detta kontrollerar titeln som användaren ser på kassasidan."
+
+#: ../includes/aco-form-fields.php:23
+msgid "Description"
+msgstr "Beskrivning"
+
+#: ../includes/aco-form-fields.php:25
+msgid "Pay with Avarda via invoice, card and direct bank payments."
+msgstr "Betala med Avarda via faktura, kort eller direkt bankbetalning."
+
+#: ../includes/aco-form-fields.php:27
+msgid "This controls the description which the user sees during checkout."
+msgstr "Detta kontrollerar beskrivningen som användaren ser på kassasidan."
+
+#: ../includes/aco-form-fields.php:30
+msgid "Other payment method button text"
+msgstr "Annan text för betalningsmetod knappen"
+
+#: ../includes/aco-form-fields.php:32
+msgid ""
+"Customize the <em>Select another payment method</em> button text that is "
+"displayed in checkout if using other payment methods than Avarda Checkout. "
+"Leave blank to use the default (and translatable) text."
+msgstr ""
+"Anpassa texten på knappen <em>Välj en annan betalningsmetod</em> som visas "
+"på kassasidan om fler betalsätt än Avarda används. Lämna tomt för att "
+"använda standardtexten (som också är översättningsbar)."
+
+#: ../includes/aco-form-fields.php:37
+msgid "Testmode"
+msgstr "Testläge"
+
+#: ../includes/aco-form-fields.php:39
+msgid "Enable Avarda Checkout testmode"
+msgstr "Aktivera testläget för Avarda Checkout"
+
+#: ../includes/aco-form-fields.php:43
+msgid "Enable Order Management"
+msgstr "Aktivera Orderhantering"
+
+#: ../includes/aco-form-fields.php:45
+msgid ""
+"Enable Avarda order capture on WooCommerce order completion and Avarda order "
+"cancellation on WooCommerce order cancellation"
+msgstr ""
+"Aktivera Avarda order aktivering vid WooCommerce order färdigställning och "
+"Avarda order kancellering vid WooCommerce order avbrytning."
+
+#: ../includes/aco-form-fields.php:49
+msgid "Debug Log"
+msgstr "Debug Log"
+
+#: ../includes/aco-form-fields.php:51
+msgid "Enable logging"
+msgstr "Aktivera loggning"
+
+#: ../includes/aco-form-fields.php:56
+msgid "Two column checkout layout"
+msgstr "Två kolumn kassa"
+
+#: ../includes/aco-form-fields.php:58
+msgid "Enable Two column checkout layout"
+msgstr "Aktivera Två kolumn kassa"
+
+#: ../includes/aco-form-fields.php:67, ../includes/aco-form-fields.php:84,
+#: ../includes/aco-form-fields.php:101, ../includes/aco-form-fields.php:118
+msgid "Client ID"
+msgstr "Client ID"
+
+#: ../includes/aco-form-fields.php:73, ../includes/aco-form-fields.php:90,
+#: ../includes/aco-form-fields.php:107, ../includes/aco-form-fields.php:124
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#. translators: Avarda purchase ID.
+#: ../includes/aco-functions.php:107
+msgid "Payment via Avarda Checkout. Purchase ID: %s"
+msgstr "Betalning via Avarda Checkout. Betalnings ID: %s"
