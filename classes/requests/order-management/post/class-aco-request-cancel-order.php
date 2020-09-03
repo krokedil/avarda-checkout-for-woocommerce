@@ -58,6 +58,7 @@ class ACO_Request_Cancel_Order extends ACO_Request {
 			'headers' => $this->get_headers(),
 			'method'  => 'POST',
 			'body'    => wp_json_encode( $this->get_body() ),
+			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }
