@@ -18,9 +18,7 @@ function aco_maybe_create_token() {
 	$currency = get_transient( 'aco_currency' );
 	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
 		$avarda_payment = ACO_WC()->api->request_token();
-		error_log( '$avarda_payment 1 ' . var_export( $avarda_payment, true ) );
 		if ( ! $avarda_payment ) {
-			error_log( '$avarda_payment 2 ' . var_export( $avarda_payment, true ) );
 			return;
 		}
 		// Set transient with 55minute life time.
