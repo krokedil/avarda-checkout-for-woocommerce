@@ -203,7 +203,7 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	$aco_payment_method = '';
 	if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 		$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
-		update_post_meta( $order_id, '_avarda_payment_method', $aco_payment_method );
+		update_post_meta( $order->get_id(), '_avarda_payment_method', $aco_payment_method );
 	}
 
 	switch ( $aco_payment_method ) {
