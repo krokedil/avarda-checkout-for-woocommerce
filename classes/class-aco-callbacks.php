@@ -21,8 +21,6 @@ class ACO_Callbacks {
 		add_action( 'woocommerce_api_aco_wc_notification', array( $this, 'notification_cb' ) );
 	}
 
-
-
 	/**
 	 * Handles notification callbacks. Triggered by Avarda 1-10 minutes after finalized purchase.
 	 *
@@ -52,9 +50,5 @@ class ACO_Callbacks {
 		header( 'HTTP/1.1 200 OK' );
 		exit;
 	}
-
-
-
-
 }
 new ACO_Callbacks();
