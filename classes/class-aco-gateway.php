@@ -44,7 +44,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'avarda_thank_you' ) );
+		add_action( 'woocommerce_thankyou', array( $this, 'avarda_thank_you' ) );
 	}
 
 	/**
@@ -171,23 +171,13 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function avarda_thank_you( $order_id ) {
 		if ( $order_id ) {
-			$order = wc_get_order( $order_id );
 
-			if ( is_object( $order ) && $order->get_transaction_id() ) {
-				$avarda_purchase_id = $order->get_transaction_id();
-				// Save payment type, card details & run $order->payment_complete() if all looks good.
-				if ( ! $order->has_status( array( 'on-hold', 'processing', 'completed' ) ) ) {
-					aco_confirm_avarda_order( $order_id, $avarda_purchase_id );
-					$order->add_order_note( __( 'Order finalized in thankyou page.', 'avarda-checkout-for-woocommerce' ) );
-					WC()->cart->empty_cart();
-				}
-				// Clear sessionStorage.
-				echo '<script>sessionStorage.removeItem("acoRequiredFields")</script>';
-				echo '<script>sessionStorage.removeItem("acoFieldData")</script>';
+			// Clear sessionStorage.
+			echo '<script>sessionStorage.removeItem("acoRequiredFields")</script>';
+			echo '<script>sessionStorage.removeItem("acoFieldData")</script>';
 
-				// Unset sessions.
-				aco_wc_unset_sessions();
-			}
+			// Unset sessions.
+			aco_wc_unset_sessions();
 		}
 	}
 
