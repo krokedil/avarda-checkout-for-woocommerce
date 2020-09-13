@@ -153,3 +153,34 @@ function aco_wc_show_another_gateway_button() {
 	}
 }
 
+/**
+ * Finds an Order ID based on a transaction ID (the Avarda order number).
+ *
+ * @param string $transaction_id Avarda order number saved as Transaction ID in WC order.
+ * @return int The ID of an order, or 0 if the order could not be found.
+ */
+function aco_get_order_id_by_transaction_id( $transaction_id ) {
+	$query_args = array(
+		'fields'      => 'ids',
+		'post_type'   => wc_get_order_types(),
+		'post_status' => array_keys( wc_get_order_statuses() ),
+		'meta_key'    => '_transaction_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'meta_value'  => sanitize_text_field( wp_unslash( $transaction_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'date_query'  => array(
+			array(
+				'after' => '30 day ago',
+			),
+		),
+	);
+
+	$orders = get_posts( $query_args );
+
+	if ( $orders ) {
+		$order_id = $orders[0];
+	} else {
+		$order_id = 0;
+	}
+
+	return $order_id;
+}
+

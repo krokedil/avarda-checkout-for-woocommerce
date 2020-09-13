@@ -92,6 +92,11 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function init() {
+
+			if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+				return;
+			}
+
 			load_plugin_textdomain( 'avarda-checkout-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
@@ -151,6 +156,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 
 			// Requests.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
