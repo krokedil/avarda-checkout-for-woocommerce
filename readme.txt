@@ -31,7 +31,7 @@ More information on how to get started can be found in the [plugin documentation
 
 == CHANGELOG ==
 = 2020.09.18        - version 0.2.0 =
-* Enhancement       - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completded Card/Swish payments.
+* Enhancement       - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.
 * Tweak             - Increased timeout time to 10 seconds in request to Avarda.
 * Tweak             - Move Woo order confirmation process to separate class.
 * Fix               - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.
