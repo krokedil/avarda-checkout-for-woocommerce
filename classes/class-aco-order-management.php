@@ -43,6 +43,11 @@ class ACO_Order_Management {
 			return;
 		}
 
+		// Check if the order has been paid.
+		if ( empty( $order->get_date_paid() ) ) {
+			return;
+		}
+
 		$subscription = $this->check_if_subscription( $order );
 
 		// Check if we have a purchase id.
@@ -96,6 +101,11 @@ class ACO_Order_Management {
 		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
 		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
 		if ( ! $order_management ) {
+			return;
+		}
+
+		// Check if the order has been paid.
+		if ( empty( $order->get_date_paid() ) ) {
 			return;
 		}
 

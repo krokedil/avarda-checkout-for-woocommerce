@@ -44,6 +44,7 @@ class ACO_Request_Get_Payment extends ACO_Request {
 		return array(
 			'headers' => $this->get_headers(),
 			'method'  => 'GET',
+			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }

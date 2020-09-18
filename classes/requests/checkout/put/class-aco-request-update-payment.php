@@ -55,6 +55,7 @@ class ACO_Request_Update_Payment extends ACO_Request {
 			'headers' => $this->get_headers(),
 			'method'  => 'PUT',
 			'body'    => wp_json_encode( $this->get_body() ),
+			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }

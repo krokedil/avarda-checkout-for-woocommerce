@@ -69,6 +69,7 @@ class ACO_Request_Return_Order extends ACO_Request {
 			'headers' => $this->get_headers(),
 			'method'  => 'POST',
 			'body'    => wp_json_encode( $this->get_body( $order_id, $refunded_items ) ),
+			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }

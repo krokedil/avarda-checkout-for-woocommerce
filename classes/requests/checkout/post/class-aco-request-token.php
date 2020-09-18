@@ -66,6 +66,7 @@ class ACO_Request_Token extends ACO_Request {
 			'headers' => $this->get_headers(),
 			'method'  => 'POST',
 			'body'    => $this->get_body(),
+			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }

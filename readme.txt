@@ -1,10 +1,10 @@
 === Avarda Checkout for WooCommerce ===
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
-Requires at least: 4.5
-Tested up to: 5.4.2
-WC requires at least: 3.5.0
-WC tested up to: 4.3.0
+Requires at least: 4.7
+Tested up to: 5.5.1
+WC requires at least: 3.8.0
+WC tested up to: 4.5.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -30,6 +30,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2020.09.18        - version 0.2.0 =
+* Enhancement       - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.
+* Tweak             - Increased timeout time to 10 seconds in request to Avarda.
+* Tweak             - Move Woo order confirmation process to separate class.
+* Fix               - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.
+
 = 2020.07.10        - version 0.1.9 =
 * Enhancement       - Added Swedish translation.
 
