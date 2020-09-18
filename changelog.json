@@ -48,6 +48,11 @@
           "description" : "<ul><li>Enhancement - Added Swedish translation.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.4.2"
+     },
+     "0.2.0" : {
+          "description" : "<ul><li>Enhancement - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completded Card/Swish payments.</li><li>Tweak - Increased timeout time to 10 seconds in request to Avarda.</li><li>Tweak - Move Woo order confirmation process to separate class.</li><li>Fix - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.5.1"
      }
 
 }
