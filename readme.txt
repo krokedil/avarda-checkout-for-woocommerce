@@ -3,6 +3,7 @@ Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 4.7
 Tested up to: 5.5.1
+Requires PHP: 5.6
 WC requires at least: 3.8.0
 WC tested up to: 4.5.2
 License: GPLv3
