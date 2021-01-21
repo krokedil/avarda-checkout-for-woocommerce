@@ -391,6 +391,24 @@ jQuery(function($) {
 			}
 		},
 
+		/**
+		 * Logs the message to the Avarda log in WooCommerce.
+		 * @param {string} message 
+		 */
+		logToFile: function( message ) {
+			$.ajax(
+				{
+					url: aco_wc_params.log_to_file_url,
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						message: message,
+						nonce: aco_wc_params.log_to_file_nonce
+					}
+				}
+			);
+		},
+
 		/*
 		 * Initiates the script and sets the triggers for the functions.
 		 */
