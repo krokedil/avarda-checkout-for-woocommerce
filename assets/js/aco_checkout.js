@@ -146,6 +146,7 @@ jQuery(function($) {
 		},
 
 		handleBeforeSubmitCallback: function(data, callback) {
+			aco_wc.logToFile( 'Received "beforeSubmitCallback" from Avarda' );
 			aco_wc.getAvardaPayment();
 
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
@@ -178,8 +179,10 @@ jQuery(function($) {
 					if ($("form.checkout #terms").length > 0) {
 						$("form.checkout #terms").prop("checked", true);
 					}
-					$('form.checkout').submit();
-					return true;
+					//$('form.checkout').submit();
+					//return true;
+					// Submit wc order.
+					aco_wc.submitForm();
 				}
 			});
 		},
@@ -392,6 +395,73 @@ jQuery(function($) {
 		},
 
 		/**
+		 * Submit the order using the WooCommerce AJAX function.
+		 */
+		submitForm: function() {
+			$( '.woocommerce-checkout-review-order-table' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+			$.ajax({
+				type: 'POST',
+				url: aco_wc_params.submit_order,
+				data: $('form.checkout').serialize(),
+				dataType: 'json',
+				success: function( data ) {
+					try {
+						if ( 'success' === data.result ) {
+							aco_wc.logToFile( 'Successfully placed order. Sending "beforeSubmitContinue" true to Avarda' );
+
+							$( 'body' ).trigger( 'aco_order_validation', true );
+							console.log('data.redirect_url');
+							console.log(data.redirect_url);
+							sessionStorage.setItem( 'avardaRedirectUrl', data.redirect_url );
+							$('form.checkout').removeClass( 'processing' ).unblock();
+						} else {
+							throw 'Result failed';
+						}
+					} catch ( err ) {
+						if ( data.messages )  {
+							aco_wc.logToFile( 'Checkout error | ' + data.messages );
+							aco_wc.failOrder( 'submission', data.messages );
+						} else {
+							aco_wc.logToFile( 'Checkout error | No message' );
+							aco_wc.failOrder( 'submission', '<div class="woocommerce-error">' + 'Checkout error' + '</div>' );
+						}
+					}
+				},
+				error: function( data ) {
+					aco_wc.logToFile( 'AJAX error | ' + data );
+					aco_wc.failOrder( 'ajax-error', data );
+				}
+			});
+		},
+
+		failOrder: function( event, error_message ) {
+			// Send false and cancel
+			$( 'body' ).trigger( 'aco_order_validation', false );
+		
+			// Re-enable the form.
+			$( 'body' ).trigger( 'updated_checkout' );
+			$( aco_wc.checkoutFormSelector ).unblock();
+			$( '.woocommerce-checkout-review-order-table' ).unblock();
+
+			// Print error messages, and trigger checkout_error, and scroll to notices.
+			$( '.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message' ).remove();
+			$( 'form.checkout' ).prepend( '<div class="woocommerce-NoticeGroup woocommerce-NoticeGroup-checkout">' + error_message + '</div>' ); // eslint-disable-line max-len
+			$( 'form.checkout' ).removeClass( 'processing' ).unblock();
+			$( 'form.checkout' ).find( '.input-text, select, input:checkbox' ).trigger( 'validate' ).blur();
+			$( document.body ).trigger( 'checkout_error' , [ error_message ] );
+			$( 'html, body' ).animate( {
+				scrollTop: ( $( 'form.checkout' ).offset().top - 100 )
+			}, 1000 );
+		},
+
+
+		/**
 		 * Logs the message to the Avarda log in WooCommerce.
 		 * @param {string} message 
 		 */
@@ -426,9 +496,9 @@ jQuery(function($) {
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
  				
 				// Hashchange.
-				$( window ).on('hashchange', aco_wc.hashChange);
+				//$( window ).on('hashchange', aco_wc.hashChange);
 				// Error detected.
-				$( document.body ).on( 'checkout_error', aco_wc.errorDetected );
+				// $( document.body ).on( 'checkout_error', aco_wc.errorDetected );
 			}
 			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 			aco_wc.bodyEl.on( 'click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO );
