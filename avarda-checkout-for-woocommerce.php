@@ -210,7 +210,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * Loads the needed scripts for Avarda_Checkout.
 		 */
 		public function load_scripts() {
-			if ( is_checkout() ) {
+			if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
 					do_action( 'aco_before_load_scripts' );
 
 					// Checkout script.
