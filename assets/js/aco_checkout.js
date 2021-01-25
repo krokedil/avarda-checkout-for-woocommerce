@@ -261,26 +261,6 @@ jQuery(function($) {
 			});
 		},
 
-		hashChange: function() {
-			console.log('hashchange');
-			var currentHash = location.hash;
-            var splittedHash = currentHash.split("=");
-            console.log(splittedHash[0]);
-            console.log(splittedHash[1]);
-            if(splittedHash[0] === "#avarda-success"){
-				$( 'body' ).trigger( 'aco_order_validation', true );
-				var response = JSON.parse( atob( splittedHash[1] ) );
-                console.log('response.redirect_url');
-                console.log(response.redirect_url);
-				sessionStorage.setItem( 'avardaRedirectUrl', response.redirect_url );
-				$('form.checkout').removeClass( 'processing' ).unblock();
-            }
-		},
-
-		errorDetected: function() {
-			$( 'body' ).trigger( 'aco_order_validation', false );
-		},
-
 		/*
 		 * Check if our gateway is the selected gateway.
 		 */
@@ -495,10 +475,6 @@ jQuery(function($) {
 				// Update avarda payment.
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
  				
-				// Hashchange.
-				//$( window ).on('hashchange', aco_wc.hashChange);
-				// Error detected.
-				// $( document.body ).on( 'checkout_error', aco_wc.errorDetected );
 			}
 			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 			aco_wc.bodyEl.on( 'click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO );
