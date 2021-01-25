@@ -53,6 +53,11 @@
           "description" : "<ul><li>Enhancement - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.</li><li>Tweak - Increased timeout time to 10 seconds in request to Avarda.</li><li>Tweak - Move Woo order confirmation process to separate class.</li><li>Fix - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.5.1"
+     },
+     "1.0.0" : {
+          "description" : "<ul><li>Tweak - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.</li><li>Tweak - Adds logging to logfile from frontend actions in checkout (during payment completion).</li><li>Tweak - Don't load checkout scripts on thankyou page.</li></ul>",
+          "requires" : "4.7.0",
+          "tested" : "5.6"
      }
 
 }

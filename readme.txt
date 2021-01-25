@@ -1,11 +1,11 @@
 === Avarda Checkout for WooCommerce ===
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
-Requires at least: 4.7
-Tested up to: 5.5.1
+Requires at least: 5.0
+Tested up to: 5.6
 Requires PHP: 5.6
 WC requires at least: 3.8.0
-WC tested up to: 4.5.2
+WC tested up to: 4.9.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,11 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.01.25        - version 1.0.0 =
+* Tweak             - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.
+* Tweak             - Adds logging to logfile from frontend actions in checkout (during payment completion).
+* Tweak             - Don't load checkout scripts on thankyou page.
+
 = 2020.09.18        - version 0.2.0 =
 * Enhancement       - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.
 * Tweak             - Increased timeout time to 10 seconds in request to Avarda.
