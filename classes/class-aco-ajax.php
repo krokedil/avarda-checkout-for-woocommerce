@@ -29,6 +29,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_get_avarda_payment'             => true,
 			'aco_wc_iframe_shipping_address_change' => true,
 			'aco_wc_change_payment_method'          => true,
+			'aco_wc_log_js'                         => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
@@ -230,6 +231,25 @@ class ACO_AJAX extends WC_AJAX {
 		);
 		wp_die();
 
+	}
+
+	/**
+	 * Logs messages from the JavaScript to the server log.
+	 *
+	 * @return void
+	 */
+	public static function aco_wc_log_js() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_log_js' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+		$posted_message     = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
+		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
+		ACO_Logger::log( $message );
+		wp_send_json_success();
+		wp_die();
 	}
 }
 ACO_AJAX::init();

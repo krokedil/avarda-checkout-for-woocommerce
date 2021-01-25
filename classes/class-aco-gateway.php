@@ -82,13 +82,9 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				),
 				wc_get_checkout_url()
 			);
-			$response         = array(
-				'redirect_url' => $confirmation_url,
-				'time'         => microtime(),
-			);
 			return array(
-				'result'   => 'success',
-				'redirect' => '#avarda-success=' . base64_encode( wp_json_encode( $response ) ),
+				'result'       => 'success',
+				'redirect_url' => $confirmation_url,
 			);
 		} else {
 			return array(
