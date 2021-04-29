@@ -82,6 +82,12 @@ class ACO_AJAX extends WC_AJAX {
 	 */
 	public static function aco_wc_update_checkout() {
 
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_update_checkout' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
@@ -101,6 +107,9 @@ class ACO_AJAX extends WC_AJAX {
 				$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 				// Check if we got a wp_error.
 				if ( ! $avarda_order ) {
+					// Unset sessions.
+					aco_wc_unset_sessions();
+
 					wp_send_json_error();
 					wp_die();
 				}
@@ -110,24 +119,33 @@ class ACO_AJAX extends WC_AJAX {
 				WC()->cart->calculate_fees();
 				WC()->cart->calculate_totals();
 
-				// Check if order needs payment.
+				// Check if order needs payment. If not, send refreshZeroAmount so checkout page is reloaded.
 				if ( apply_filters( 'aco_check_if_needs_payment', true ) ) {
 					if ( ! WC()->cart->needs_payment() ) {
-						$return['redirect_url'] = wc_get_checkout_url();
-						wp_send_json_error( $return );
+						wp_send_json_success(
+							array(
+								'refreshZeroAmount' => 'refreshZeroAmount',
+							)
+						);
 						wp_die();
 					}
 				}
+				// Get current status of Avarda session.
 				if ( 'B2C' === $avarda_order['mode'] ) {
 					$aco_state = $avarda_order['b2C']['step']['current'];
 				} elseif ( 'B2B' === $avarda_order['mode'] ) {
 					$aco_state = $avarda_order['b2B']['step']['current'];
 				}
+
 				if ( ! ( 'Completed' === $aco_state || 'TimedOut' === $aco_state ) ) {
 					// Update order.
 					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-					// If the update failed - reload the checkout page and display the error.
+
+					// If the update failed - unset sessions and return error.
 					if ( false === $avarda_order ) {
+						// Unset sessions.
+						aco_wc_unset_sessions();
+
 						wp_send_json_error();
 						wp_die();
 					}

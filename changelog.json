@@ -58,6 +58,10 @@
           "description" : "<ul><li>Tweak - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.</li><li>Tweak - Adds logging to logfile from frontend actions in checkout (during payment completion).</li><li>Tweak - Don't load checkout scripts on thankyou page.</li></ul>",
           "requires" : "4.7.0",
           "tested" : "5.6"
+     },
+     "1.0.1" : {
+          "description" : "<ul><li>Tweak - Added stack trace to logger.</li><li>Tweak - Reduce the amount of update requests in checkout.</li><li>Fix - Delete current purchase id stored in Woo session if GET or PUT request to Avarda fails.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.7.1"
      }
-
 }
