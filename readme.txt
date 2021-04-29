@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.6
+Tested up to: 5.7.1
 Requires PHP: 5.6
-WC requires at least: 3.8.0
-WC tested up to: 4.9.1
+WC requires at least: 4.0.0
+WC tested up to: 5.2.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,11 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.04.29        - version 1.0.1 =
+* Tweak             - Added stack trace to logger.
+* Tweak             - Reduce the amount of update requests in checkout.
+* Fix               - Delete current purchase id stored in Woo session if GET or PUT request to Avarda fails.
+
 = 2021.01.25        - version 1.0.0 =
 * Tweak             - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.
 * Tweak             - Adds logging to logfile from frontend actions in checkout (during payment completion).
