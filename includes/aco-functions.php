@@ -71,7 +71,7 @@ function aco_wc_show_checkout_form() {
 		if ( 'TimedOut' === $aco_state ) {
 			aco_wc_initialize_payment();
 		} elseif ( ! ( 'Completed' === $aco_state || 'TimedOut' === $aco_state ) ) {
-			ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+			ACO_WC()->api->request_update_payment( $avarda_purchase_id, true );
 		}
 	}
 	?>
@@ -267,6 +267,7 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_wc_purchase_id' );
 	WC()->session->__unset( 'aco_wc_jwt' );
+	WC()->session->__unset( 'aco_update_md5' );
 }
 
 /**

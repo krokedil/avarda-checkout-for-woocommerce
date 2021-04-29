@@ -246,17 +246,29 @@ jQuery(function($) {
 				error: function(data) {
 				},
 				complete: function(data) {
+					console.log('updateAvardaPayment complete');
+					console.log(data);
 					console.log(data.responseJSON);
-					if (true === data.responseJSON.success) {
+
+					if ( data.responseJSON && true === data.responseJSON.success ) {
+
+						if( data.responseJSON.data && data.responseJSON.data.refreshZeroAmount ) {
+							window.location.reload();
+						}
+
 						window.avardaCheckout.refreshForm();
-						$('.woocommerce-checkout-review-order-table').unblock();							
+						$('.woocommerce-checkout-review-order-table').unblock();
+
 					} else {
-						console.log('error');
-						if( '' !== data.responseJSON.data.redirect_url ) {
+						console.log('updateAvardaPayment error');
+						if( data.responseJSON && data.responseJSON.data && '' !== data.responseJSON.data.redirect_url ) {
 							console.log('Cart do not need payment. Reloading checkout.');
 							window.location.href = data.responseJSON.data.redirect_url;
 						}
+						$('.woocommerce-checkout-review-order-table').unblock();
 					}
+
+					
 				}
 			});
 		},
