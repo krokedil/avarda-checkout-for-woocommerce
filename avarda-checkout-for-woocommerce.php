@@ -113,6 +113,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->logger           = new ACO_Logger();
 			$this->cart_items       = new ACO_Helper_Cart();
 			$this->order_items      = new ACO_Helper_Order();
+			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
 			$this->order_management = new ACO_Order_Management();
 
 			do_action( 'aco_initiated' );
@@ -174,6 +175,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-create-refund-data.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-checkout-setup.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';
