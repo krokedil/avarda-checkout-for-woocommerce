@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.7.1
+Tested up to: 5.7.2
 Requires PHP: 5.6
 WC requires at least: 4.0.0
-WC tested up to: 5.2.2
+WC tested up to: 5.4.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,11 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.07.06        - version 1.1.0 =
+* Feature           - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).
+* Tweak             - Changed Initialize checkout request endpoint to /api/partner/payments/.
+* Tweak             - Adds request_url to logging.
+
 = 2021.04.29        - version 1.0.1 =
 * Tweak             - Added stack trace to logger.
 * Tweak             - Reduce the amount of update requests in checkout.

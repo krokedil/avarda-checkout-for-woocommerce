@@ -65,7 +65,7 @@ class ACO_Helper_Cart {
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
 			'amount'      => $this->get_product_price( $cart_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $cart_item ), // String.
-			'taxAmount'   => $cart_item['line_tax'], // Float.
+			'taxAmount'   => round( $cart_item['line_tax'], 2 ), // Float.
 		);
 	}
 

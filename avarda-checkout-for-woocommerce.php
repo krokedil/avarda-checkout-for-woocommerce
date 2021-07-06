@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         1.0.1
+ * Version:         1.1.0
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 4.0.0
- * WC tested up to: 5.2.2
+ * WC tested up to: 5.4.1
  *
  * Copyright:       © 2016-2021 Krokedil.
  * License:         GNU General Public License v3.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '1.0.1' );
+define( 'AVARDA_CHECKOUT_VERSION', '1.1.0' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://avdonl-p-checkout.avarda.org' );
@@ -113,6 +113,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->logger           = new ACO_Logger();
 			$this->cart_items       = new ACO_Helper_Cart();
 			$this->order_items      = new ACO_Helper_Order();
+			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
 			$this->order_management = new ACO_Order_Management();
 
 			do_action( 'aco_initiated' );
@@ -174,6 +175,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-create-refund-data.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-checkout-setup.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';
@@ -277,12 +279,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function check_version() {
-			require AVARDA_CHECKOUT_PATH . '/includes/plugin_update_check.php';
-			$KernlUpdater = new PluginUpdateChecker_2_0( // phpcs:ignore
+			require AVARDA_CHECKOUT_PATH . '/kernl-update-checker/kernl-update-checker.php';
+
+			$update_checker = Puc_v4_Factory::buildUpdateChecker(
 				'https://kernl.us/api/v1/updates/5eb54681c57f8861e5314e4e/',
 				__FILE__,
-				'avarda-checkout-for-woocommerce',
-				1
+				'avarda-checkout-for-woocommerce'
 			);
 		}
 	}

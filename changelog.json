@@ -63,5 +63,10 @@
           "description" : "<ul><li>Tweak - Added stack trace to logger.</li><li>Tweak - Reduce the amount of update requests in checkout.</li><li>Fix - Delete current purchase id stored in Woo session if GET or PUT request to Avarda fails.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.7.1"
+     },
+     "1.1.0" : {
+          "description" : "<ul><li>Feature - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).</li><li>Tweak - Changed Initialize checkout request endpoint to /api/partner/payments/.</li><li>Tweak - Adds request_url to logging.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.7.2"
      }
 }
