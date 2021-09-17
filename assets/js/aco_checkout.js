@@ -186,9 +186,86 @@ jQuery(function($) {
 				}
 			});
 		},
+		getAvardaData: function (data, obj) {
+			if (data === null) {
+				throw Error("Data can't be null");
+			}
+			if (obj === null) {
+				throw Error("Obj can't be null");
+			}
+
+			Object.keys(obj).forEach((key) => {
+				if (data.hasOwnProperty(key) && data[key] !== null) {
+					obj[key] = data[key];
+				}
+			});
+
+			return obj;
+		},
+
+		getBillingData: function(data)  {
+			const billingData = {
+				address1: '',
+				address2: '',
+				city: '',
+				country: '',
+				firstName: '',
+				lastName: '',
+				zip: ''
+			};
+
+			return this.getAvardaData(data, billingData);
+		},
+
+		getShippingData: function (data)  {
+			const shippingData = {
+				address1: '',
+				address2: '',
+				city: '',
+				country: '',
+				firstName:'',
+				lastName: '',
+				type: '',
+				viewType: ''
+			};
+			return this.getAvardaData(data, shippingData);
+		},
+
+		getAvardaAddresses: function(billing, shipping) {
+			var customerBillingAddress = this.getBillingData(billing);
+			var customerShippingAddress = this.getShippingData(shipping);
+			var address1, address2 = '';
+			if (customerBillingAddress.address1 !== null) {
+				address1 = customerBillingAddress.address1;
+				if (customerBillingAddress.address2 !== null) {
+					address2 = customerBillingAddress.address2;
+				}
+			} else if (customerShippingAddress.address1 !== null) {
+				address1 = customerShippingAddress.address1;
+				if (customerShippingAddress.address2 !== null) {
+					address2 = customerShippingAddress.address2;
+				}
+			}
+
+			return {
+				address1: address1 ? address1 : '.',
+				address2: address2 ? address2 : '',
+			}
+		},
+
+		getUserInputs: function(data) {
+			var userInputData = {
+				email: '',
+				phone: '',
+				ssn: '',
+				zip: ''
+			};
+
+			return this.getAvardaData(data, userInputData);
+		},
 
 		setCustomerData: function( data ) {
-			console.log(data);
+			var userInputs, invoicingAddress, deliveryAddress = null;
 
 			if ( 'B2C' === data.customer_data.mode ) {
 				userInputs = data.customer_data.b2C.userInputs;
@@ -201,14 +278,20 @@ jQuery(function($) {
 				$( '#billing_company' ).val( ( invoicingAddress.name ? invoicingAddress.name : '' ) );
 			}
 
-			$( '#billing_first_name' ).val( '.' );
-			$( '#billing_last_name' ).val( '.' );
-			$( '#billing_address_1' ).val( '.' );
-			$( '#billing_address_2' ).val( '' );
-			$( '#billing_city' ).val( '.' );
-			$( '#billing_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
-			$( '#billing_phone' ).val( '.' );
-			$( '#billing_email' ).val( 'krokedil@krokedil.se' );
+			var billingData = this.getBillingData(invoicingAddress);
+			var shippingData = this.getShippingData(deliveryAddress);
+			var { address1, address2 } = this.getAvardaAddresses(billingData, shippingData);
+			var billingZip = billingData.zip;
+			var { email, phone } =  this.getUserInputs(userInputs);
+
+			$( '#billing_first_name' ).val( billingData.firstName ? billingData.firstName : '.'  );
+			$( '#billing_last_name' ).val( billingData.lastName ? billingData.lastName : '.' );
+			$( '#billing_address_1' ).val(  address1 );
+			$( '#billing_address_2' ).val( address2);
+			$( '#billing_city' ).val( billingData.city ? billingData.city : '.' );
+			$( '#billing_postcode' ).val( billingZip ? billingZip: '' );
+			$( '#billing_phone' ).val( phone ? phone : '.' );
+			$( '#billing_email' ).val( email ?  email : 'krokedil@krokedil.se' );
 
 			
 
@@ -217,12 +300,12 @@ jQuery(function($) {
 				if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 					$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 				}
-				$( '#shipping_first_name' ).val( '.' );
-				$( '#shipping_last_name' ).val( '.' );
-				$( '#shipping_address_1' ).val( '.' );
-				$( '#shipping_address_2' ).val( '' );
-				$( '#shipping_city' ).val( '.' );
-				$( '#shipping_postcode' ).val( invoicingAddress.zip ? invoicingAddress.zip : '11111' );
+				$( '#shipping_first_name' ).val( shippingData.firstName ? shippingData.firstName : billingData.firstName );
+				$( '#shipping_last_name' ).val( shippingData.lastName ? shippingData.lastName : billingData.lastName );
+				$( '#shipping_address_1' ).val( shippingData.address1 ? shippingData.address1 : billingData.address1 );
+				$( '#shipping_address_2' ).val( shippingData.address2 ? shippingData.address2 : billingData.address2 );
+				$( '#shipping_city' ).val( shippingData.city ? shippingData.city : billingData.city );
+				$( '#shipping_postcode' ).val( billingZip ? billingZip : '11111' );
 			} 
 		},
 
