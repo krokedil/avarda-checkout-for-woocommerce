@@ -155,7 +155,8 @@ class ACO_Request {
 		}
 
 		// Check the status code, if its not between 200 and 299 then its an error.
-		if ( wp_remote_retrieve_response_code( $response ) < 200 || wp_remote_retrieve_response_code( $response ) > 299 ) {
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code > 299 ) {
 			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
 			$error_message = '';
 			// Get the error messages.
@@ -169,7 +170,13 @@ class ACO_Request {
 				$errors = json_decode( $response['body'], true );
 				foreach ( $errors as $error => $aco_error_messages ) {
 					foreach ( $aco_error_messages as $aco_error_message ) {
-						$error_message .= $aco_error_message . ' ';
+						if ( is_array( $aco_error_message ) ) {
+							foreach ( $aco_error_message as $aco_err_msg ) {
+								$error_message .= $aco_err_msg . ' ';
+							}
+						} else {
+							$error_message .= $aco_error_message . ' ';
+						}
 					}
 				}
 			}
