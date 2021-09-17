@@ -40,7 +40,6 @@ class ACO_Subscription {
 				$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
 				// translators: %s Avarda recurring token.
 				$note = sprintf( __( 'Recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
-				// za order parent nisam ubacio token.
 				$wc_order->add_order_note( $note );
 
 				foreach ( $subscriptions as $subscription ) {
