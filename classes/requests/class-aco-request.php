@@ -13,6 +13,43 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main request class
  */
 class ACO_Request {
+
+	/**
+	 * The base url
+	 *
+	 * @var string the base url.
+	 */
+	public $base_url;
+
+	/**
+	 * Client id
+	 *
+	 * @var string $client_id
+	 */
+	public $client_id;
+
+	/**
+	 * Client secret
+	 *
+	 * @var string $client_secret
+	 */
+	public $client_secret;
+
+	/**
+	 * Enable Avarda Checkout testmode.
+	 *
+	 * @var string $testmode
+	 */
+	public $testmode;
+
+
+	/**
+	 * Plugin settings.
+	 *
+	 * @var array $avarda_settings
+	 */
+	public $avarda_settings;
+
 	/**
 	 * The request enviroment.
 	 *
