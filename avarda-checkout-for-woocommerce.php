@@ -200,11 +200,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 
 			// Requests.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-token.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-initialize-payment.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/get/class-aco-request-get-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-order-reference.php';
@@ -339,7 +341,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 	 *
 	 * @return Avarda_Checkout_For_WooCommerce
 	 */
-	function ACO_WC() { // phpcs:ignore
+	function ACO_WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 		return Avarda_Checkout_For_WooCommerce::get_instance();
 	}
 }
