@@ -51,11 +51,11 @@ class ACO_Request {
 	public $avarda_settings;
 
 	/**
-	 * The request enviroment.
+	 * The request environment.
 	 *
 	 * @var $enviroment
 	 */
-	public $enviroment;
+	public $environment;
 
 	/**
 	 * Class constructor
@@ -94,15 +94,15 @@ class ACO_Request {
 	 *
 	 * @return void
 	 */
-	public function set_enviroment() {
-		$live_enviroment = 'https://avdonl-p-checkout.avarda.org';
-		$test_enviroment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
-		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+	public function set_environment() {
+		$live_environment = 'https://avdonl-p-checkout.avarda.org';
+		$test_environment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
+		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
 
 		if ( 'no' === $avarda_settings['testmode'] ) {
-			$this->enviroment = $live_enviroment;
+			$this->environment = $live_environment;
 		} else {
-			$this->enviroment = $test_enviroment;
+			$this->environment = $test_environment;
 		}
 	}
 
