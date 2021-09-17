@@ -39,6 +39,48 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 	 */
 	class Avarda_Checkout_For_WooCommerce {
 		/**
+		 * Checkout Setup helper class.
+		 *
+		 * @var ACO_Helper_Checkout_Setup $checkout_setup
+		 */
+		public $checkout_setup;
+
+		/**
+		 * Helper API class for Avarda API
+		 *
+		 * @var ACO_API $api
+		 */
+		public $api;
+
+		/**
+		 * Helper class for cart management.
+		 *
+		 * @var ACO_Helper_Cart $cart_items
+		 */
+		public $cart_items;
+
+		/**
+		 * Helper class for logging requests.
+		 *
+		 * @var ACO_Logger $logger
+		 */
+		public $logger;
+
+		/**
+		 * Helper class for order management.
+		 *
+		 * @var ACO_Helper_Order $order_items
+		 */
+		public $order_items;
+
+
+		/**
+		 * Helper class for order reservation.
+		 *
+		 * @var $order_management ACO_Order_Management
+		 */
+		public $order_management;
+		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
 		 * @var $instance
