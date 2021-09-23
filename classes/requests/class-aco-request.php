@@ -166,6 +166,10 @@ class ACO_Request {
 				$error_message     = $aco_error_code . $aco_error_message;
 			}
 
+			if ( isset( $response['body'] ) && is_string( $response['body'] ) ) {
+				$error_message = $response['body'];
+			}
+
 			if ( null !== json_decode( $response['body'], true ) ) {
 				$errors = json_decode( $response['body'], true );
 				foreach ( $errors as $error => $aco_error_messages ) {
