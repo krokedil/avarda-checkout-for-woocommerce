@@ -77,14 +77,19 @@ class ACO_Subscription {
 		}
 
 		$create_order_response = ACO_WC()->api->create_recurring_order( $order_id, $recurring_token );
-		if ( ! is_wp_error( $create_order_response ) ) {
-			$avarda_order_id = $create_order_response['order_id'];
-			// Translators: Klarna order id.
-			$renewal_order->add_order_note( sprintf( __( 'Subscription payment made with Avarda. Avarda order id: %s', 'avarda-checkout-for-woocommerce' ), $avarda_order_id ) );
+		if ( ! is_wp_error( $create_order_response ) && is_array( $create_order_response ) ) {
+			$avarda_purchase_id = $create_order_response['purchaseId'];
+			// Translators: Avarda purchase id.
+			$renewal_order->add_order_note( sprintf( __( 'Subscription payment made with Avarda. Avarda purchase id: %s', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
 			foreach ( $subscriptions as $subscription ) {
-				$subscription->payment_complete( $avarda_order_id );
+				$subscription->payment_complete( $avarda_purchase_id );
 			}
 		} else {
+			/**
+			 * An instance of WP_Error
+			 *
+			 * @var $create_order_response WP_Error
+			 */
 			$error_message = $create_order_response->get_error_message();
 			// Translators: Error message.
 			$renewal_order->add_order_note( sprintf( __( 'Subscription payment failed with Avarda. Message: %1$s', 'avarda-checkout-for-woocommerce' ), $error_message ) );
