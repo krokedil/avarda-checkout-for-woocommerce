@@ -21,6 +21,7 @@ class ACO_Subscription {
 	public function __construct() {
 		add_action( 'aco_wc_payment_complete', array( $this, 'set_recurring_token_for_order' ), 10, 2 );
 		add_action( 'woocommerce_scheduled_subscription_payment_aco', array( $this, 'trigger_scheduled_payment' ), 10, 2 );
+		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
 	}
 
 	/**
@@ -96,6 +97,38 @@ class ACO_Subscription {
 			foreach ( $subscriptions as $subscription ) {
 				$subscription->payment_failed();
 			}
+		}
+	}
+
+
+	/**
+	 * Shows the recurring token for the order.
+	 *
+	 * @param WC_Order $order The WooCommerce order.
+	 * @return void
+	 */
+	public function show_recurring_token( $order ) {
+		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_wc_avarda_purchase_id' ) ) {
+			?>
+			<div class="order_data_column" style="clear:both; float:none; width:100%;">
+				<div class="address">
+					<p>
+						<strong><?php echo esc_html( 'Avarda recurring token' ); ?>:</strong><?php echo esc_html( $order->get_meta( '_wc_avarda_purchase_id', true ) ); ?>
+					</p>
+				</div>
+				<div class="edit_address">
+					<?php
+					woocommerce_wp_text_input(
+						array(
+							'id'            => '_wc_avarda_purchase_id',
+							'label'         => __( 'Avarda recurring token', 'avarda-checkout-for-woocommerce' ),
+							'wrapper_class' => '_billing_company_field',
+						)
+					);
+					?>
+				</div>
+			</div>
+			<?php
 		}
 	}
 }
