@@ -52,7 +52,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 
 		return array(
 			'orderReference' => $order_number,
-			'amount'         => round( $aco_total_amount - $order->get_total(), 2 ),
+			'amount'         => number_format( $aco_total_amount - $order->get_total(), 2, '.', '' ),
 		);
 	}
 

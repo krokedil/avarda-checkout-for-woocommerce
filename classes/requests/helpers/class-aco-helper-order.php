@@ -80,7 +80,7 @@ class ACO_Helper_Order {
 	 */
 	public function get_product_price( $order_item ) {
 		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
-		return round( $items_subtotal, 2 );
+		return number_format( $items_subtotal, 2, '.', '' );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class ACO_Helper_Order {
 		$tax_items = $order->get_items( 'tax' );
 		foreach ( $tax_items as $tax_item ) {
 			$tax_amount = $tax_item->get_tax_total();
-			return round( $tax_amount, 2 );
+			return number_format( $tax_amount, 2, '.', '' );
 		}
 	}
 
