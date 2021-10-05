@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.7.2
+Tested up to: 5.8.1
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 5.4.1
+WC tested up to: 5.7.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.10.05        - version 1.1.1 =
+* Tweak             - Bumped required PHP version to 7.0.
+* Fix               - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.
+
 = 2021.07.06        - version 1.1.0 =
 * Feature           - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).
 * Tweak             - Changed Initialize checkout request endpoint to /api/partner/payments/.

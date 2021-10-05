@@ -68,5 +68,10 @@
           "description" : "<ul><li>Feature - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).</li><li>Tweak - Changed Initialize checkout request endpoint to /api/partner/payments/.</li><li>Tweak - Adds request_url to logging.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.7.2"
+     },
+     "1.1.1" : {
+          "description" : "<ul><li>Tweak - Bumped required PHP version to 7.0.</li><li>Fix - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.1"
      }
 }
