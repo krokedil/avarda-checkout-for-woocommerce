@@ -77,8 +77,25 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		$order              = wc_get_order( $order_id );
-		$avarda_purchase_id = $this->get_avarda_purchase_id( $order );
+		$order                 = wc_get_order( $order_id );
+		$avarda_purchase_id    = $this->get_avarda_purchase_id( $order );
+		$change_payment_method = filter_input( INPUT_GET, 'change_payment_method', FILTER_SANITIZE_STRING );
+		// Order-pay purchase (or subscription payment method change)
+		// 1. Redirect to receipt page.
+		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
+		if ( ! empty( $change_payment_method ) ) {
+			$pay_url = add_query_arg(
+				array(
+					'aco-action' => 'change-subs-payment',
+				),
+				$order->get_checkout_payment_url( true )
+			);
+
+			return array(
+				'result'   => 'success',
+				'redirect' => $pay_url,
+			);
+		}
 		// Regular purchase.
 		// 1. Process the payment.
 		// 2. Redirect to confirmation page.
