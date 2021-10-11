@@ -65,18 +65,21 @@ jQuery(function($) {
 			"avardaCheckoutInit","avardaCheckout","1.0.0",
 			acoJsUrl
 			);
-	
-			window.avardaCheckoutInit({
-				"purchaseJwt": aco_wc_params.aco_jwt_token,
-				"rootElementId": "checkout-form",
-				"redirectUrl": aco_wc_params.aco_redirect_url,
-				"styles": aco_wc_params.aco_checkout_style,
-				"disableFocus": true,
-				"beforeSubmitCallback": aco_wc.handleBeforeSubmitCallback,
-				"completedPurchaseCallback": aco_wc.handleCompletedPurchaseCallback,
-				"deliveryAddressChangedCallback": aco_wc.handleDeliveryAddressChangedCallback,
-				"sessionTimedOutCallback": aco_wc.handleSessionTimedOutCallback,
-			});
+
+			var acoInit = {
+				purchaseJwt: aco_wc_params.aco_jwt_token,
+				rootElementId: "checkout-form",
+				redirectUrl: aco_wc_params.aco_redirect_url,
+				styles: aco_wc_params.aco_checkout_style,
+				disableFocus: true,
+				completedPurchaseCallback: aco_wc.handleCompletedPurchaseCallback,
+				deliveryAddressChangedCallback: aco_wc.handleDeliveryAddressChangedCallback,
+				sessionTimedOutCallback: aco_wc.handleSessionTimedOutCallback,
+			};
+			if (aco_wc_params.is_aco_action === 'no') {
+				acoInit.beforeSubmitCallback = aco_wc.handleBeforeSubmitCallback;
+			}
+			window.avardaCheckoutInit(acoInit);
 		},
 
 		handleSessionTimedOutCallback: function(callback) {
@@ -136,13 +139,19 @@ jQuery(function($) {
 		},
 
 		handleCompletedPurchaseCallback: function(callback){
-			console.log('avarda-payment-completed');
-            var redirectUrl = sessionStorage.getItem( 'avardaRedirectUrl' );
-            console.log(redirectUrl);
-            if( redirectUrl ) {
-               window.location.href = redirectUrl;
+			if ( aco_wc_params.confirmation_url !== null && aco_wc_params.confirmation_url.length > 1  ) {
+				var confirmation_url = aco_wc_params.confirmation_url;
+				if( confirmation_url) {
+					window.location.href = confirmation_url;
+				}
+				callback.unmount();
+			} else {
+				var redirectUrl = sessionStorage.getItem( 'avardaRedirectUrl' );
+				if( redirectUrl) {
+					window.location.href = redirectUrl;
+				}
+				callback.unmount();
 			}
-			callback.unmount();
 		},
 
 		handleBeforeSubmitCallback: function(data, callback) {
@@ -365,7 +374,10 @@ jQuery(function($) {
 				if( 'aco' === aco_wc.paymentMethod ) {
 					return true;
 				}
-			} 
+			}
+			if (aco_wc_params.is_aco_action === 'yes') {
+				return true;
+			}
 			return false;
 		},
 
