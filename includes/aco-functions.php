@@ -123,6 +123,21 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 }
 
 /**
+ * Confirms and finishes the Avarda Subscription for processing.
+ *
+ * @param int    $subscription_id The WooCommerce Subscription id.
+ * @param string $avarda_purchase_id The Avarda purchase id.
+ * @return void
+ */
+function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
+	$subscription    = wc_get_order( $subscription_id );
+	$avarda_order    = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
+	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
+	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+}
+
+/**
  * Populates the wc order address.
  *
  * @param WC_Order $order The WC Order.
