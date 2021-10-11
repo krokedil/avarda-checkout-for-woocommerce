@@ -54,6 +54,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou', array( $this, 'avarda_thank_you' ) );
+		add_action( 'woocommerce_receipt_aco', array( $this, 'receipt_page' ) );
 	}
 
 	/**
@@ -217,6 +218,19 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
 		}
 		return $avarda_purchase_id;
+	}
+
+	/**
+	 * Receipt page. Used to display the ACO iframe during subscription payment method change.
+	 *
+	 * @param WC_Order $order The WooCommerce order.
+	 * @return void
+	 */
+	public function receipt_page( $order ) {
+		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		if ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) {
+			require AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php';
+		}
 	}
 
 }
