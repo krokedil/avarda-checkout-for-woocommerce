@@ -131,6 +131,32 @@ class ACO_Subscription {
 			<?php
 		}
 	}
+
+	/**
+	 * Checks the cart if it has a subscription product in it.
+	 *
+	 * @return bool
+	 */
+	public function check_if_subscription() {
+		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Checks if this is a ACO subscription payment method change.
+	 *
+	 * @return bool
+	 */
+	public function is_aco_subs_change_payment_method() {
+		$key        = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $key ) && ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) ) {
+			return true;
+		}
+		return false;
+	}
 }
 
 new ACO_Subscription();
