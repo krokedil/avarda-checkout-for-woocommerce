@@ -324,12 +324,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 				);
 
-					wp_localize_script(
-						'aco_wc',
-						'aco_wc_params',
-						$params
-					);
-					wp_enqueue_script( 'aco_wc' );
+				wp_localize_script(
+					'aco_wc',
+					'aco_wc_params',
+					$params
+				);
+				wp_enqueue_script( 'aco_wc' );
 
 				wp_register_style(
 					'aco',
