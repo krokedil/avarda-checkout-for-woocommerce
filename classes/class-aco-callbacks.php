@@ -34,6 +34,15 @@ class ACO_Callbacks {
 		$order_id    = aco_get_order_id_by_transaction_id( sanitize_text_field( $data['purchaseId'] ) );
 		$order       = wc_get_order( $order_id );
 
+		$aco_sub_payment_change = filter_input( INPUT_GET, 'aco-sub-payment-change', FILTER_SANITIZE_STRING );
+
+		if ( ! empty( $aco_sub_payment_change ) ) {
+			aco_confirm_subscription( $aco_sub_payment_change, $purchase_id );
+			ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $aco_sub_payment_change );
+			header( 'HTTP/1.1 200 OK' );
+			exit;
+		}
+
 		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order_id );
 
 		if ( ! is_object( $order ) ) {
