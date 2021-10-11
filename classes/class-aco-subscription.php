@@ -19,6 +19,7 @@ class ACO_Subscription {
 	 * Class constructor.
 	 */
 	public function __construct() {
+		add_filter( 'aco_wc_api_request_args', array( $this, 'set_recurring' ) );
 		add_action( 'aco_wc_payment_complete', array( $this, 'set_recurring_token_for_order' ), 10, 2 );
 		add_action( 'woocommerce_scheduled_subscription_payment_aco', array( $this, 'trigger_scheduled_payment' ), 10, 2 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
@@ -130,6 +131,50 @@ class ACO_Subscription {
 			</div>
 			<?php
 		}
+	}
+
+	/**
+	 * Marks the order as a recurring order for ACO
+	 *
+	 * @param array $request_args The Avarda request arguments.
+	 * @return array
+	 */
+	public function set_recurring( $request_args ) {
+		if ( $this->check_if_subscription() || $this->is_aco_subs_change_payment_method() ) {
+			$request_args['recurringPayments'] = 'checked';
+		}
+		if ( $this->is_aco_subs_change_payment_method() ) {
+			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+			$order_id = wc_get_order_id_by_order_key( $key );
+			if ( $order_id ) {
+				$wc_order = wc_get_order( $order_id );
+				if ( is_object( $wc_order ) && function_exists( 'wcs_order_contains_subscription' ) && function_exists( 'wcs_is_subscription' ) ) {
+					if ( wcs_order_contains_subscription( $wc_order, array( 'parent', 'renewal', 'resubscribe', 'switch' ) ) || wcs_is_subscription( $wc_order ) ) {
+						$order_lines = array();
+						foreach ( $wc_order->get_items() as $item ) {
+							$order_lines[] = array(
+								'description' => substr( $wc_order->get_shipping_method(), 0, 35 ),
+								'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ),
+								'amount'      => 0,
+								'taxCode'     => 0,
+								'taxAmount'   => 0,
+								'quantity'    => 0,
+							);
+						}
+						$request_args['items'] = $order_lines;
+
+						$request_args['checkoutSetup']['completedNotificationUrl'] = add_query_arg(
+							array(
+								'aco-sub-payment-change' => $order_id,
+							),
+							get_home_url() . '/wc-api/ACO_WC_Notification'
+						);
+					}
+				}
+			}
+		}
+
+		return $request_args;
 	}
 
 	/**
