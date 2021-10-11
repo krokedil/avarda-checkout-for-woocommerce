@@ -23,6 +23,7 @@ class ACO_Subscription {
 		add_action( 'aco_wc_payment_complete', array( $this, 'set_recurring_token_for_order' ), 10, 2 );
 		add_action( 'woocommerce_scheduled_subscription_payment_aco', array( $this, 'trigger_scheduled_payment' ), 10, 2 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
+		add_action( 'init', array( $this, 'display_thankyou_message_for_payment_method_change' ) );
 	}
 
 	/**
@@ -201,6 +202,20 @@ class ACO_Subscription {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Display thankyou notice when customer is redirected back to the
+	 * subscription page in front-end after changing payment method.
+	 *
+	 * @return void
+	 */
+	public function display_thankyou_message_for_payment_method_change() {
+		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		if ( ! empty( $aco_action ) && 'subs-payment-changed' === $aco_action ) {
+			wc_add_notice( __( 'Thank you, your subscription payment method is now updated.', 'avarda-checkout-for-woocommerce' ), 'success' );
+			aco_wc_unset_sessions();
+		}
 	}
 }
 
