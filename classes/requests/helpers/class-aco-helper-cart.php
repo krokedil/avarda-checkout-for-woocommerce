@@ -142,9 +142,9 @@ class ACO_Helper_Cart {
 		return array(
 			'description' => substr( $fee->name, 0, 35 ), // String.
 			'notes'       => substr( 'fee|' . $fee->id, 0, 35 ), // String.
-			'amount'      => $fee->amount + $fee->tax, // Float.
+			'amount'      => number_format( $fee->amount + $fee->tax, 2, '.', '' ), // String.
 			'taxCode'     => (string) ( $fee->tax / $fee->amount * 100 ), // String.
-			'taxAmount'   => $fee->tax, // Float.
+			'taxAmount'   => number_format( $fee->tax, 2, '.', '' ), // String.
 		);
 	}
 
@@ -164,9 +164,9 @@ class ACO_Helper_Cart {
 						return array(
 							'description' => substr( $method->label, 0, 35 ), // String.
 							'notes'       => substr( 'shipping|' . $method->id, 0, 35 ), // String.
-							'amount'      => $method->cost + array_sum( $method->taxes ), // Float.
+							'amount'      => number_format( $method->cost + array_sum( $method->taxes ), 2, '.', '' ), // String.
 							'taxCode'     => (string) ( array_sum( $method->taxes ) / $method->cost * 100 ), // String.
-							'taxAmount'   => array_sum( $method->taxes ), // Float.
+							'taxAmount'   => number_format( array_sum( $method->taxes ), 2, '.', '' ), // Float.
 						);
 					} else {
 						return array(

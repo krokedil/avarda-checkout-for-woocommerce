@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.10.12        - version 1.1.2 =
+* Fix               - Improvement of previous fix where to many decimals might get sent in prices to Avarda.
+
 = 2021.10.05        - version 1.1.1 =
 * Tweak             - Bumped required PHP version to 7.0.
 * Fix               - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.
