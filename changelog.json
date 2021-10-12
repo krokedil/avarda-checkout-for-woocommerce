@@ -73,5 +73,10 @@
           "description" : "<ul><li>Tweak - Bumped required PHP version to 7.0.</li><li>Fix - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.1"
+     },
+     "1.1.2" : {
+          "description" : "<ul><li>Fix - Improvement of previous fix where to many decimals might get sent in prices to Avarda.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.1"
      }
 }
