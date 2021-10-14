@@ -2,7 +2,29 @@ jQuery(function($) {
 	const aco_wc = {
 		bodyEl: $('body'),
 		checkoutFormSelector: 'form.checkout',
-
+		customerData: {
+			email: '',
+			phone: '',
+			mode: '',
+			invoicingAddress: {
+				firstName: '',
+				lastName: '',
+				address1: '',
+				address2: '',
+				city: '',
+				zip: '',
+				country:''
+			},
+			deliveryAddress: {
+				firstName: '',
+				lastName: '',
+				address1: '',
+				address2: '',
+				city: '',
+				zip: '',
+				country:''
+			}
+		},
 		// Order notes.
 		orderNotesValue: '',
 		orderNotesSelector: 'textarea#order_comments',
@@ -157,6 +179,28 @@ jQuery(function($) {
 		handleBeforeSubmitCallback: function(data, callback) {
 			aco_wc.logToFile( 'Received "beforeSubmitCallback" from Avarda' );
 			aco_wc.getAvardaPayment();
+			Object.keys(aco_wc.customerData).forEach((key) => {
+				if (typeof aco_wc.customerData[key] === 'object') {
+					Object.keys(aco_wc.customerData[key]).forEach((k) => {
+						aco_wc.customerData[key][k] = data[key][k];
+					});
+				}
+
+				if (typeof aco_wc.customerData[key] === 'string' && aco_wc.customerData[key] === '') {
+					aco_wc.customerData[key] = data[key];
+				}
+			});
+
+
+			console.log(aco_wc.customerData);
+
+			aco_wc.setCustomerData( data );
+			// Check Terms checkbox, if it exists.
+			if ($("form.checkout #terms").length > 0) {
+				$("form.checkout #terms").prop("checked", true);
+			}
+			// Submit wc order.
+			aco_wc.submitForm();
 
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
 				if ( false === bool ) {
@@ -183,15 +227,15 @@ jQuery(function($) {
 					return false;
 				},
 				complete: function(data) {
-					aco_wc.setCustomerData( data.responseJSON.data );
+					aco_wc.setCustomerDataFromApi( data.responseJSON.data );
 					// Check Terms checkbox, if it exists.
-					if ($("form.checkout #terms").length > 0) {
-						$("form.checkout #terms").prop("checked", true);
-					}
+					// if ($("form.checkout #terms").length > 0) {
+					// 	$("form.checkout #terms").prop("checked", true);
+					// }
 					//$('form.checkout').submit();
 					//return true;
 					// Submit wc order.
-					aco_wc.submitForm();
+					// aco_wc.submitForm();
 				}
 			});
 		},
@@ -228,14 +272,13 @@ jQuery(function($) {
 
 		getShippingData: function (data)  {
 			const shippingData = {
-				address1: '',
-				address2: '',
-				city: '',
-				country: '',
-				firstName:'',
-				lastName: '',
-				type: '',
-				viewType: ''
+				firstName: "",
+				lastName: "",
+				address1: "",
+				address2: "",
+				city: "",
+				zip: "",
+				country: ""
 			};
 			return this.getAvardaData(data, shippingData);
 		},
@@ -273,10 +316,10 @@ jQuery(function($) {
 			return this.getAvardaData(data, userInputData);
 		},
 
-		setCustomerData: function( data ) {
+		setCustomerDataFromApi: function (data) {
 			var userInputs, invoicingAddress, deliveryAddress = null;
-
-			if ( 'B2C' === data.customer_data.mode ) {
+			var hasCustomerAndMode = data.hasOwnProperty('customer_data') &&  data.customer_data.hasOwnProperty('mode');
+			if ( hasCustomerAndMode && 'B2C' === data.customer_data.mode ) {
 				userInputs = data.customer_data.b2C.userInputs;
 				invoicingAddress = data.customer_data.b2C.invoicingAddress;
 				deliveryAddress = data.customer_data.b2C.deliveryAddress;
@@ -287,35 +330,40 @@ jQuery(function($) {
 				$( '#billing_company' ).val( ( invoicingAddress.name ? invoicingAddress.name : '' ) );
 			}
 
-			var billingData = this.getBillingData(invoicingAddress);
-			var shippingData = this.getShippingData(deliveryAddress);
-			var { address1, address2 } = this.getAvardaAddresses(billingData, shippingData);
-			var billingZip = billingData.zip;
-			var { email, phone } =  this.getUserInputs(userInputs);
+			var {email, phone} = this.getUserInputs(userInputs);
+			aco_wc.customerData.invoicingAddress = aco_wc.getBillingData(invoicingAddress);
+			aco_wc.customerData.deliveryAddress = aco_wc.getShippingData(deliveryAddress);
+			aco_wc.customerData.email = email;
+			aco_wc.customerData.phone = phone;
 
-			$( '#billing_first_name' ).val( billingData.firstName ? billingData.firstName : '.'  );
-			$( '#billing_last_name' ).val( billingData.lastName ? billingData.lastName : '.' );
-			$( '#billing_address_1' ).val(  address1 );
-			$( '#billing_address_2' ).val( address2);
-			$( '#billing_city' ).val( billingData.city ? billingData.city : '.' );
-			$( '#billing_postcode' ).val( billingZip ? billingZip: '' );
-			$( '#billing_phone' ).val( phone ? phone : '.' );
-			$( '#billing_email' ).val( email ?  email : 'krokedil@krokedil.se' );
+
+
+		},
+
+		setCustomerData: function( data ) {
+			$( '#billing_first_name' ).val( aco_wc.customerData.invoicingAddress.firstName ? aco_wc.customerData.invoicingAddress.firstName : '.'  );
+			$( '#billing_last_name' ).val( aco_wc.customerData.invoicingAddress.lastName ? aco_wc.customerData.invoicingAddress.lastName : '.' );
+			$( '#billing_address_1' ).val(  aco_wc.customerData.invoicingAddress.address1 );
+			$( '#billing_address_2' ).val( aco_wc.customerData.invoicingAddress.address2);
+			$( '#billing_city' ).val( aco_wc.customerData.invoicingAddress.city ? aco_wc.customerData.invoicingAddress.city : '.' );
+			$( '#billing_postcode' ).val( aco_wc.customerData.invoicingAddress.zip ? aco_wc.customerData.invoicingAddress.zip: '' );
+			$( '#billing_phone' ).val( aco_wc.customerData.phone ? aco_wc.customerData.phone : '.' );
+			$( '#billing_email' ).val( aco_wc.customerData.email ?  aco_wc.customerData.email : 'krokedil@krokedil.se' );
 
 			
 
-			if ( null !== deliveryAddress ) {
+			// if ( null !== aco_wc.customerData.deliveryAddress ) {
 				// Check Ship to different address, if it exists.
-				if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
-					$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
-				}
-				$( '#shipping_first_name' ).val( shippingData.firstName ? shippingData.firstName : billingData.firstName );
-				$( '#shipping_last_name' ).val( shippingData.lastName ? shippingData.lastName : billingData.lastName );
-				$( '#shipping_address_1' ).val( shippingData.address1 ? shippingData.address1 : billingData.address1 );
-				$( '#shipping_address_2' ).val( shippingData.address2 ? shippingData.address2 : billingData.address2 );
-				$( '#shipping_city' ).val( shippingData.city ? shippingData.city : billingData.city );
-				$( '#shipping_postcode' ).val( billingZip ? billingZip : '11111' );
-			} 
+			if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
+				$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
+			}
+			$( '#shipping_first_name' ).val( aco_wc.customerData.deliveryAddress.firstName ? aco_wc.customerData.deliveryAddress.firstName : aco_wc.customerData.invoicingAddress.firstName );
+			$( '#shipping_last_name' ).val( aco_wc.customerData.deliveryAddress.lastName ? aco_wc.customerData.deliveryAddress.lastName : aco_wc.customerData.invoicingAddress.lastName );
+			$( '#shipping_address_1' ).val( aco_wc.customerData.deliveryAddress.address1 ? aco_wc.customerData.deliveryAddress.address1 : aco_wc.customerData.invoicingAddress.address1 );
+			$( '#shipping_address_2' ).val( aco_wc.customerData.deliveryAddress.address2 ? aco_wc.customerData.deliveryAddress.address2 : aco_wc.customerData.invoicingAddress.address2 );
+			$( '#shipping_city' ).val( aco_wc.customerData.deliveryAddress.city ? aco_wc.customerData.deliveryAddress.city : aco_wc.customerData.invoicingAddress.city );
+			$( '#shipping_postcode' ).val( aco_wc.customerData.deliveryAddress.zip ? aco_wc.customerData.deliveryAddress.zip : '11111' );
+			// }
 		},
 
 		updateAvardaPayment: function() {
@@ -521,7 +569,7 @@ jQuery(function($) {
 					}
 				},
 				error: function( data ) {
-					aco_wc.logToFile( 'AJAX error | ' + data );
+					aco_wc.logToFile( 'AJAX  error | ' + data );
 					aco_wc.failOrder( 'ajax-error', data );
 				}
 			});
