@@ -38,7 +38,7 @@ class ACO_Callbacks {
 
 		if ( ! empty( $aco_sub_payment_change ) ) {
 			aco_confirm_subscription( $aco_sub_payment_change, $purchase_id );
-			ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $aco_sub_payment_change );
+			ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. Subscription payment method update. WC Subscription ID: ' . $aco_sub_payment_change );
 			header( 'HTTP/1.1 200 OK' );
 			exit;
 		}
