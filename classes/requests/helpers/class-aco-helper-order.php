@@ -80,7 +80,7 @@ class ACO_Helper_Order {
 	 */
 	public function get_product_price( $order_item ) {
 		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
-		return round( $items_subtotal, 2 );
+		return number_format( $items_subtotal, 2, '.', '' );
 	}
 
 	/**
@@ -111,7 +111,7 @@ class ACO_Helper_Order {
 		$tax_items = $order->get_items( 'tax' );
 		foreach ( $tax_items as $tax_item ) {
 			$tax_amount = $tax_item->get_tax_total();
-			return round( $tax_amount, 2 );
+			return number_format( $tax_amount, 2, '.', '' );
 		}
 	}
 
@@ -125,9 +125,9 @@ class ACO_Helper_Order {
 		return array(
 			'description' => substr( $fee->get_name(), 0, 35 ), // String.
 			'notes'       => substr( $fee->get_id(), 0, 35 ), // String.
-			'amount'      => $fee->get_amount(), // Float.
+			'amount'      => number_format( $fee->get_amount(), 2, '.', '' ), // String.
 			'taxCode'     => (string) array_sum( $fee->get_taxes() ) / $fee->get_amount() * 100, // String.
-			'taxAmount'   => array_sum( $fee->get_taxes() ), // Float.
+			'taxAmount'   => number_format( array_sum( $fee->get_taxes() ), 2, '.', '' ), // String.
 		);
 	}
 
@@ -142,9 +142,9 @@ class ACO_Helper_Order {
 			return array(
 				'description' => substr( $order->get_shipping_method(), 0, 35 ), // String.
 				'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ), // String.
-				'amount'      => $order->get_shipping_total() + $order->get_shipping_tax(), // Float.
+				'amount'      => number_format( $order->get_shipping_total() + $order->get_shipping_tax(), 2, '.', '' ), // String.
 				'taxCode'     => ( '0' !== $order->get_shipping_tax() ) ? $this->get_product_tax_code( $order, current( $order->get_items( 'shipping' ) ) ) : 0, // Float.
-				'taxAmount'   => (float) $order->get_shipping_tax(),
+				'taxAmount'   => number_format( $order->get_shipping_tax(), 2, '.', '' ),
 			);
 		} else {
 			return array(
