@@ -135,6 +135,10 @@ function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
 	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
 	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
 	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+
+	// translators: %s Avarda recurring token.
+	$note = sprintf( __( 'New recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
+	$subscription->add_order_note( $note );
 }
 
 /**
