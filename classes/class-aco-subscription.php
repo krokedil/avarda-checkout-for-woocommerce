@@ -110,19 +110,19 @@ class ACO_Subscription {
 	 * @return void
 	 */
 	public function show_recurring_token( $order ) {
-		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_wc_avarda_purchase_id' ) ) {
+		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_aco_recurring_token' ) ) {
 			?>
 			<div class="order_data_column" style="clear:both; float:none; width:100%;">
 				<div class="address">
 					<p>
-						<strong><?php echo esc_html( 'Avarda recurring token' ); ?>:</strong><?php echo esc_html( $order->get_meta( '_wc_avarda_purchase_id', true ) ); ?>
+						<strong><?php echo esc_html( 'Avarda recurring token' ); ?>:</strong><?php echo esc_html( $order->get_meta( '_aco_recurring_token', true ) ); ?>
 					</p>
 				</div>
 				<div class="edit_address">
 					<?php
 					woocommerce_wp_text_input(
 						array(
-							'id'            => '_wc_avarda_purchase_id',
+							'id'            => '_aco_recurring_token',
 							'label'         => __( 'Avarda recurring token', 'avarda-checkout-for-woocommerce' ),
 							'wrapper_class' => '_billing_company_field',
 						)
