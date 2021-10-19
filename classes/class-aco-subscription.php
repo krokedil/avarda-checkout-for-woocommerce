@@ -48,6 +48,7 @@ class ACO_Subscription {
 				foreach ( $subscriptions as $subscription ) {
 					update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
 					update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+					aco_populate_wc_order( $subscription, $avarda_order );
 				}
 			} else {
 				$wc_order->add_order_note( __( 'Recurring token was missing from the Avarda order during the checkout process. Please contact Avarda for help.', 'avarda-checkout-for-woocommerce' ) );
