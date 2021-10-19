@@ -179,22 +179,6 @@ jQuery(function($) {
 		handleBeforeSubmitCallback: function(data, callback) {
 			aco_wc.logToFile( 'Received "beforeSubmitCallback" from Avarda' );
 			aco_wc.getAvardaPayment();
-			Object.keys(aco_wc.customerData).forEach((key) => {
-				if (typeof aco_wc.customerData[key] === 'object') {
-					Object.keys(aco_wc.customerData[key]).forEach((k) => {
-						aco_wc.customerData[key][k] = data[key][k];
-					});
-				}
-
-				if (typeof aco_wc.customerData[key] === 'string' && aco_wc.customerData[key] === '') {
-					aco_wc.customerData[key] = data[key];
-				}
-			});
-
-
-			console.log(aco_wc.customerData);
-
-			aco_wc.setCustomerData( data );
 			// Check Terms checkbox, if it exists.
 			if ($("form.checkout #terms").length > 0) {
 				$("form.checkout #terms").prop("checked", true);
@@ -337,10 +321,6 @@ jQuery(function($) {
 			aco_wc.customerData.phone = phone;
 
 
-
-		},
-
-		setCustomerData: function( data ) {
 			$( '#billing_first_name' ).val( aco_wc.customerData.invoicingAddress.firstName ? aco_wc.customerData.invoicingAddress.firstName : '.'  );
 			$( '#billing_last_name' ).val( aco_wc.customerData.invoicingAddress.lastName ? aco_wc.customerData.invoicingAddress.lastName : '.' );
 			$( '#billing_address_1' ).val(  aco_wc.customerData.invoicingAddress.address1 );
@@ -350,10 +330,6 @@ jQuery(function($) {
 			$( '#billing_phone' ).val( aco_wc.customerData.phone ? aco_wc.customerData.phone : '.' );
 			$( '#billing_email' ).val( aco_wc.customerData.email ?  aco_wc.customerData.email : 'krokedil@krokedil.se' );
 
-			
-
-			// if ( null !== aco_wc.customerData.deliveryAddress ) {
-				// Check Ship to different address, if it exists.
 			if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 				$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 			}
@@ -363,7 +339,7 @@ jQuery(function($) {
 			$( '#shipping_address_2' ).val( aco_wc.customerData.deliveryAddress.address2 ? aco_wc.customerData.deliveryAddress.address2 : aco_wc.customerData.invoicingAddress.address2 );
 			$( '#shipping_city' ).val( aco_wc.customerData.deliveryAddress.city ? aco_wc.customerData.deliveryAddress.city : aco_wc.customerData.invoicingAddress.city );
 			$( '#shipping_postcode' ).val( aco_wc.customerData.deliveryAddress.zip ? aco_wc.customerData.deliveryAddress.zip : '11111' );
-			// }
+
 		},
 
 		updateAvardaPayment: function() {
