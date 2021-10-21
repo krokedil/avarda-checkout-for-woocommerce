@@ -47,7 +47,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			'subscription_amount_changes',
 			'subscription_date_changes',
 			'multiple_subscriptions',
-			'subscription_payment_method_change_customer',
+			// 'subscription_payment_method_change_customer',
 			'subscription_payment_method_change_admin',
 		);
 
@@ -65,6 +65,13 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function is_available() {
 		if ( 'yes' === $this->enabled ) {
 			// Do checks here.
+
+			// Avarda doesn't support 0 value subscriptions.
+			if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
+				if ( 0 == round( WC()->cart->total, 2 ) ) { // phpcs:ignore
+					return false;
+				}
+			}
 			return true;
 		}
 		return false;
