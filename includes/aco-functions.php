@@ -136,6 +136,7 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$user_inputs       = array();
 	$invoicing_address = array();
 	$delivery_address  = array();
+	$billing_company   = '';
 	if ( 'B2C' === $avarda_order['mode'] ) {
 		$user_inputs       = $avarda_order['b2C']['userInputs'];
 		$invoicing_address = $avarda_order['b2C']['invoicingAddress'];
@@ -144,6 +145,8 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 		$user_inputs       = $avarda_order['b2B']['userInputs'];
 		$invoicing_address = $avarda_order['b2B']['invoicingAddress'];
 		$delivery_address  = $avarda_order['b2B']['deliveryAddress'];
+		$billing_company   = $invoicing_address['Name'];
+		$shipping_company  = isset( $delivery_address['Name'] ) ? $delivery_address['Name'] : $invoicing_address['Name'];
 	}
 
 	$shipping_data = array(
@@ -184,6 +187,12 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$order->set_billing_phone( sanitize_text_field( $user_inputs['phone'] ) );
 	// Email.
 	$order->set_billing_email( sanitize_text_field( $user_inputs['email'] ) );
+
+	// Company name.
+	if ( ! empty( $billing_company ) ) {
+		$order->set_billing_company( sanitize_text_field( $billing_company ) );
+		$order->set_shipping_company( sanitize_text_field( $shipping_company ) );
+	}
 
 	// Save order.
 	$order->save();
