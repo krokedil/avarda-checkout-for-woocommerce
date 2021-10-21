@@ -339,8 +339,10 @@ jQuery(function($) {
 						if( data.responseJSON.data && data.responseJSON.data.refreshZeroAmount ) {
 							window.location.reload();
 						}
-
-						window.avardaCheckout.refreshForm();
+						if( window.avardaCheckout ) {
+							window.avardaCheckout.refreshForm();
+						}
+						
 						$('.woocommerce-checkout-review-order-table').unblock();
 
 					} else {
