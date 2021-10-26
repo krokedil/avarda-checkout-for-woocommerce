@@ -78,5 +78,10 @@
           "description" : "<ul><li>Fix - Improvement of previous fix where to many decimals might get sent in prices to Avarda.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.1"
+     },
+     "1.1.3" : {
+          "description" : "<ul><li>Fix - Save Billing company name correct in WooCommerce order for B2B purchases.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.1"
      }
 }

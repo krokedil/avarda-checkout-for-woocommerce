@@ -5,7 +5,7 @@ Requires at least: 5.0
 Tested up to: 5.8.1
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 5.7.1
+WC tested up to: 5.8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.10.26        - version 1.1.3 =
+* Fix               - Save Billing company name correct in WooCommerce order for B2B purchases.
+
 = 2021.10.12        - version 1.1.2 =
 * Fix               - Improvement of previous fix where to many decimals might get sent in prices to Avarda.
 
