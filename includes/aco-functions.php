@@ -48,6 +48,7 @@ function aco_wc_initialize_payment() {
 	}
 	WC()->session->set( 'aco_wc_purchase_id', $avarda_payment['purchaseId'] );
 	WC()->session->set( 'aco_wc_jwt', $avarda_payment['jwt'] );
+	WC()->session->set( 'aco_wc_jwt_expired_utc', $avarda_payment['expiredUtc'] );
 	return $avarda_payment;
 
 }
@@ -56,7 +57,10 @@ function aco_wc_initialize_payment() {
  * Avarda checkout form.
  */
 function aco_wc_show_checkout_form() {
-	if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+
+	$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
+
+	if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) ) {
 		aco_wc_initialize_payment();
 	} else {
 		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
@@ -285,6 +289,7 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_wc_purchase_id' );
 	WC()->session->__unset( 'aco_wc_jwt' );
+	WC()->session->__unset( 'aco_wc_jwt_expired_utc' );
 	WC()->session->__unset( 'aco_update_md5' );
 }
 

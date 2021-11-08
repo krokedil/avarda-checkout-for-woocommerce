@@ -137,8 +137,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function aco_maybe_initialize_payment() {
-			// Creates jwt token if we do not have session var set with jwt token.
-			if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+			// Creates jwt token if we do not have session var set with jwt token or if it have expired.
+			$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
+			if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) ) {
 				aco_wc_initialize_payment();
 			}
 		}
