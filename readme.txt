@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.8.1
+Tested up to: 5.8.2
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 5.8.0
+WC tested up to: 5.9.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.11.11        - version 1.2.0 =
+* Tweak             - Standard Woo checkout fields check improvement.
+* Tweak             - Adds filter aco_ignored_checkout_fields to be able to modify the checkout form fields that should not be isplayed on the Avarda Checkout page.
+* Fix               - Adds JWT token time expiry check.
+* Fix               - Floating point precision fix (many decimals sent to Avarda) for refund requests.
+
 = 2021.10.26        - version 1.1.3 =
 * Fix               - Save Billing company name correct in WooCommerce order for B2B purchases.
 
