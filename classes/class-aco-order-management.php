@@ -20,7 +20,7 @@ class ACO_Order_Management {
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_reservation' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
 		// Update an order.
-		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); For aco refund.
+		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); // for aco refund .
 	}
 
 	/**
@@ -32,7 +32,7 @@ class ACO_Order_Management {
 	public function cancel_reservation( $order_id ) {
 		$order = wc_get_order( $order_id );
 		// If this order wasn't created using aco payment method, bail.
-		if ( 'aco' != $order->get_payment_method() ) {
+		if ( 'aco' !== $order->get_payment_method() ) {
 			return;
 		}
 
@@ -93,7 +93,7 @@ class ACO_Order_Management {
 	public function activate_reservation( $order_id ) {
 		$order = wc_get_order( $order_id );
 		// If this order wasn't created using aco payment method, bail.
-		if ( 'aco' != $order->get_payment_method() ) {
+		if ( 'aco' !== $order->get_payment_method() ) {
 			return;
 		}
 
@@ -162,7 +162,7 @@ class ACO_Order_Management {
 	public function refund_payment( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		// If this order wasn't created using aco payment method, bail.
-		if ( 'aco' != $order->get_payment_method() ) {
+		if ( 'aco' !== $order->get_payment_method() ) {
 			return;
 		}
 
@@ -242,17 +242,19 @@ class ACO_Order_Management {
 		}
 
 		// If this order wasn't created using Avarda Checkout payment method, bail.
-		if ( 'aco' != $order->get_payment_method() ) {
+		if ( 'aco' !== $order->get_payment_method() ) {
+			return;
+		}
+
+		// Check Avarda settings to see if we have the ordermanagement enabled.
+		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
+		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
+		if ( ! $order_management ) {
 			return;
 		}
 
 		// Changes only possible if order is set to On Hold.
-		if ( 'on-hold' !== $order->get_status() ) {
-			return;
-		}
-
-		// TODO: include swish and direct payments.
-		if ( 'Card' !== get_post_meta( $order_id, 'avarda_payment_method', true ) ) {
+		if ( ! in_array( $order->get_status(), apply_filters( 'aco_allowed_update_statuses', array( 'on-hold' ) ), true ) ) {
 			return;
 		}
 
@@ -279,10 +281,10 @@ class ACO_Order_Management {
 
 		// Check if B2C or B2B.
 		$aco_state = '';
-		if ( 'B2C' === $$avarda_order_tmp['mode'] ) {
-			$aco_state = $$avarda_order_tmp['b2C']['step']['current'];
-		} elseif ( 'B2B' === $$avarda_order_tmp['mode'] ) {
-			$aco_state = $$avarda_order_tmp['b2B']['step']['current'];
+		if ( 'B2C' === $avarda_order_tmp['mode'] ) {
+			$aco_state = $avarda_order_tmp['b2C']['step']['current'];
+		} elseif ( 'B2B' === $avarda_order_tmp['mode'] ) {
+			$aco_state = $avarda_order_tmp['b2B']['step']['current'];
 		}
 
 		if ( 'Completed' === $aco_state ) {
@@ -300,7 +302,6 @@ class ACO_Order_Management {
 			update_post_meta( $order_id, '_avarda_payment_amount', $order->get_total() );
 			return;
 		}
-		$order->add_order_note( __( 'Avarda Checkout order could not be updated.', 'avarda-checkout-for-woocommerce' ) );
 	}
 
 
