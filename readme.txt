@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.11.17        - version 1.2.1 =
+* Fix               - Floating point precision fix (many decimals sent to Avarda) for refund requests.
+
 = 2021.11.11        - version 1.2.0 =
 * Tweak             - Standard Woo checkout fields check improvement.
 * Tweak             - Adds filter aco_ignored_checkout_fields to be able to modify the checkout form fields that should not be isplayed on the Avarda Checkout page.
