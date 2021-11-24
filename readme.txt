@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.11.24        - version 1.2.2 =
+* Fix               - Save company name correctly to WooCommerce order for B2B purchases.
+
 = 2021.11.17        - version 1.2.1 =
 * Fix               - Floating point precision fix (many decimals sent to Avarda) for refund requests.
 
