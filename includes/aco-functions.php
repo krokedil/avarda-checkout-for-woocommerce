@@ -153,8 +153,8 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 		$user_inputs         = $avarda_order['b2B']['userInputs'];
 		$invoicing_address   = $avarda_order['b2B']['invoicingAddress'];
 		$delivery_address    = $avarda_order['b2B']['deliveryAddress'];
-		$billing_company     = $invoicing_address['Name'];
-		$shipping_company    = $invoicing_address['Name'];
+		$billing_company     = $invoicing_address['name'];
+		$shipping_company    = $invoicing_address['name'];
 		$billing_first_name  = isset( $avarda_order['b2B']['customerInfo']['firstName'] ) ? $avarda_order['b2B']['customerInfo']['firstName'] : '';
 		$billing_last_name   = isset( $avarda_order['b2B']['customerInfo']['lastName'] ) ? $avarda_order['b2B']['customerInfo']['lastName'] : '';
 		$shipping_first_name = isset( $avarda_order['b2B']['deliveryAddress']['firstName'] ) ? $avarda_order['b2B']['deliveryAddress']['firstName'] : $avarda_order['b2B']['customerInfo']['firstName'];

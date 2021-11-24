@@ -93,5 +93,10 @@
           "description" : "<ul><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.2"
+     },
+     "1.2.2" : {
+          "description" : "<ul><li>Fix - Save company name correctly to WooCommerce order for B2B purchases.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
      }
 }
