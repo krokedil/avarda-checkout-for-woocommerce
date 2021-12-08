@@ -98,5 +98,10 @@
           "description" : "<ul><li>Fix - Save company name correctly to WooCommerce order for B2B purchases.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.2"
+     },
+     "1.2.3" : {
+          "description" : "<ul><li>Enhancement - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
      }
 }
