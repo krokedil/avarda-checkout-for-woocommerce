@@ -32,7 +32,7 @@ More information on how to get started can be found in the [plugin documentation
 
 == CHANGELOG ==
 = 2021.12.08        - version 1.2.3 =
-* Enhancement       - Adds seperate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.
+* Enhancement       - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.
 
 = 2021.11.24        - version 1.2.2 =
 * Fix               - Save company name correctly to WooCommerce order for B2B purchases.
