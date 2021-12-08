@@ -49,8 +49,11 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body() {
-		return array(
-			'items' => ACO_WC()->cart_items->get_cart_items(),
+		return apply_filters(
+			'aco_update_args',
+			array(
+				'items' => ACO_WC()->cart_items->get_cart_items(),
+			)
 		);
 	}
 
