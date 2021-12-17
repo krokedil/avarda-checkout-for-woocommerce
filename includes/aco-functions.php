@@ -49,6 +49,8 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_purchase_id', $avarda_payment['purchaseId'] );
 	WC()->session->set( 'aco_wc_jwt', $avarda_payment['jwt'] );
 	WC()->session->set( 'aco_wc_jwt_expired_utc', $avarda_payment['expiredUtc'] );
+	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
+	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	return $avarda_payment;
 
 }
@@ -60,7 +62,7 @@ function aco_wc_show_checkout_form() {
 
 	$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
 
-	if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) ) {
+	if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 		aco_wc_initialize_payment();
 	} else {
 		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
@@ -291,6 +293,8 @@ function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_wc_jwt' );
 	WC()->session->__unset( 'aco_wc_jwt_expired_utc' );
 	WC()->session->__unset( 'aco_update_md5' );
+	WC()->session->__unset( 'aco_language' );
+	WC()->session->__unset( 'aco_currency' );
 }
 
 /**

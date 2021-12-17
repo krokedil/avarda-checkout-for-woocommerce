@@ -97,6 +97,14 @@ class ACO_AJAX extends WC_AJAX {
 			// Set empty return array for errors.
 			$return = array();
 
+			// Check that the currency and locale is the same as earlier, otherwise create a new session.
+			if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
+				aco_wc_unset_sessions();
+				$return['redirect_url'] = wc_get_checkout_url();
+				wp_send_json_error( $return );
+				wp_die();
+			}
+
 			// Check if we have a avarda purchase id.
 			if ( empty( $avarda_purchase_id ) ) {
 				wc_add_notice( 'Avarda purchase id is missing.', 'error' );
