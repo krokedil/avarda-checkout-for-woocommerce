@@ -5,7 +5,7 @@ Requires at least: 5.0
 Tested up to: 5.8.2
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 5.9.0
+WC tested up to: 6.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: trunk
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2021.12.17        - version 1.3.0 =
+* Tweak             - Create new purchase ID if customer changes currency or language during ongoing session.
+
 = 2021.12.08        - version 1.2.3 =
 * Enhancement       - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.
 
