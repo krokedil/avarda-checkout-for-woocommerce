@@ -69,7 +69,7 @@ class ACO_Templates {
 				if ( locate_template( 'woocommerce/avarda-checkout.php' ) ) {
 					$avarda_checkout_template = locate_template( 'woocommerce/avarda-checkout.php' );
 				} else {
-					$avarda_checkout_template = AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php';
+					$avarda_checkout_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php', $template_name );
 				}
 
 				// Avarda checkout page.
