@@ -145,6 +145,18 @@ class ACO_API {
 	}
 
 	/**
+	 * Gets Avarda Invoices.
+	 *
+	 * @param int $order_id WC order id.
+	 * @return mixed
+	 */
+	public function request_get_invoices( $order_id ) {
+		$request  = new ACO_Request_Get_Invoices();
+		$response = $request->request( $order_id );
+		return $response;
+	}
+
+	/**
 	 * Checks for WP Errors and returns either the response as array or a false.
 	 *
 	 * @param array $response The response from the request.
