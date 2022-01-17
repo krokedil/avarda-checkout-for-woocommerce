@@ -131,9 +131,9 @@ class ACO_Helper_Create_Refund_Data {
 		return array(
 			'description' => substr( $title, 0, 35 ),
 			'notes'       => substr( $sku, 0, 35 ),
-			'amount'      => abs( floatval( round( $total_amount, 2 ) ) ),
+			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $formatted_tax_rate ) ),
-			'taxAmount'   => abs( floatval( round( $total_tax, 2 ) ) ),
+			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
 
@@ -165,9 +165,9 @@ class ACO_Helper_Create_Refund_Data {
 		return array(
 			'description' => substr( $title, 0, 35 ),
 			'notes'       => substr( $shipping_reference, 0, 35 ),
-			'amount'      => abs( floatval( round( $total_amount, 2 ) ) ),
+			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $tax_rate ) ),
-			'taxAmount'   => abs( floatval( round( $total_tax, 2 ) ) ),
+			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
 
@@ -194,9 +194,9 @@ class ACO_Helper_Create_Refund_Data {
 		return array(
 			'description' => substr( $title, 0, 35 ),
 			'notes'       => substr( $sku, 0, 35 ),
-			'amount'      => abs( floatval( round( $total_amount, 2 ) ) ),
+			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $formatted_tax_rate ) ),
-			'taxAmount'   => abs( floatval( round( $total_tax, 2 ) ) ),
+			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
 }

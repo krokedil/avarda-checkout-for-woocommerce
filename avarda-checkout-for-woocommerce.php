@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         1.1.2
+ * Version:         1.3.0
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 4.0.0
- * WC tested up to: 5.7.1
+ * WC tested up to: 6.0.0
  *
  * Copyright:       © 2016-2021 Krokedil.
  * License:         GNU General Public License v3.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '1.1.2' );
+define( 'AVARDA_CHECKOUT_VERSION', '1.3.0' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://avdonl-p-checkout.avarda.org' );
@@ -179,8 +179,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function aco_maybe_initialize_payment() {
-			// Creates jwt token if we do not have session var set with jwt token.
-			if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+			// Creates jwt token if we do not have session var set with jwt token or if it have expired.
+			$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
+			if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 				aco_wc_initialize_payment();
 			}
 		}
@@ -213,7 +214,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-cancel-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-return-order.php';
-			// include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php'; For aco refund.
+			// include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php'; // For aco refund.
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
@@ -278,6 +279,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			}
 
 			if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
+
 				do_action( 'aco_before_load_scripts' );
 
 				// Checkout script.
@@ -288,7 +290,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 					AVARDA_CHECKOUT_VERSION,
 					true
 				);
-				$standard_woo_checkout_fields = array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer' );
+				$standard_woo_checkout_fields = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address' ) );
 				$avarda_settings              = get_option( 'woocommerce_aco_settings' );
 				$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
 				$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );

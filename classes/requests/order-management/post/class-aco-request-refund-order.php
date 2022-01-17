@@ -48,7 +48,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	public function get_body( $order_id ) {
 		$order            = wc_get_order( $order_id );
 		$order_number     = $order->get_order_number();
-		$aco_total_amount = get_post_meta( $order_id, '_avarda_payment_amount', true );
+		$aco_total_amount = ! empty( get_post_meta( $order_id, '_avarda_payment_amount', true ) ) ? get_post_meta( $order_id, '_avarda_payment_amount', true ) : 0;
 
 		return array(
 			'orderReference' => $order_number,

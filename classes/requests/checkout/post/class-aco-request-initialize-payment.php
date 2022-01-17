@@ -40,9 +40,12 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body() {
-		return array(
-			'checkoutSetup' => ACO_WC()->checkout_setup->get_checkout_setup(),
-			'items'         => ACO_WC()->cart_items->get_cart_items(),
+		return apply_filters(
+			'aco_create_args',
+			array(
+				'checkoutSetup' => ACO_WC()->checkout_setup->get_checkout_setup(),
+				'items'         => ACO_WC()->cart_items->get_cart_items(),
+			)
 		);
 	}
 

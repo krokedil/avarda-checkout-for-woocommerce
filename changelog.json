@@ -78,5 +78,35 @@
           "description" : "<ul><li>Fix - Improvement of previous fix where to many decimals might get sent in prices to Avarda.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.1"
+     },
+     "1.1.3" : {
+          "description" : "<ul><li>Fix - Save Billing company name correct in WooCommerce order for B2B purchases.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.1"
+     },
+     "1.2.0" : {
+          "description" : "<ul><li>Tweak - Standard Woo checkout fields check improvement.</li><li>Tweak - Adds filter aco_ignored_checkout_fields to be able to modify the checkout form fields that should not be isplayed on the Avarda Checkout page.</li><li>Fix - Adds JWT token time expiry check.</li><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
+     },
+     "1.2.1" : {
+          "description" : "<ul><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
+     },
+     "1.2.2" : {
+          "description" : "<ul><li>Fix - Save company name correctly to WooCommerce order for B2B purchases.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
+     },
+     "1.2.3" : {
+          "description" : "<ul><li>Enhancement - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
+     },
+     "1.3.0" : {
+          "description" : "<ul><li>Tweak - Create new purchase ID if customer changes currency or language during ongoing session.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.8.2"
      }
 }

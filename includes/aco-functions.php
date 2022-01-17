@@ -48,6 +48,9 @@ function aco_wc_initialize_payment() {
 	}
 	WC()->session->set( 'aco_wc_purchase_id', $avarda_payment['purchaseId'] );
 	WC()->session->set( 'aco_wc_jwt', $avarda_payment['jwt'] );
+	WC()->session->set( 'aco_wc_jwt_expired_utc', $avarda_payment['expiredUtc'] );
+	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
+	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	return $avarda_payment;
 
 }
@@ -56,7 +59,10 @@ function aco_wc_initialize_payment() {
  * Avarda checkout form.
  */
 function aco_wc_show_checkout_form() {
-	if ( null === WC()->session->get( 'aco_wc_jwt' ) ) {
+
+	$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
+
+	if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 		aco_wc_initialize_payment();
 	} else {
 		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
@@ -155,19 +161,31 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$user_inputs       = array();
 	$invoicing_address = array();
 	$delivery_address  = array();
+	$billing_company   = '';
 	if ( 'B2C' === $avarda_order['mode'] ) {
-		$user_inputs       = $avarda_order['b2C']['userInputs'];
-		$invoicing_address = $avarda_order['b2C']['invoicingAddress'];
-		$delivery_address  = $avarda_order['b2C']['deliveryAddress'];
+		$user_inputs         = $avarda_order['b2C']['userInputs'];
+		$invoicing_address   = $avarda_order['b2C']['invoicingAddress'];
+		$delivery_address    = $avarda_order['b2C']['deliveryAddress'];
+		$billing_first_name  = $invoicing_address['firstName'];
+		$billing_last_name   = $invoicing_address['lastName'];
+		$shipping_first_name = isset( $delivery_address['firstName'] ) ? $delivery_address['firstName'] : $invoicing_address['firstName'];
+		$shipping_last_name  = isset( $delivery_address['lastName'] ) ? $delivery_address['lastName'] : $invoicing_address['lastName'];
 	} elseif ( 'B2B' === $avarda_order['mode'] ) {
-		$user_inputs       = $avarda_order['b2B']['userInputs'];
-		$invoicing_address = $avarda_order['b2B']['invoicingAddress'];
-		$delivery_address  = $avarda_order['b2B']['deliveryAddress'];
+		$user_inputs         = $avarda_order['b2B']['userInputs'];
+		$invoicing_address   = $avarda_order['b2B']['invoicingAddress'];
+		$delivery_address    = $avarda_order['b2B']['deliveryAddress'];
+		$billing_company     = $invoicing_address['name'];
+		$shipping_company    = $invoicing_address['name'];
+		$billing_first_name  = isset( $avarda_order['b2B']['customerInfo']['firstName'] ) ? $avarda_order['b2B']['customerInfo']['firstName'] : '';
+		$billing_last_name   = isset( $avarda_order['b2B']['customerInfo']['lastName'] ) ? $avarda_order['b2B']['customerInfo']['lastName'] : '';
+		$shipping_first_name = isset( $avarda_order['b2B']['deliveryAddress']['firstName'] ) ? $avarda_order['b2B']['deliveryAddress']['firstName'] : $avarda_order['b2B']['customerInfo']['firstName'];
+		$shipping_last_name  = isset( $avarda_order['b2B']['deliveryAddress']['lastName'] ) ? $avarda_order['b2B']['deliveryAddress']['lastName'] : $avarda_order['b2B']['customerInfo']['lastName'];
+
 	}
 
 	$shipping_data = array(
-		'first_name' => isset( $delivery_address['firstName'] ) ? $delivery_address['firstName'] : $invoicing_address['firstName'],
-		'last_name'  => isset( $delivery_address['lastName'] ) ? $delivery_address['lastName'] : $invoicing_address['lastName'],
+		'first_name' => $shipping_first_name,
+		'last_name'  => $shipping_last_name,
 		'country'    => isset( $delivery_address['country'] ) ? $delivery_address['country'] : $invoicing_address['country'],
 		'address1'   => isset( $delivery_address['address1'] ) ? $delivery_address['address1'] : $invoicing_address['address1'],
 		'address2'   => isset( $delivery_address['address2'] ) ? $delivery_address['address2'] : $invoicing_address['address2'],
@@ -179,10 +197,10 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	aco_set_payment_method_title( $order, $avarda_order );
 
 	// First name.
-	$order->set_billing_first_name( sanitize_text_field( $invoicing_address['firstName'] ) );
+	$order->set_billing_first_name( sanitize_text_field( $billing_first_name ) );
 	$order->set_shipping_first_name( sanitize_text_field( $shipping_data['first_name'] ) );
 	// Last name.
-	$order->set_billing_last_name( sanitize_text_field( $invoicing_address['lastName'] ) );
+	$order->set_billing_last_name( sanitize_text_field( $billing_last_name ) );
 	$order->set_shipping_last_name( sanitize_text_field( $shipping_data['last_name'] ) );
 	// Country.
 	$order->set_billing_country( strtoupper( sanitize_text_field( $invoicing_address['country'] ) ) );
@@ -203,6 +221,12 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$order->set_billing_phone( sanitize_text_field( $user_inputs['phone'] ) );
 	// Email.
 	$order->set_billing_email( sanitize_text_field( $user_inputs['email'] ) );
+
+	// Company name.
+	if ( ! empty( $billing_company ) ) {
+		$order->set_billing_company( sanitize_text_field( $billing_company ) );
+		$order->set_shipping_company( sanitize_text_field( $shipping_company ) );
+	}
 
 	// Save order.
 	$order->save();
@@ -286,7 +310,10 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_wc_purchase_id' );
 	WC()->session->__unset( 'aco_wc_jwt' );
+	WC()->session->__unset( 'aco_wc_jwt_expired_utc' );
 	WC()->session->__unset( 'aco_update_md5' );
+	WC()->session->__unset( 'aco_language' );
+	WC()->session->__unset( 'aco_currency' );
 }
 
 /**
