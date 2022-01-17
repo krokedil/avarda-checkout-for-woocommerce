@@ -31,6 +31,12 @@ class ACO_Helper_Checkout_Setup {
 			$checkout_setup['termsAndConditionsUrl'] = $terms_url;
 		}
 
+		// wc subscription.
+		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
+			// Indicate that it's a recurring payment - Avarda.
+			$checkout_setup['recurringPayments'] = 'checked';
+		}
+
 		return $checkout_setup;
 	}
 

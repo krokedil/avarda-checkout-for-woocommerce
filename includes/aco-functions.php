@@ -129,6 +129,25 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 }
 
 /**
+ * Confirms and finishes the Avarda Subscription for processing.
+ *
+ * @param int    $subscription_id The WooCommerce Subscription id.
+ * @param string $avarda_purchase_id The Avarda purchase id.
+ * @return void
+ */
+function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
+	$subscription    = wc_get_order( $subscription_id );
+	$avarda_order    = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
+	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
+	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+
+	// translators: %s Avarda recurring token.
+	$note = sprintf( __( 'New recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
+	$subscription->add_order_note( $note );
+}
+
+/**
  * Populates the wc order address.
  *
  * @param WC_Order $order The WC Order.
@@ -315,7 +334,7 @@ function aco_wc_show_another_gateway_button() {
 
 	if ( count( $available_gateways ) > 1 ) {
 		$settings                   = get_option( 'woocommerce_aco_settings' );
-		$select_another_method_text = isset( $settings['select_another_method_text'] ) && '' !== $settings['select_another_method_text'] ? $settings['select_another_method_text'] : __( 'Select another payment method', 'klarna-checkout-for-woocommerce' );
+		$select_another_method_text = isset( $settings['select_another_method_text'] ) && '' !== $settings['select_another_method_text'] ? $settings['select_another_method_text'] : __( 'Select another payment method', 'avarda-checkout-for-woocommerce' );
 
 		?>
 		<p class="avarda-checkout-select-other-wrapper">

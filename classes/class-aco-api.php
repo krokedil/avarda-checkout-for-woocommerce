@@ -145,6 +145,20 @@ class ACO_API {
 	}
 
 	/**
+	 *
+	 * Creates recurring order.
+	 *
+	 * @param int    $order_id WC order id.
+	 * @param string $recurring_token  Avarda recurring token.
+	 *
+	 * @return array
+	 */
+	public function create_recurring_order( $order_id, $recurring_token ) {
+		return ( new ACO_Request_Auth_Recurring_Payment( $order_id, $recurring_token, false ) )->request();
+
+	}
+
+	/**
 	 * Checks for WP Errors and returns either the response as array or a false.
 	 *
 	 * @param array $response The response from the request.

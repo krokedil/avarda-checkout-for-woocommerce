@@ -13,12 +13,49 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Main request class
  */
 class ACO_Request {
+
 	/**
-	 * The request enviroment.
+	 * The base url
+	 *
+	 * @var string the base url.
+	 */
+	public $base_url;
+
+	/**
+	 * Client id
+	 *
+	 * @var string $client_id
+	 */
+	public $client_id;
+
+	/**
+	 * Client secret
+	 *
+	 * @var string $client_secret
+	 */
+	public $client_secret;
+
+	/**
+	 * Enable Avarda Checkout testmode.
+	 *
+	 * @var string $testmode
+	 */
+	public $testmode;
+
+
+	/**
+	 * Plugin settings.
+	 *
+	 * @var array $avarda_settings
+	 */
+	public $avarda_settings;
+
+	/**
+	 * The request environment.
 	 *
 	 * @var $enviroment
 	 */
-	public $enviroment;
+	public $environment;
 
 	/**
 	 * Class constructor
@@ -57,15 +94,15 @@ class ACO_Request {
 	 *
 	 * @return void
 	 */
-	public function set_enviroment() {
-		$live_enviroment = 'https://avdonl-p-checkout.avarda.org';
-		$test_enviroment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
-		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+	public function set_environment() {
+		$live_environment = 'https://avdonl-p-checkout.avarda.org';
+		$test_environment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
+		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
 
 		if ( 'no' === $avarda_settings['testmode'] ) {
-			$this->enviroment = $live_enviroment;
+			$this->environment = $live_environment;
 		} else {
-			$this->enviroment = $test_enviroment;
+			$this->environment = $test_environment;
 		}
 	}
 
@@ -118,7 +155,8 @@ class ACO_Request {
 		}
 
 		// Check the status code, if its not between 200 and 299 then its an error.
-		if ( wp_remote_retrieve_response_code( $response ) < 200 || wp_remote_retrieve_response_code( $response ) > 299 ) {
+		$response_code = wp_remote_retrieve_response_code( $response );
+		if ( $response_code < 200 || $response_code > 299 ) {
 			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
 			$error_message = '';
 			// Get the error messages.
@@ -128,11 +166,21 @@ class ACO_Request {
 				$error_message     = $aco_error_code . $aco_error_message;
 			}
 
+			if ( isset( $response['body'] ) && is_string( $response['body'] ) ) {
+				$error_message = $response['body'];
+			}
+
 			if ( null !== json_decode( $response['body'], true ) ) {
 				$errors = json_decode( $response['body'], true );
 				foreach ( $errors as $error => $aco_error_messages ) {
 					foreach ( $aco_error_messages as $aco_error_message ) {
-						$error_message .= $aco_error_message . ' ';
+						if ( is_array( $aco_error_message ) ) {
+							foreach ( $aco_error_message as $aco_err_msg ) {
+								$error_message .= $aco_err_msg . ' ';
+							}
+						} else {
+							$error_message .= $aco_error_message . ' ';
+						}
 					}
 				}
 			}

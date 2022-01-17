@@ -39,6 +39,48 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 	 */
 	class Avarda_Checkout_For_WooCommerce {
 		/**
+		 * Checkout Setup helper class.
+		 *
+		 * @var ACO_Helper_Checkout_Setup $checkout_setup
+		 */
+		public $checkout_setup;
+
+		/**
+		 * Helper API class for Avarda API
+		 *
+		 * @var ACO_API $api
+		 */
+		public $api;
+
+		/**
+		 * Helper class for cart management.
+		 *
+		 * @var ACO_Helper_Cart $cart_items
+		 */
+		public $cart_items;
+
+		/**
+		 * Helper class for logging requests.
+		 *
+		 * @var ACO_Logger $logger
+		 */
+		public $logger;
+
+		/**
+		 * Helper class for order management.
+		 *
+		 * @var ACO_Helper_Order $order_items
+		 */
+		public $order_items;
+
+
+		/**
+		 * Helper class for order reservation.
+		 *
+		 * @var $order_management ACO_Order_Management
+		 */
+		public $order_management;
+		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
 		 * @var $instance
@@ -159,11 +201,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 
 			// Requests.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-token.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-initialize-payment.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/get/class-aco-request-get-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-order-reference.php';
@@ -213,55 +257,81 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * Loads the needed scripts for Avarda_Checkout.
 		 */
 		public function load_scripts() {
+			if ( isset( $_GET['pay_for_order'], $_GET['change_payment_method'] ) && 'true' === $_GET['pay_for_order'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return;
+			}
+
+			$is_aco_action    = 'no';
+			$order_id         = 0;
+			$confirmation_url = '';
+			if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$is_aco_action    = 'yes';
+				$key              = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+				$order_id         = wc_get_order_id_by_order_key( $key );
+				$order            = wc_get_order( $order_id );
+				$confirmation_url = add_query_arg(
+					array(
+						'aco-action'   => 'subs-payment-changed',
+						'aco-order-id' => $order_id,
+					),
+					$order->get_view_order_url()
+				);
+			}
+
 			if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
-					do_action( 'aco_before_load_scripts' );
 
-					// Checkout script.
-					wp_register_script(
-						'aco_wc',
-						AVARDA_CHECKOUT_URL . '/assets/js/aco_checkout.js',
-						array( 'jquery' ),
-						AVARDA_CHECKOUT_VERSION,
-						true
-					);
-					$standard_woo_checkout_fields = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address' ) );
-					$avarda_settings              = get_option( 'woocommerce_aco_settings' );
-					$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
-					$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
-					$styles                       = new stdClass(); // empty object as default value.
-					$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
+				do_action( 'aco_before_load_scripts' );
 
-					$params = array(
-						'ajax_url'                     => admin_url( 'admin-ajax.php' ),
-						'select_another_method_text'   => __( 'Select another payment method', 'avarda-checkout-for-woocommerce' ),
-						'standard_woo_checkout_fields' => $standard_woo_checkout_fields,
-						'address_changed_url'          => WC_AJAX::get_endpoint( 'aco_wc_address_changed' ),
-						'address_changed_nonce'        => wp_create_nonce( 'aco_wc_address_changed' ),
-						'update_payment_url'           => WC_AJAX::get_endpoint( 'aco_wc_update_checkout' ),
-						'update_payment_nonce'         => wp_create_nonce( 'aco_wc_update_checkout' ),
-						'change_payment_method_url'    => WC_AJAX::get_endpoint( 'aco_wc_change_payment_method' ),
-						'change_payment_method_nonce'  => wp_create_nonce( 'aco_wc_change_payment_method' ),
-						'get_avarda_payment_url'       => WC_AJAX::get_endpoint( 'aco_wc_get_avarda_payment' ),
-						'get_avarda_payment_nonce'     => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
-						'iframe_shipping_address_change_url' => WC_AJAX::get_endpoint( 'aco_wc_iframe_shipping_address_change' ),
-						'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
-						'log_to_file_url'              => WC_AJAX::get_endpoint( 'aco_wc_log_js' ),
-						'log_to_file_nonce'            => wp_create_nonce( 'aco_wc_log_js' ),
-						'submit_order'                 => WC_AJAX::get_endpoint( 'checkout' ),
-						'required_fields_text'         => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
-						'aco_jwt_token'                => WC()->session->get( 'aco_wc_jwt' ),
-						'aco_redirect_url'             => wc_get_checkout_url(),
-						'aco_test_mode'                => $aco_test_mode,
-						'aco_checkout_layout'          => $aco_two_column_checkout,
-						'aco_checkout_style'           => $aco_custom_css_styles,
-					);
+				// Checkout script.
+				wp_register_script(
+					'aco_wc',
+					AVARDA_CHECKOUT_URL . '/assets/js/aco_checkout.js',
+					array( 'jquery' ),
+					AVARDA_CHECKOUT_VERSION,
+					true
+				);
+				$standard_woo_checkout_fields = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address' ) );
+				$avarda_settings              = get_option( 'woocommerce_aco_settings' );
+				$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
+				$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+				$styles                       = new stdClass(); // empty object as default value.
+				$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
 
-					wp_localize_script(
-						'aco_wc',
-						'aco_wc_params',
-						$params
-					);
-					wp_enqueue_script( 'aco_wc' );
+				$params = array(
+					'ajax_url'                             => admin_url( 'admin-ajax.php' ),
+					'select_another_method_text'           => __( 'Select another payment method', 'avarda-checkout-for-woocommerce' ),
+					'standard_woo_checkout_fields'         => $standard_woo_checkout_fields,
+					'address_changed_url'                  => WC_AJAX::get_endpoint( 'aco_wc_address_changed' ),
+					'address_changed_nonce'                => wp_create_nonce( 'aco_wc_address_changed' ),
+					'update_payment_url'                   => WC_AJAX::get_endpoint( 'aco_wc_update_checkout' ),
+					'update_payment_nonce'                 => wp_create_nonce( 'aco_wc_update_checkout' ),
+					'change_payment_method_url'            => WC_AJAX::get_endpoint( 'aco_wc_change_payment_method' ),
+					'change_payment_method_nonce'          => wp_create_nonce( 'aco_wc_change_payment_method' ),
+					'get_avarda_payment_url'               => WC_AJAX::get_endpoint( 'aco_wc_get_avarda_payment' ),
+					'get_avarda_payment_nonce'             => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
+					'iframe_shipping_address_change_url'   => WC_AJAX::get_endpoint( 'aco_wc_iframe_shipping_address_change' ),
+					'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
+					'log_to_file_url'                      => WC_AJAX::get_endpoint( 'aco_wc_log_js' ),
+					'log_to_file_nonce'                    => wp_create_nonce( 'aco_wc_log_js' ),
+					'submit_order'                         => WC_AJAX::get_endpoint( 'checkout' ),
+					'required_fields_text'                 => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
+					'aco_jwt_token'                        => WC()->session->get( 'aco_wc_jwt' ),
+					'aco_redirect_url'                     => wc_get_checkout_url(),
+					'aco_test_mode'                        => $aco_test_mode,
+					'aco_checkout_layout'                  => $aco_two_column_checkout,
+					'aco_checkout_style'                   => $aco_custom_css_styles,
+					'is_aco_action'                        => $is_aco_action,
+					'aco_order_id'                         => $order_id,
+					'confirmation_url'                     => $confirmation_url,
+
+				);
+
+				wp_localize_script(
+					'aco_wc',
+					'aco_wc_params',
+					$params
+				);
+				wp_enqueue_script( 'aco_wc' );
 
 				wp_register_style(
 					'aco',
@@ -297,7 +367,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 	 *
 	 * @return Avarda_Checkout_For_WooCommerce
 	 */
-	function ACO_WC() { // phpcs:ignore
+	function ACO_WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 		return Avarda_Checkout_For_WooCommerce::get_instance();
 	}
 }
