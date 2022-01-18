@@ -347,6 +347,20 @@ function aco_wc_show_another_gateway_button() {
 }
 
 /**
+ * Adds the extra checkout field div to the checkout page.
+ *
+ * @return void
+ */
+function aco_wc_add_extra_checkout_fields() {
+	do_action( 'aco_wc_before_extra_fields' );
+	?>
+	<div id="aco-extra-checkout-fields">
+	</div>
+	<?php
+	do_action( 'aco_wc_after_extra_fields' );
+}
+
+/**
  * Finds an Order ID based on a transaction ID (the Avarda order number).
  *
  * @param string $transaction_id Avarda order number saved as Transaction ID in WC order.
