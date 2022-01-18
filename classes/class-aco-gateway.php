@@ -58,6 +58,19 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get gateway icon.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+
+		$icon_src   = AVARDA_CHECKOUT_URL . '/assets/images/avarda.png';
+		$icon_width = '75';
+		$icon_html  = '<img src="' . $icon_src . '" alt="Avarda" style="max-width:' . $icon_width . 'px"/>';
+		return apply_filters( 'aco_icon_html', $icon_html );
+	}
+
+	/**
 	 * Check if this gateway is enabled and available in the user's country.
 	 *
 	 * @return boolean
