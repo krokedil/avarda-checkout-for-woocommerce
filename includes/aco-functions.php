@@ -108,6 +108,9 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 		// Populate wc order address.
 		aco_populate_wc_order( $order, $avarda_order );
 
+		// Let other plugins hook into this sequence.
+		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
+
 		// Check if B2C or B2B.
 		$aco_state = '';
 		if ( 'B2C' === $avarda_order['mode'] ) {
