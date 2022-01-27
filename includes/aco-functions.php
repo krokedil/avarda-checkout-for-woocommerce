@@ -248,6 +248,11 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 		$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
 		update_post_meta( $order->get_id(), '_avarda_payment_method', $aco_payment_method );
+
+		$aco_payment_fee = isset( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) ? sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) : '';
+		if ( ! empty( $aco_payment_fee ) ) {
+			update_post_meta( $order->get_id(), '_avarda_payment_method_fee', $aco_payment_fee );
+		}
 	}
 
 	switch ( $aco_payment_method ) {
