@@ -124,6 +124,7 @@ class ACO_Templates {
 			<div id="aco-nonce-wrapper">
 				<?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
 			</div>
+			<input id="payment_method_aco" type="radio" class="input-radio" name="payment_method" value="aco" checked="checked" />
 		</div>
 		<?php
 	}
