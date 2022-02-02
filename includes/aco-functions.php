@@ -64,12 +64,13 @@ function aco_wc_initialize_payment() {
 function aco_wc_show_checkout_form() {
 	$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
 	$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
+	$avarda_jwt              = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
 	$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
 
-	if ( 'new_token_required' === $token || null === $avarda_payment_data['jwt'] || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
+	if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 		aco_wc_initialize_payment();
 	} else {
-		$avarda_purchase_id = $avarda_payment_data['purchaseId'];
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 		// Initialize new payment if current timed out.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		$aco_state      = '';
