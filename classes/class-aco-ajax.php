@@ -92,7 +92,7 @@ class ACO_AJAX extends WC_AJAX {
 
 		if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
 
-			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+			$avarda_purchase_id = aco_get_purchase_id_from_session();
 
 			// Set empty return array for errors.
 			$return = array();
@@ -175,7 +175,7 @@ class ACO_AJAX extends WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 
 		// Check if we have a Avarda purchase id.
 		if ( empty( $avarda_purchase_id ) ) {
@@ -245,7 +245,7 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 
-		$avarda_payment = ACO_WC()->api->request_get_payment( WC()->session->get( 'aco_wc_purchase_id' ) );
+		$avarda_payment = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
 		if ( ! $avarda_payment ) {
 			wp_send_json_error( $avarda_payment );
 			wp_die();
@@ -271,7 +271,7 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 		$posted_message     = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
-		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
 		wp_send_json_success();
