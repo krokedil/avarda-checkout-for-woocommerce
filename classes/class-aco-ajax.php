@@ -100,6 +100,7 @@ class ACO_AJAX extends WC_AJAX {
 			// Check that the currency and locale is the same as earlier, otherwise create a new session.
 			if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 				aco_wc_unset_sessions();
+				ACO_Logger::log( 'Currency or language changed in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
 				$return['redirect_url'] = wc_get_checkout_url();
 				wp_send_json_error( $return );
 				wp_die();
@@ -107,8 +108,11 @@ class ACO_AJAX extends WC_AJAX {
 
 			// Check if we have a avarda purchase id.
 			if ( empty( $avarda_purchase_id ) ) {
+				aco_wc_unset_sessions();
 				wc_add_notice( 'Avarda purchase id is missing.', 'error' );
-				wp_send_json_error();
+				ACO_Logger::log( 'Avarda purchase ID is missing in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
+				$return['redirect_url'] = wc_get_checkout_url();
+				wp_send_json_error( $return );
 				wp_die();
 			} else {
 				// Get the Avarda order from Avarda.
@@ -117,7 +121,7 @@ class ACO_AJAX extends WC_AJAX {
 				if ( ! $avarda_order ) {
 					// Unset sessions.
 					aco_wc_unset_sessions();
-
+					ACO_Logger::log( 'Avarda GET request failed in update checkout ajax request. Clearing Avarda session.' );
 					wp_send_json_error();
 					wp_die();
 				}
@@ -153,7 +157,7 @@ class ACO_AJAX extends WC_AJAX {
 					if ( false === $avarda_order ) {
 						// Unset sessions.
 						aco_wc_unset_sessions();
-
+						ACO_Logger::log( 'Avarda update request failed in update checkout ajax request. Clearing Avarda session.' );
 						wp_send_json_error();
 						wp_die();
 					}
