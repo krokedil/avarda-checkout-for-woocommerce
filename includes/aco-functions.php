@@ -416,3 +416,13 @@ function aco_get_purchase_id_from_session() {
 	return $avarda_purchase_id;
 }
 
+/**
+ * Returns the current Avarda JWT token from WC->session.
+ *
+ * @return string The purchase id.
+ */
+function aco_get_jwt_token_from_session() {
+	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
+	$jwt                 = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
+	return $jwt;
+}

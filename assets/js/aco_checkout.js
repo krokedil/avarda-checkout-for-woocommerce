@@ -322,7 +322,8 @@ jQuery(function($) {
 				type: 'POST',
 				url: aco_wc_params.update_payment_url,
 				data: {
-					nonce: aco_wc_params.update_payment_nonce
+					nonce: aco_wc_params.update_payment_nonce,
+					aco_jwt_token: aco_wc_params.aco_jwt_token
 				},
 				dataType: 'json',
 				success: function(data) {

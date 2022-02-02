@@ -106,6 +106,18 @@ class ACO_AJAX extends WC_AJAX {
 				wp_die();
 			}
 
+			// Check that the JWT token in frontend is the same as saved in session, otherwise create a new session.
+			$aco_jwt_token = filter_input( INPUT_POST, 'aco_jwt_token', FILTER_SANITIZE_STRING );
+			if ( aco_get_jwt_token_from_session() !== $aco_jwt_token ) {
+				aco_wc_unset_sessions();
+				wc_add_notice( 'Avarda JWT token mismatch. Please try again.', 'error' );
+				ACO_Logger::log( 'JWT token used in frontend not the same as saved in WC session. Clearing Avarda session and reloading the cehckout page.' );
+				$return['redirect_url'] = wc_get_checkout_url();
+				wp_send_json_error( $return );
+				wp_die();
+
+			}
+
 			// Check if we have a avarda purchase id.
 			if ( empty( $avarda_purchase_id ) ) {
 				aco_wc_unset_sessions();
