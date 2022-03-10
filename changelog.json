@@ -108,5 +108,10 @@
           "description" : "<ul><li>Tweak - Create new purchase ID if customer changes currency or language during ongoing session.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.8.2"
+     },
+     "1.4.0" : {
+          "description" : "<ul><li>Enhancement - Adds filter aco_locate_template to be able to load ACO checkout template from other plugins.</li><li>Enhancement - Adds hook aco_wc_confirm_avarda_order in confirmation step.</li><li>Enhancement - Adds payment gateway logo displayed in checkout.</li><li>Tweak - Stores _avarda_payment_method_fee if returned from Avarda.</li><li>Tweak - Adds calc_shipping_country, calc_shipping_state and calc_shipping_postcode as standard checkout fields (that should not be displayed in checkout when ACO is the selected payment method).</li><li>Tweak - Moves add_extra_checkout_fields function to aco-functions file. Makes it easier to use remove_cation if checkout design modifications is performed via separate plugin/theme.</li><li>Tweak - Adds logging to update Avarda order ajax request. For easier trouble shooting.</li><li>Fix - Saves all Avarda payment info (JWT token and purchase ID) in the same WC session (aco_wc_payment_data). To avoid updating different sessions in frontend and backend.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.9.1"
      }
 }
