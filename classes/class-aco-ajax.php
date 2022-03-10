@@ -92,7 +92,7 @@ class ACO_AJAX extends WC_AJAX {
 
 		if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
 
-			$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+			$avarda_purchase_id = aco_get_purchase_id_from_session();
 
 			// Set empty return array for errors.
 			$return = array();
@@ -100,15 +100,31 @@ class ACO_AJAX extends WC_AJAX {
 			// Check that the currency and locale is the same as earlier, otherwise create a new session.
 			if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 				aco_wc_unset_sessions();
+				ACO_Logger::log( 'Currency or language changed in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
 				$return['redirect_url'] = wc_get_checkout_url();
 				wp_send_json_error( $return );
 				wp_die();
 			}
 
+			// Check that the JWT token in frontend is the same as saved in session, otherwise create a new session.
+			$aco_jwt_token = filter_input( INPUT_POST, 'aco_jwt_token', FILTER_SANITIZE_STRING );
+			if ( aco_get_jwt_token_from_session() !== $aco_jwt_token ) {
+				aco_wc_unset_sessions();
+				wc_add_notice( 'Avarda JWT token mismatch. Please try again.', 'error' );
+				ACO_Logger::log( 'JWT token used in frontend not the same as saved in WC session. Clearing Avarda session and reloading the cehckout page.' );
+				$return['redirect_url'] = wc_get_checkout_url();
+				wp_send_json_error( $return );
+				wp_die();
+
+			}
+
 			// Check if we have a avarda purchase id.
 			if ( empty( $avarda_purchase_id ) ) {
+				aco_wc_unset_sessions();
 				wc_add_notice( 'Avarda purchase id is missing.', 'error' );
-				wp_send_json_error();
+				ACO_Logger::log( 'Avarda purchase ID is missing in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
+				$return['redirect_url'] = wc_get_checkout_url();
+				wp_send_json_error( $return );
 				wp_die();
 			} else {
 				// Get the Avarda order from Avarda.
@@ -117,7 +133,7 @@ class ACO_AJAX extends WC_AJAX {
 				if ( ! $avarda_order ) {
 					// Unset sessions.
 					aco_wc_unset_sessions();
-
+					ACO_Logger::log( 'Avarda GET request failed in update checkout ajax request. Clearing Avarda session.' );
 					wp_send_json_error();
 					wp_die();
 				}
@@ -153,7 +169,7 @@ class ACO_AJAX extends WC_AJAX {
 					if ( false === $avarda_order ) {
 						// Unset sessions.
 						aco_wc_unset_sessions();
-
+						ACO_Logger::log( 'Avarda update request failed in update checkout ajax request. Clearing Avarda session.' );
 						wp_send_json_error();
 						wp_die();
 					}
@@ -175,7 +191,7 @@ class ACO_AJAX extends WC_AJAX {
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
-		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 
 		// Check if we have a Avarda purchase id.
 		if ( empty( $avarda_purchase_id ) ) {
@@ -245,7 +261,7 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 
-		$avarda_payment = ACO_WC()->api->request_get_payment( WC()->session->get( 'aco_wc_purchase_id' ) );
+		$avarda_payment = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
 		if ( ! $avarda_payment ) {
 			wp_send_json_error( $avarda_payment );
 			wp_die();
@@ -271,7 +287,7 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 		$posted_message     = isset( $_POST['message'] ) ? sanitize_text_field( wp_unslash( $_POST['message'] ) ) : '';
-		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
 		wp_send_json_success();

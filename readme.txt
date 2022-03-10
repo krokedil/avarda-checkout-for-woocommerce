@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.8.2
+Tested up to: 5.9.1
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.0.0
+WC tested up to: 6.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: trunk
+Stable tag: 1.4.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,16 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.03.10        - version 1.3.0 =
+* Enhancement       - Adds filter aco_locate_template to be able to load ACO checkout template from other plugins.
+* Enhancement       - Adds hook aco_wc_confirm_avarda_order in confirmation step.
+* Enhancement       - Adds payment gateway logo displayed in checkout.
+* Tweak             - Stores _avarda_payment_method_fee if returned from Avarda.
+* Tweak             - Adds calc_shipping_country, calc_shipping_state and calc_shipping_postcode as standard checkout fields (that should not be displayed in checkout when ACO is the selected payment method).
+* Tweak             - Moves add_extra_checkout_fields function to aco-functions file. Makes it easier to use remove_cation if checkout design modifications is performed via separate plugin/theme.
+* Tweak             - Adds logging to update Avarda order ajax request. For easier trouble shooting.
+* Fix               - Saves all Avarda payment info (JWT token and purchase ID) in the same WC session (aco_wc_payment_data). To avoid updating different sessions in frontend and backend.
+
 = 2021.12.17        - version 1.3.0 =
 * Tweak             - Create new purchase ID if customer changes currency or language during ongoing session.
 

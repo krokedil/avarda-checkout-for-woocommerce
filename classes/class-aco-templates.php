@@ -41,9 +41,9 @@ class ACO_Templates {
 
 		// Template hooks.
 		add_action( 'aco_wc_after_wrapper', array( $this, 'add_wc_form' ), 10 );
-		add_action( 'aco_wc_after_order_review', array( $this, 'add_extra_checkout_fields' ), 10 );
 		add_action( 'aco_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 		add_action( 'aco_wc_before_checkout_form', 'woocommerce_checkout_coupon_form', 20 );
+		add_action( 'aco_wc_after_order_review', 'aco_wc_add_extra_checkout_fields', 10 );
 		add_action( 'aco_wc_after_order_review', 'aco_wc_show_another_gateway_button', 20 );
 	}
 
@@ -69,7 +69,7 @@ class ACO_Templates {
 				if ( locate_template( 'woocommerce/avarda-checkout.php' ) ) {
 					$avarda_checkout_template = locate_template( 'woocommerce/avarda-checkout.php' );
 				} else {
-					$avarda_checkout_template = AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php';
+					$avarda_checkout_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php', $template_name );
 				}
 
 				// Avarda checkout page.
@@ -124,22 +124,9 @@ class ACO_Templates {
 			<div id="aco-nonce-wrapper">
 				<?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
 			</div>
-			<input id="payment_method_aco" type="radio" class="input-radio" name="payment_method" value="aco" checked="checked" />		</div>
-		<?php
-	}
-
-	/**
-	 * Adds the extra checkout field div to the checkout page.
-	 *
-	 * @return void
-	 */
-	public function add_extra_checkout_fields() {
-		do_action( 'aco_wc_before_extra_fields' );
-		?>
-		<div id="aco-extra-checkout-fields">
+			<input id="payment_method_aco" type="radio" class="input-radio" name="payment_method" value="aco" checked="checked" />
 		</div>
 		<?php
-		do_action( 'aco_wc_after_extra_fields' );
 	}
 }
 

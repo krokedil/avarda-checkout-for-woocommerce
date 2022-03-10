@@ -46,9 +46,12 @@ function aco_wc_initialize_payment() {
 	if ( ! $avarda_payment ) {
 		return;
 	}
-	WC()->session->set( 'aco_wc_purchase_id', $avarda_payment['purchaseId'] );
-	WC()->session->set( 'aco_wc_jwt', $avarda_payment['jwt'] );
-	WC()->session->set( 'aco_wc_jwt_expired_utc', $avarda_payment['expiredUtc'] );
+	// WC()->session->set( 'aco_wc_purchase_id', $avarda_payment['purchaseId'] );
+	// WC()->session->set( 'aco_wc_jwt', $avarda_payment['jwt'] );
+	// WC()->session->set( 'aco_wc_jwt_expired_utc', $avarda_payment['expiredUtc'] );
+
+	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
+
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	return $avarda_payment;
@@ -59,13 +62,15 @@ function aco_wc_initialize_payment() {
  * Avarda checkout form.
  */
 function aco_wc_show_checkout_form() {
+	$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
+	$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
+	$avarda_jwt              = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
+	$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
 
-	$token = ( time() < strtotime( WC()->session->get( 'aco_wc_jwt_expired_utc' ) ) ) ? 'session' : 'new_token_required';
-
-	if ( 'new_token_required' === $token || null === WC()->session->get( 'aco_wc_jwt' ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
+	if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 		aco_wc_initialize_payment();
 	} else {
-		$avarda_purchase_id = WC()->session->get( 'aco_wc_purchase_id' );
+		$avarda_purchase_id = aco_get_purchase_id_from_session();
 		// Initialize new payment if current timed out.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		$aco_state      = '';
@@ -108,6 +113,9 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 		// Populate wc order address.
 		aco_populate_wc_order( $order, $avarda_order );
 
+		// Let other plugins hook into this sequence.
+		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
+
 		// Check if B2C or B2B.
 		$aco_state = '';
 		if ( 'B2C' === $avarda_order['mode'] ) {
@@ -126,6 +134,25 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 			do_action( 'aco_wc_payment_complete', $order_id, $avarda_order );
 		}
 	}
+}
+
+/**
+ * Confirms and finishes the Avarda Subscription for processing.
+ *
+ * @param int    $subscription_id The WooCommerce Subscription id.
+ * @param string $avarda_purchase_id The Avarda purchase id.
+ * @return void
+ */
+function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
+	$subscription    = wc_get_order( $subscription_id );
+	$avarda_order    = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
+	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
+	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+
+	// translators: %s Avarda recurring token.
+	$note = sprintf( __( 'New recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
+	$subscription->add_order_note( $note );
 }
 
 /**
@@ -226,6 +253,11 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 		$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
 		update_post_meta( $order->get_id(), '_avarda_payment_method', $aco_payment_method );
+
+		$aco_payment_fee = isset( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) ? sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) : '';
+		if ( ! empty( $aco_payment_fee ) ) {
+			update_post_meta( $order->get_id(), '_avarda_payment_method_fee', $aco_payment_fee );
+		}
 	}
 
 	switch ( $aco_payment_method ) {
@@ -289,9 +321,10 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
  * @return void
  */
 function aco_wc_unset_sessions() {
-	WC()->session->__unset( 'aco_wc_purchase_id' );
-	WC()->session->__unset( 'aco_wc_jwt' );
-	WC()->session->__unset( 'aco_wc_jwt_expired_utc' );
+	// WC()->session->__unset( 'aco_wc_purchase_id' );
+	// WC()->session->__unset( 'aco_wc_jwt' );
+	// WC()->session->__unset( 'aco_wc_jwt_expired_utc' );
+	WC()->session->__unset( 'aco_wc_payment_data' );
 	WC()->session->__unset( 'aco_update_md5' );
 	WC()->session->__unset( 'aco_language' );
 	WC()->session->__unset( 'aco_currency' );
@@ -315,7 +348,7 @@ function aco_wc_show_another_gateway_button() {
 
 	if ( count( $available_gateways ) > 1 ) {
 		$settings                   = get_option( 'woocommerce_aco_settings' );
-		$select_another_method_text = isset( $settings['select_another_method_text'] ) && '' !== $settings['select_another_method_text'] ? $settings['select_another_method_text'] : __( 'Select another payment method', 'klarna-checkout-for-woocommerce' );
+		$select_another_method_text = isset( $settings['select_another_method_text'] ) && '' !== $settings['select_another_method_text'] ? $settings['select_another_method_text'] : __( 'Select another payment method', 'avarda-checkout-for-woocommerce' );
 
 		?>
 		<p class="avarda-checkout-select-other-wrapper">
@@ -325,6 +358,20 @@ function aco_wc_show_another_gateway_button() {
 		</p>
 		<?php
 	}
+}
+
+/**
+ * Adds the extra checkout field div to the checkout page.
+ *
+ * @return void
+ */
+function aco_wc_add_extra_checkout_fields() {
+	do_action( 'aco_wc_before_extra_fields' );
+	?>
+	<div id="aco-extra-checkout-fields">
+	</div>
+	<?php
+	do_action( 'aco_wc_after_extra_fields' );
 }
 
 /**
@@ -358,3 +405,24 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 	return $order_id;
 }
 
+/**
+ * Returns the current Avarda purchaseId from WC->session.
+ *
+ * @return string The purchase id.
+ */
+function aco_get_purchase_id_from_session() {
+	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
+	$avarda_purchase_id  = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['purchaseId'] ) ) ? $avarda_payment_data['purchaseId'] : '';
+	return $avarda_purchase_id;
+}
+
+/**
+ * Returns the current Avarda JWT token from WC->session.
+ *
+ * @return string The purchase id.
+ */
+function aco_get_jwt_token_from_session() {
+	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
+	$jwt                 = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
+	return $jwt;
+}
