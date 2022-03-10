@@ -41,7 +41,6 @@ More information on how to get started can be found in the [plugin documentation
 * Tweak             - Adds logging to update Avarda order ajax request. For easier trouble shooting.
 * Fix               - Saves all Avarda payment info (JWT token and purchase ID) in the same WC session (aco_wc_payment_data). To avoid updating different sessions in frontend and backend.
 
-
 = 2021.12.17        - version 1.3.0 =
 * Tweak             - Create new purchase ID if customer changes currency or language during ongoing session.
 
