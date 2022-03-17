@@ -161,7 +161,16 @@ class ACO_AJAX extends WC_AJAX {
 					$aco_state = $avarda_order['b2B']['step']['current'];
 				}
 
-				if ( ! ( 'Completed' === $aco_state || 'TimedOut' === $aco_state ) ) {
+				// check if session TimedOut.
+				if ( 'TimedOut' === $aco_state ) {
+					aco_wc_unset_sessions();
+					ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
+					$return['redirect_url'] = wc_get_checkout_url();
+					wp_send_json_error( $return );
+					wp_die();
+				}
+
+				if ( ! ( 'Completed' === $aco_state ) ) {
 					// Update order.
 					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
 
