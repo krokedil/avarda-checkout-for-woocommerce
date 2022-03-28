@@ -31,7 +31,7 @@ class ACO_Helper_Order {
 		// Get order fees.
 		$order_fees = $order->get_fees();
 		foreach ( $order_fees as $fee ) {
-			$formated_order_items[] = $this->get_fee( $fee );
+			$formated_order_items[] = $this->get_fee( $order, $fee );
 		}
 
 		// Get order shipping.
@@ -118,16 +118,17 @@ class ACO_Helper_Order {
 	/**
 	 * Formats the fee.
 	 *
+	 * @param object $order WooCommerce order.
 	 * @param object $fee A WooCommerce Fee.
 	 * @return array
 	 */
-	public function get_fee( $fee ) {
+	public function get_fee( $order, $fee ) {
 		return array(
 			'description' => substr( $fee->get_name(), 0, 35 ), // String.
 			'notes'       => substr( $fee->get_id(), 0, 35 ), // String.
-			'amount'      => number_format( $fee->get_amount(), 2, '.', '' ), // String.
-			'taxCode'     => (string) array_sum( $fee->get_taxes() ) / $fee->get_amount() * 100, // String.
-			'taxAmount'   => number_format( array_sum( $fee->get_taxes() ), 2, '.', '' ), // String.
+			'amount'      => number_format( (float) $fee->get_amount(), 2, '.', '' ), // String.
+			'taxCode'     => self::get_tax_rate( $order, $fee ), // String.
+			'taxAmount'   => self::get_item_tax_amount( $fee ), // String.
 		);
 	}
 
@@ -156,4 +157,53 @@ class ACO_Helper_Order {
 			);
 		}
 	}
+
+	/**
+	 * Get the tax rate.
+	 *
+	 * @param WC_Order                                                       $order The WooCommerce order.
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $order_item The WooCommerce order item.
+	 * @return int
+	 */
+	public static function get_tax_rate( $order, $order_item ) {
+		// If we don't have any tax, return 0.
+		if ( '0' === $order_item->get_total_tax() ) {
+			return 0;
+		}
+
+		$tax_items = $order->get_items( 'tax' );
+		/**
+		 * Process the tax items.
+		 *
+		 * @var WC_Order_Item_Tax $tax_item The WooCommerce order tax item.
+		 */
+		foreach ( $tax_items as $tax_item ) {
+			$rate_id = $tax_item->get_rate_id();
+			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
+				return round( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] * 100 );
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Calculate item tax percentage.
+	 *
+	 * @param  WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee|WC_Order_Item_Coupon $order_item Order line item.
+	 *
+	 * @return integer $item_tax_amount Item tax amount.
+	 */
+	public static function get_item_tax_amount( $order_item ) {
+
+		if ( in_array( $order_item->get_type(), array( 'line_item', 'fee', 'shipping' ), true ) ) {
+			$item_tax_amount = $order_item->get_total_tax();
+		} elseif ( 'coupon' === $order_item->get_type() ) {
+			$item_tax_amount = $order_item->get_discount_tax();
+		} else {
+			$item_tax_amount = 00;
+		}
+		return number_format( $item_tax_amount, 2, '.', '' );
+	}
+
 }
