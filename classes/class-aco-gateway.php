@@ -125,8 +125,10 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect_url' => $confirmation_url,
 			);
 		} else {
+			aco_wc_unset_sessions();
 			return array(
 				'result' => 'error',
+				'reload' => true,
 			);
 		}
 	}
