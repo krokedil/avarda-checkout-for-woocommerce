@@ -225,8 +225,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_avarda_purchase_id( $order ) {
 		$avarda_purchase_id = '';
-		if ( is_object( $order ) && $order->get_transaction_id() ) {
-			$avarda_purchase_id = $order->get_transaction_id();
+		if ( is_object( $order ) && ! empty( get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true ) ) ) {
+			$avarda_purchase_id = get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true );
 		} else {
 			$avarda_purchase_id = aco_get_purchase_id_from_session();
 		}
