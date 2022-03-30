@@ -290,23 +290,32 @@ jQuery(function($) {
 		},
 
 		setCustomerData: function() {
-			$( '#billing_first_name' ).val( aco_wc.customerData.invoicingAddress.firstName ? aco_wc.customerData.invoicingAddress.firstName : '.'  );
-			$( '#billing_last_name' ).val( aco_wc.customerData.invoicingAddress.lastName ? aco_wc.customerData.invoicingAddress.lastName : '.' );
-			$( '#billing_address_1' ).val(  aco_wc.customerData.invoicingAddress.address1 );
-			$( '#billing_address_2' ).val( aco_wc.customerData.invoicingAddress.address2);
-			$( '#billing_city' ).val( aco_wc.customerData.invoicingAddress.city ? aco_wc.customerData.invoicingAddress.city : '.' );
-			$( '#billing_postcode' ).val( aco_wc.customerData.invoicingAddress.zip ? aco_wc.customerData.invoicingAddress.zip: '' );
-			$( '#billing_phone' ).val( aco_wc.customerData.phone ? aco_wc.customerData.phone : '.' );
-			$( '#billing_email' ).val( aco_wc.customerData.email ?  aco_wc.customerData.email : 'krokedil@krokedil.se' );
+			var billing_first_name = aco_wc.customerData.invoicingAddress.firstName ? aco_wc.customerData.invoicingAddress.firstName : '.';
+			var billing_last_name = aco_wc.customerData.invoicingAddress.lastName ? aco_wc.customerData.invoicingAddress.lastName : '.';
+			var billing_address_1 = aco_wc.customerData.invoicingAddress.address1;
+			var billing_address_2 = aco_wc.customerData.invoicingAddress.address2;
+			var billing_city = aco_wc.customerData.invoicingAddress.city ? aco_wc.customerData.invoicingAddress.city : '.';
+			var billing_postcode = aco_wc.customerData.invoicingAddress.zip ? aco_wc.customerData.invoicingAddress.zip: '';
+			var billing_phone = aco_wc.customerData.phone ? aco_wc.customerData.phone : '.';
+			var billing_email = aco_wc.customerData.email ?  aco_wc.customerData.email : 'krokedil@krokedil.se';
+
+			$( '#billing_first_name' ).val( billing_first_name  );
+			$( '#billing_last_name' ).val( billing_last_name );
+			$( '#billing_address_1' ).val(  billing_address_1 );
+			$( '#billing_address_2' ).val( billing_address_2 );
+			$( '#billing_city' ).val( billing_city );
+			$( '#billing_postcode' ).val( billing_postcode );
+			$( '#billing_phone' ).val( billing_phone );
+			$( '#billing_email' ).val( billing_email );
 
 			if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 				$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 			}
-			$( '#shipping_first_name' ).val( aco_wc.customerData.deliveryAddress.firstName ? aco_wc.customerData.deliveryAddress.firstName : aco_wc.customerData.invoicingAddress.firstName );
-			$( '#shipping_last_name' ).val( aco_wc.customerData.deliveryAddress.lastName ? aco_wc.customerData.deliveryAddress.lastName : aco_wc.customerData.invoicingAddress.lastName );
-			$( '#shipping_address_1' ).val( aco_wc.customerData.deliveryAddress.address1 ? aco_wc.customerData.deliveryAddress.address1 : aco_wc.customerData.invoicingAddress.address1 );
-			$( '#shipping_address_2' ).val( aco_wc.customerData.deliveryAddress.address2 ? aco_wc.customerData.deliveryAddress.address2 : aco_wc.customerData.invoicingAddress.address2 );
-			$( '#shipping_city' ).val( aco_wc.customerData.deliveryAddress.city ? aco_wc.customerData.deliveryAddress.city : aco_wc.customerData.invoicingAddress.city );
+			$( '#shipping_first_name' ).val( aco_wc.customerData.deliveryAddress.firstName ? aco_wc.customerData.deliveryAddress.firstName : billing_first_name );
+			$( '#shipping_last_name' ).val( aco_wc.customerData.deliveryAddress.lastName ? aco_wc.customerData.deliveryAddress.lastName : billing_last_name );
+			$( '#shipping_address_1' ).val( aco_wc.customerData.deliveryAddress.address1 ? aco_wc.customerData.deliveryAddress.address1 : billing_address_1 );
+			$( '#shipping_address_2' ).val( aco_wc.customerData.deliveryAddress.address2 ? aco_wc.customerData.deliveryAddress.address2 : billing_address_2 );
+			$( '#shipping_city' ).val( aco_wc.customerData.deliveryAddress.city ? aco_wc.customerData.deliveryAddress.city : billing_city );
 			$( '#shipping_postcode' ).val( aco_wc.customerData.deliveryAddress.zip ? aco_wc.customerData.deliveryAddress.zip : '11111' );
 		},
 
