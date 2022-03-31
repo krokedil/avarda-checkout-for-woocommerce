@@ -8,7 +8,7 @@ WC requires at least: 4.0.0
 WC tested up to: 6.3.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,11 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.03.31        - version 1.4.2 =
+* Tweak             - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.
+* Fix               - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).
+* Fix               - Use billing address data if shipping address doesn't exist. Fixes issue where shipping first and last name might be missing when order should be created in Woo.
+
 = 2022.03.17        - version 1.4.1 =
 * Fix               - Creates a new Avarda session if purchase_id has state TimedOut. Avoids issue when customer don't finalize purchase under 1 hour.
 
