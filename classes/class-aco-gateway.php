@@ -125,7 +125,10 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect_url' => $confirmation_url,
 			);
 		} else {
+			// Something went wrong. Unset sessions and remove previos purchase id from order.
 			aco_wc_unset_sessions();
+			delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
+			delete_post_meta( $order_id, '_transaction_id' );
 			return array(
 				'result' => 'error',
 				'reload' => true,
@@ -161,10 +164,26 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		if ( ! $avarda_order ) {
+			// Unset sessions.
+			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session.' );
 			return false;
 		}
 
 		if ( $order_id && $avarda_order ) {
+
+			// Get current status of Avarda session.
+			if ( 'B2C' === $avarda_order['mode'] ) {
+				$aco_state = $avarda_order['b2C']['step']['current'];
+			} elseif ( 'B2B' === $avarda_order['mode'] ) {
+				$aco_state = $avarda_order['b2B']['step']['current'];
+			}
+
+			// check if session TimedOut.
+			if ( 'TimedOut' === $aco_state ) {
+				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page.' );
+				return false;
+			}
+
 			// Set WC order transaction ID.
 			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
