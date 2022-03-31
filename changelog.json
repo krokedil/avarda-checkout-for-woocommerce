@@ -118,5 +118,10 @@
           "description" : "<ul><li>Fix - Creates a new Avarda session if purchase_id has state TimedOut. Avoids issue when customer don't finalize purchase under 1 hour.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.9.2"
+     },
+     "1.4.2" : {
+          "description" : "<ul><li>Tweak - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.</li><li>Fix - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).</li><li>Fix - Use billing address data if shipping address doesn't exist. Fixes issue where shipping first and last name might be missing when order should be created in Woo.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "5.9.2"
      }
 }
