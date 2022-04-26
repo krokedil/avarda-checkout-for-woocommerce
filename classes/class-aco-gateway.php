@@ -165,7 +165,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		if ( ! $avarda_order ) {
 			// Unset sessions.
-			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session.' );
+			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 			return false;
 		}
 
@@ -180,7 +180,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			// check if session TimedOut.
 			if ( 'TimedOut' === $aco_state ) {
-				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page.' );
+				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 				return false;
 			}
 
@@ -205,6 +205,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 		}
 		// Return false if we get here. Something went wrong.
+		ACO_Logger::log( 'Avarda general error in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID ' . $order_id . '. Avarda purchase ID ' . $avarda_purchase_id );
 		return false;
 	}
 
@@ -246,8 +247,10 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_purchase_id = '';
 		if ( is_object( $order ) && ! empty( get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true ) ) ) {
 			$avarda_purchase_id = get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true );
+			ACO_Logger::log( 'Get Avarda purchase ID from order. Order ID' . $order->get_id() . '. Avarda purchase ID: ' . $avarda_purchase_id );
 		} else {
 			$avarda_purchase_id = aco_get_purchase_id_from_session();
+			ACO_Logger::log( 'Get Avarda purchase ID from session. Order ID' . $order->get_id() . '. Avarda purchase ID: ' . $avarda_purchase_id );
 		}
 		return $avarda_purchase_id;
 	}
