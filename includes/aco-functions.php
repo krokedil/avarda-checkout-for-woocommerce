@@ -66,8 +66,28 @@ function aco_wc_initialize_payment() {
 
 /**
  * Avarda checkout form.
+ *
+ * @param bool $order_id WooCommerce order ID. If used, the order items will be fetched from the order.
  */
-function aco_wc_show_checkout_form() {
+function aco_wc_show_checkout_form( $order_id = null ) {
+	if ( $order_id ) {
+		aco_wc_initialize_or_update_order_from_wc_order( $order_id );
+	} else {
+		aco_wc_initialize_or_update_order();
+	}
+	?>
+	<div id="checkout-form">
+	</div>
+	<?php
+}
+
+/**
+ * Initialize or update the Avarda payment.
+ *
+ * @return void
+ */
+function aco_wc_initialize_or_update_order() {
+
 	$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
 	$avarda_purchase_id      = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['purchaseId'] ) ) ? $avarda_payment_data['purchaseId'] : '';
 	$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
@@ -106,7 +126,7 @@ function aco_wc_show_checkout_form() {
 				if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 					aco_wc_initialize_payment();
 				} else {
-					ACO_WC()->api->request_update_payment( $avarda_purchase_id, true );
+					ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
 				}
 				break;
 		}
@@ -114,10 +134,89 @@ function aco_wc_show_checkout_form() {
 		// We have no purchase id, let's create a new session.
 		aco_wc_initialize_payment();
 	}
-	?>
-	<div id="checkout-form">
-	</div>
-	<?php
+}
+
+/**
+ * Creates or updates a Avarda order for the Pay for order feature.
+ *
+ * @param int $order_id The WooCommerce order id.
+ *
+ * @return mixed
+ */
+function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
+
+	if ( get_post_meta( $order_id, '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
+		$order                   = wc_get_order( $order_id );
+		$avarda_purchase_id      = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
+
+		// We ha ve a purchase ID, get payment from Avarda.
+		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		// Get payment status.
+		$aco_state = aco_get_payment_state( $avarda_payment );
+
+		switch ( $aco_state ) {
+			case 'Completed':
+				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
+				if ( is_object( $order ) ) {
+					$confirmation_url = add_query_arg(
+						array(
+							'aco_confirm'     => 'yes',
+							'aco_purchase_id' => $avarda_purchase_id,
+							'wc_order_id'     => $order_id,
+						),
+						$order->get_checkout_order_received_url()
+					);
+					wp_safe_redirect( $confirmation_url );
+					exit;
+				}
+				break;
+			case 'TimedOut':
+				$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
+				break;
+			default:
+				if ( strtotime( $avarda_jwt_expired_time ) < time() ) {
+					$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
+					aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
+				} else {
+					// Try to update the order, if it fails try to create new order.
+					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id, $order_id, true );
+				}
+				break;
+		}
+		if ( false === $avarda_order ) {
+			// If update order failed try to create new order.
+			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
+			if ( false === $avarda_order ) {
+				// If failed then bail.
+				return;
+			}
+			aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
+			return $avarda_order;
+		}
+		return $avarda_order;
+	} else {
+		// Create new order, since we dont have one.
+		$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
+		if ( false === $avarda_order ) {
+			return;
+		}
+		aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
+		return $avarda_order;
+	}
+}
+
+/**
+ * Save fetched Avarda session data to WC order.
+ *
+ * @param int   $order_id The WooCommerce Order id.
+ * @param array $avarda_order The Avarda session data.
+ * @return void
+ */
+function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
+	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
+	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
+	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
 }
 
 /**

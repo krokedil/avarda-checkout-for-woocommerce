@@ -18,11 +18,13 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	 * Makes the request.
 	 *
 	 * @param string $aco_purchase_id Avarda purchase id.
+	 * @param int    $order_id The WooCommerce order id.
+	 * @param bool   $force If true always update the order, even if not needed.
 	 * @return array
 	 */
-	public function request( $aco_purchase_id, $force = false ) {
+	public function request( $aco_purchase_id, $order_id = null, $force = false ) {
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/items';
-		$request_args = apply_filters( 'aco_update_payment_args', $this->get_request_args() );
+		$request_args = apply_filters( 'aco_update_payment_args', $this->get_request_args( $order_id ) );
 
 		// Check if we need to update.
 		// @Todo - return false if no update is needed. Before we can do this change we need to change the return data in check_for_api_error() function.
@@ -46,27 +48,34 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	/**
 	 * Gets the request body.
 	 *
+	 * @param int $order_id The WooCommerce order id.
+	 *
 	 * @return array
 	 */
-	public function get_body() {
-		return apply_filters(
-			'aco_update_args',
-			array(
-				'items' => ACO_WC()->cart_items->get_cart_items(),
-			)
-		);
+	public function get_body( $order_id ) {
+
+		$request_body = array();
+		if ( $order_id ) {
+			$request_body['items'] = ACO_WC()->order_items->get_order_items( $order_id );
+		} else {
+			$request_body['items'] = ACO_WC()->cart_items->get_cart_items();
+		}
+
+		return apply_filters( 'aco_update_args', $request_body, $order_id );
 	}
 
 	/**
 	 * Gets the request args for the API call.
 	 *
+	 * @param int $order_id The WooCommerce order id.
+	 *
 	 * @return array
 	 */
-	public function get_request_args() {
+	public function get_request_args( $order_id ) {
 		return array(
 			'headers' => $this->get_headers(),
 			'method'  => 'PUT',
-			'body'    => wp_json_encode( apply_filters( 'aco_wc_api_request_args', $this->get_body() ) ),
+			'body'    => wp_json_encode( apply_filters( 'aco_wc_api_request_args', $this->get_body( $order_id ) ) ),
 			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}

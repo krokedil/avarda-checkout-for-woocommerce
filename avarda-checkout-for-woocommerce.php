@@ -176,16 +176,31 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		/**
 		 * Mayne initialize payment.
 		 *
+		 * @param int $order_id The WooCommerce Order id.
+		 *
 		 * @return void
 		 */
-		public function aco_maybe_initialize_payment() {
-			// Creates jwt token if we do not have session var set with jwt token or if it have expired.
-			$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
-			$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
-			$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
-			if ( 'new_token_required' === $token || null === $avarda_payment_data['jwt'] || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
-				aco_wc_initialize_payment();
+		public function aco_maybe_initialize_payment( $order_id = null ) {
+
+			if ( ! empty( $order_id ) ) {
+				// Creates a session and store it to order if we don't have aone previous or if it has expired.
+				$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
+				if ( empty( $avarda_jwt_expired_time ) || strtotime( $avarda_jwt_expired_time ) < time() ) {
+					delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
+					delete_post_meta( $order_id, '_wc_avarda_jwt' );
+					delete_post_meta( $order_id, '_wc_avarda_expiredUtc' );
+					aco_wc_initialize_or_update_order_from_wc_order( $order_id );
+				}
+			} else {
+				// Creates jwt token if we do not have session var set with jwt token or if it have expired.
+				$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
+				$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
+				$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
+				if ( 'new_token_required' === $token || null === $avarda_payment_data['jwt'] || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
+					aco_wc_initialize_payment();
+				}
 			}
+
 		}
 
 		/**
@@ -269,6 +284,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$is_aco_action    = 'no';
 			$order_id         = 0;
 			$confirmation_url = '';
+			if ( is_wc_endpoint_url( 'order-pay' ) ) {
+				$is_aco_action    = 'yes';
+				$key              = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+				$order_id         = wc_get_order_id_by_order_key( $key );
+				$order            = wc_get_order( $order_id );
+				$confirmation_url = add_query_arg(
+					array(
+						'aco_confirm'     => 'yes',
+						'aco_purchase_id' => get_post_meta( $order_id, '_wc_avarda_purchase_id', true ),
+					),
+					$order->get_checkout_order_received_url()
+				);
+			}
+
 			if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$is_aco_action    = 'yes';
 				$key              = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
@@ -285,7 +314,19 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
 
-				do_action( 'aco_before_load_scripts' );
+				do_action( 'aco_before_load_scripts', $order_id );
+
+				if ( empty( $order_id ) ) {
+					// If we don't have an order - get JWT from session.
+					$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
+					$avarda_jwt_token    = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
+					$redirect_url        = wc_get_checkout_url();
+				} else {
+					// We have a WC order - get info from that.
+					$avarda_jwt_token = get_post_meta( $order_id, '_wc_avarda_jwt', true );
+					// Get current url (pay page).
+					$redirect_url = $order->get_checkout_payment_url( true );
+				}
 
 				// Checkout script.
 				wp_register_script(
@@ -301,8 +342,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
 				$styles                       = new stdClass(); // empty object as default value.
 				$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
-				$avarda_payment_data          = WC()->session->get( 'aco_wc_payment_data' );
-				$avarda_jwt_token             = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
 
 				$params = array(
 					'ajax_url'                             => admin_url( 'admin-ajax.php' ),
@@ -323,7 +362,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 					'submit_order'                         => WC_AJAX::get_endpoint( 'checkout' ),
 					'required_fields_text'                 => __( 'Please fill in all required checkout fields.', 'avarda-checkout-for-woocommerce' ),
 					'aco_jwt_token'                        => $avarda_jwt_token,
-					'aco_redirect_url'                     => wc_get_checkout_url(),
+					'aco_redirect_url'                     => $redirect_url,
 					'aco_test_mode'                        => $aco_test_mode,
 					'aco_checkout_layout'                  => $aco_two_column_checkout,
 					'aco_checkout_style'                   => $aco_custom_css_styles,
