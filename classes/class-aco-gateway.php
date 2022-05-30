@@ -270,17 +270,25 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function receipt_page( $order_id ) {
-		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$aco_action    = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$template_name = 'checkout/order-receipt.php';
 		if ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) {
-			require AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php';
+
+			if ( locate_template( 'woocommerce/avarda-change-payment-method.php' ) ) {
+				$avarda_change_payment_method_template = locate_template( 'woocommerce/avarda-change-payment-method.php' );
+			} else {
+				$avarda_change_payment_method_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php', $template_name );
+			}
+			require $avarda_change_payment_method_template;
 		} else {
-			?>
-			<div id="aco-iframe">
-				<?php do_action( 'aco_wc_before_avarda_checkout_form' ); ?>
-					<?php aco_wc_show_checkout_form( $order_id ); ?>
-				<?php do_action( 'aco_wc_after_avarda_checkout_form' ); ?>
-			</div>
-			<?php
+
+			if ( locate_template( 'woocommerce/avarda-order-receipt.php' ) ) {
+				$avarda_order_receipt_template = locate_template( 'woocommerce/avarda-order-receipt.php' );
+			} else {
+				$avarda_order_receipt_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-order-receipt.php', $template_name );
+			}
+			require $avarda_order_receipt_template;
+
 		}
 	}
 
