@@ -277,44 +277,45 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * Loads the needed scripts for Avarda_Checkout.
 		 */
 		public function load_scripts() {
-			if ( isset( $_GET['pay_for_order'], $_GET['change_payment_method'] ) && 'true' === $_GET['pay_for_order'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( isset( $_GET['pay_for_order'] ) && 'true' === $_GET['pay_for_order'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return;
-			}
-
-			$is_aco_action    = 'no';
-			$order_id         = 0;
-			$confirmation_url = '';
-			if ( is_wc_endpoint_url( 'order-pay' ) ) {
-				$is_aco_action    = 'yes';
-				$key              = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
-				$order_id         = wc_get_order_id_by_order_key( $key );
-				$order            = wc_get_order( $order_id );
-				$confirmation_url = add_query_arg(
-					array(
-						'aco_confirm'     => 'yes',
-						'aco_purchase_id' => get_post_meta( $order_id, '_wc_avarda_purchase_id', true ),
-					),
-					$order->get_checkout_order_received_url()
-				);
-			}
-
-			if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$is_aco_action    = 'yes';
-				$key              = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
-				$order_id         = wc_get_order_id_by_order_key( $key );
-				$order            = wc_get_order( $order_id );
-				$confirmation_url = add_query_arg(
-					array(
-						'aco-action'   => 'subs-payment-changed',
-						'aco-order-id' => $order_id,
-					),
-					$order->get_view_order_url()
-				);
 			}
 
 			if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
 
+				$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+				$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
+
 				do_action( 'aco_before_load_scripts', $order_id );
+
+				$is_aco_action    = 'no';
+				$confirmation_url = '';
+
+				// Confirmation url for order pay.
+				if ( is_wc_endpoint_url( 'order-pay' ) ) {
+					$is_aco_action    = 'yes';
+					$order            = wc_get_order( $order_id );
+					$confirmation_url = add_query_arg(
+						array(
+							'aco_confirm'     => 'yes',
+							'aco_purchase_id' => get_post_meta( $order_id, '_wc_avarda_purchase_id', true ),
+						),
+						$order->get_checkout_order_received_url()
+					);
+				}
+
+				// Confirmation url for subscription payment change.
+				if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					$is_aco_action    = 'yes';
+					$order            = wc_get_order( $order_id );
+					$confirmation_url = add_query_arg(
+						array(
+							'aco-action'   => 'subs-payment-changed',
+							'aco-order-id' => $order_id,
+						),
+						$order->get_view_order_url()
+					);
+				}
 
 				if ( empty( $order_id ) ) {
 					// If we don't have an order - get JWT from session.
