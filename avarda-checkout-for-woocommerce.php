@@ -92,6 +92,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function __construct() {
 			// Initiate the plugin.
+			$avarda_settings     = get_option( 'woocommerce_aco_settings' );
+			$this->checkout_flow = isset( $avarda_settings['checkout_flow'] ) ? $avarda_settings['checkout_flow'] : 'embedded';
 			add_action( 'plugins_loaded', array( $this, 'init' ) );
 			add_action( 'plugins_loaded', array( $this, 'check_version' ) );
 		}
@@ -156,6 +158,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->cart_items       = new ACO_Helper_Cart();
 			$this->order_items      = new ACO_Helper_Order();
 			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
+			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 
 			do_action( 'aco_initiated' );
@@ -210,12 +213,16 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function include_files() {
 			// Classes.
+
+			if ( 'embedded' === $this->checkout_flow ) {
+				include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
+			}
+
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-ajax.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-api.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-gateway.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
-			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-templates.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
@@ -241,6 +248,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-create-refund-data.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-checkout-setup.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-customer.php';
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';
@@ -278,6 +286,10 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function load_scripts() {
 			if ( isset( $_GET['pay_for_order'] ) && 'true' === $_GET['pay_for_order'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				return;
+			}
+
+			if ( 'redirect' === $this->checkout_flow && is_checkout() && ! is_wc_endpoint_url( 'order-pay' ) ) {
 				return;
 			}
 

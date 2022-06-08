@@ -30,11 +30,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->enabled     = $this->get_option( 'enabled' );
-		$this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
-		$this->debug       = $this->get_option( 'debug' );
-		$this->testmode    = 'yes' === $this->get_option( 'testmode' );
+		$this->enabled       = $this->get_option( 'enabled' );
+		$this->title         = $this->get_option( 'title' );
+		$this->description   = $this->get_option( 'description' );
+		$this->debug         = $this->get_option( 'debug' );
+		$this->testmode      = 'yes' === $this->get_option( 'testmode' );
+		$this->checkout_flow = $this->get_option( 'checkout_flow', 'embedded' );
 
 		// Supports.
 		$this->supports = array(
@@ -92,25 +93,15 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$order                 = wc_get_order( $order_id );
 		$avarda_purchase_id    = $this->get_avarda_purchase_id( $order );
 		$change_payment_method = filter_input( INPUT_GET, 'change_payment_method', FILTER_SANITIZE_STRING );
-		// Order-pay purchase (or subscription payment method change)
+		// Subscription payment method change.
 		// 1. Redirect to receipt page.
 		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
 		if ( ! empty( $change_payment_method ) ) {
-			$pay_url = add_query_arg(
-				array(
-					'aco-action' => 'change-subs-payment',
-				),
-				$order->get_checkout_payment_url( true )
-			);
-
-			return array(
-				'result'   => 'success',
-				'redirect' => $pay_url,
-			);
+			return $this->process_subscription_payment_change_handler( $order );
 		}
 
 		// Order pay.
-		if ( is_wc_endpoint_url( 'order-pay' ) ) {
+		if ( is_wc_endpoint_url( 'order-pay' ) || 'redirect' === $this->checkout_flow ) {
 			return array(
 				'result'   => 'success',
 				'redirect' => $order->get_checkout_payment_url( true ),
@@ -142,6 +133,22 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'reload' => true,
 			);
 		}
+	}
+
+	public function process_subscription_payment_change_handler( $order ) {
+
+		$pay_url = add_query_arg(
+			array(
+				'aco-action' => 'change-subs-payment',
+			),
+			$order->get_checkout_payment_url( true )
+		);
+
+		return array(
+			'result'   => 'success',
+			'redirect' => $pay_url,
+		);
+
 	}
 
 	/**
