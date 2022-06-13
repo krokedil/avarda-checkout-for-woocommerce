@@ -44,12 +44,12 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body( $order_id ) {
-		$order = wc_get_order( $order_id );
 
 		$request_body = array(
-			'checkoutSetup' => ACO_WC()->checkout_setup->get_checkout_setup(),
+			'checkoutSetup' => ACO_WC()->checkout_setup->get_checkout_setup( $order_id ),
 		);
 		if ( $order_id ) {
+			$order                 = wc_get_order( $order_id );
 			$request_body['items'] = ACO_WC()->order_items->get_order_items( $order_id );
 			// Add customer address if it exist.
 			if ( $order->get_billing_company() ) {
