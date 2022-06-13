@@ -53,8 +53,14 @@ class ACO_Helper_Order {
 	 * @return array Formated order item.
 	 */
 	public function get_order_item( $order, $order_item ) {
+		if ( $order_item['variation_id'] ) {
+			$product = wc_get_product( $order_item['variation_id'] );
+		} else {
+			$product = wc_get_product( $order_item['product_id'] );
+		}
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
+			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
 			'amount'      => $this->get_product_price( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => $this->get_product_tax_amount( $order, $order_item ), // Float.
@@ -113,6 +119,22 @@ class ACO_Helper_Order {
 			$tax_amount = $tax_item->get_tax_total();
 			return number_format( $tax_amount, 2, '.', '' );
 		}
+	}
+
+	/**
+	 * Gets the products SKU.
+	 *
+	 * @param object $product The WooCommerce Product.
+	 * @return string
+	 */
+	public function get_product_sku( $product ) {
+		if ( $product->get_sku() ) {
+			$item_reference = $product->get_sku();
+		} else {
+			$item_reference = $product->get_id();
+		}
+
+		return $item_reference;
 	}
 
 	/**

@@ -14,22 +14,36 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ACO_Helper_Checkout_Setup {
 	/**
-	 * Gets formated cart items.
+	 * Gets checkout setup.
 	 *
-	 * @param object $cart The WooCommerce cart object.
-	 * @return array Formated cart items.
+	 * @param int $order_id The WooCommerce order id.
+	 * @return array Formated checkout setup.
 	 */
-	public function get_checkout_setup( $cart = null ) {
+	public function get_checkout_setup( $order_id = null ) {
 		$checkout_setup = array();
 		$terms_url      = $this->get_terms_url();
 
-		$checkout_setup['mode']                     = 'B2C'; // TODO: Logic for using correct value depending on customer type.
 		$checkout_setup['completedNotificationUrl'] = get_home_url() . '/wc-api/ACO_WC_Notification';
 		$checkout_setup['language']                 = $this->get_language();
 
 		if ( ! empty( $terms_url ) ) {
 			$checkout_setup['termsAndConditionsUrl'] = $terms_url;
 		}
+
+		// Don't display separate delivery address info in Avarda if this is a redirect flow order.
+		if ( ! empty( $order_id ) ) {
+			$checkout_setup['differentDeliveryAddress'] = 'Hidden';
+		}
+
+		// B2B or B2C.
+		$customer_type = 'B2C';
+		if ( ! empty( $order_id ) ) {
+			$order = wc_get_order( $order_id );
+			if ( $order->get_billing_company() ) {
+				$customer_type = 'B2B';
+			}
+		}
+		$checkout_setup['mode'] = $customer_type;
 
 		// wc subscription.
 		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {

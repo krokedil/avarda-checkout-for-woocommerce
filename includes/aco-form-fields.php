@@ -33,6 +33,17 @@ $settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 	),
+	'checkout_flow'              => array(
+		'title'       => __( 'Checkout flow', 'avarda-checkout-for-woocommerce' ),
+		'type'        => 'select',
+		'options'     => array(
+			'embedded' => __( 'Embedded', 'avarda-checkout-for-woocommerce' ),
+			'redirect' => __( 'Redirect', 'avarda-checkout-for-woocommerce' ),
+		),
+		'description' => __( 'Select how Avarda Checkout should be integrated in WooCommerce. <strong>Embedded</strong> – the checkout is embedded in the WooCommerce checkout page and partially replaces the checkout form. <strong>Redirect</strong> – the customer is redirected to WooCommerce order pay page where the Avarda Checkout is displayed.', 'avarda-checkout-for-woocommerce' ),
+		'default'     => 'embedded',
+		'desc_tip'    => false,
+	),
 	'testmode'                   => array(
 		'title'   => __( 'Testmode', 'avarda-checkout-for-woocommerce' ),
 		'type'    => 'checkbox',

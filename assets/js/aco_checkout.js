@@ -95,10 +95,10 @@ jQuery(function($) {
 				styles: aco_wc_params.aco_checkout_style,
 				disableFocus: true,
 				completedPurchaseCallback: aco_wc.handleCompletedPurchaseCallback,
-				deliveryAddressChangedCallback: aco_wc.handleDeliveryAddressChangedCallback,
 				sessionTimedOutCallback: aco_wc.handleSessionTimedOutCallback,
 			};
 			if (aco_wc_params.is_aco_action === 'no') {
+				acoInit.deliveryAddressChangedCallback = aco_wc.handleDeliveryAddressChangedCallback;
 				acoInit.beforeSubmitCallback = aco_wc.handleBeforeSubmitCallback;
 			}
 			window.avardaCheckoutInit(acoInit);
