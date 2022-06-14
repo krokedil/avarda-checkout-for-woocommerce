@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 5.9.3
+Tested up to: 6.0
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.4.1
+WC tested up to: 6.5.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: 1.4.2
@@ -31,6 +31,13 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.06.14        - version 1.5.0 =
+* Feature           - Adds support for pay for order logic. Merchant can now create an order in admin and send a pay link to a customer, where they can finish the payment using Avarda Checkout.
+* Feature           - Adds support for redirect checkout flow. Regular Woo checkout page is used and Avarda Checkout is instead rendered on order recipt page.
+* Tweak             - Adds compatibility support with Woo Carrier Agents plugin.
+* Tweak             - Logging improvements.
+* Fix               - Redirects customer to thankyou page directly instead of rendering Avarda Checkout and then redirecting customer. Avoids potential issues if customer is redirected back from 3DS after Avarda session time expired.
+
 = 2022.03.31        - version 1.4.2 =
 * Tweak             - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.
 * Fix               - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).
