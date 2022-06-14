@@ -123,5 +123,10 @@
           "description" : "<ul><li>Tweak - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.</li><li>Fix - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).</li><li>Fix - Use billing address data if shipping address doesn't exist. Fixes issue where shipping first and last name might be missing when order should be created in Woo.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "5.9.2"
+     },
+     "1.5.0" : {
+          "description" : "<ul><li>Feature - Adds support for pay for order logic. Merchant can now create an order in admin and send a pay link to a customer, where they can finish the payment using Avarda Checkout.</li><li>Feature - Adds support for redirect checkout flow. Regular Woo checkout page is used and Avarda Checkout is instead rendered on order recipt page.</li><li>Tweak - Adds compatibility support with Woo Carrier Agents plugin.</li><li>Tweak - Logging improvements.</li><li>Fix - Redirects customer to thankyou page directly instead of rendering Avarda Checkout and then redirecting customer. Avoids potential issues if customer is redirected back from 3DS after Avarda session time expired.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.0"
      }
 }

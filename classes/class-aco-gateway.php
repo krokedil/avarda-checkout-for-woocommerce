@@ -30,11 +30,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->enabled     = $this->get_option( 'enabled' );
-		$this->title       = $this->get_option( 'title' );
-		$this->description = $this->get_option( 'description' );
-		$this->debug       = $this->get_option( 'debug' );
-		$this->testmode    = 'yes' === $this->get_option( 'testmode' );
+		$this->enabled       = $this->get_option( 'enabled' );
+		$this->title         = $this->get_option( 'title' );
+		$this->description   = $this->get_option( 'description' );
+		$this->debug         = $this->get_option( 'debug' );
+		$this->testmode      = 'yes' === $this->get_option( 'testmode' );
+		$this->checkout_flow = $this->get_option( 'checkout_flow', 'embedded' );
 
 		// Supports.
 		$this->supports = array(
@@ -92,20 +93,18 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$order                 = wc_get_order( $order_id );
 		$avarda_purchase_id    = $this->get_avarda_purchase_id( $order );
 		$change_payment_method = filter_input( INPUT_GET, 'change_payment_method', FILTER_SANITIZE_STRING );
-		// Order-pay purchase (or subscription payment method change)
+		// Subscription payment method change.
 		// 1. Redirect to receipt page.
 		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
 		if ( ! empty( $change_payment_method ) ) {
-			$pay_url = add_query_arg(
-				array(
-					'aco-action' => 'change-subs-payment',
-				),
-				$order->get_checkout_payment_url( true )
-			);
+			return $this->process_subscription_payment_change_handler( $order );
+		}
 
+		// Order pay.
+		if ( is_wc_endpoint_url( 'order-pay' ) || 'redirect' === $this->checkout_flow ) {
 			return array(
 				'result'   => 'success',
-				'redirect' => $pay_url,
+				'redirect' => $order->get_checkout_payment_url( true ),
 			);
 		}
 		// Regular purchase.
@@ -134,6 +133,22 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'reload' => true,
 			);
 		}
+	}
+
+	public function process_subscription_payment_change_handler( $order ) {
+
+		$pay_url = add_query_arg(
+			array(
+				'aco-action' => 'change-subs-payment',
+			),
+			$order->get_checkout_payment_url( true )
+		);
+
+		return array(
+			'result'   => 'success',
+			'redirect' => $pay_url,
+		);
+
 	}
 
 	/**
@@ -165,7 +180,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 		if ( ! $avarda_order ) {
 			// Unset sessions.
-			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session.' );
+			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 			return false;
 		}
 
@@ -180,7 +195,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			// check if session TimedOut.
 			if ( 'TimedOut' === $aco_state ) {
-				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page.' );
+				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 				return false;
 			}
 
@@ -205,6 +220,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 		}
 		// Return false if we get here. Something went wrong.
+		ACO_Logger::log( 'Avarda general error in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID ' . $order_id . '. Avarda purchase ID ' . $avarda_purchase_id );
 		return false;
 	}
 
@@ -246,8 +262,10 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_purchase_id = '';
 		if ( is_object( $order ) && ! empty( get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true ) ) ) {
 			$avarda_purchase_id = get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true );
+			ACO_Logger::log( 'Get Avarda purchase ID from order. Order ID' . $order->get_id() . '. Avarda purchase ID: ' . $avarda_purchase_id );
 		} else {
 			$avarda_purchase_id = aco_get_purchase_id_from_session();
+			ACO_Logger::log( 'Get Avarda purchase ID from session. Order ID' . $order->get_id() . '. Avarda purchase ID: ' . $avarda_purchase_id );
 		}
 		return $avarda_purchase_id;
 	}
@@ -255,13 +273,29 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Receipt page. Used to display the ACO iframe during subscription payment method change.
 	 *
-	 * @param WC_Order $order The WooCommerce order.
+	 * @param int $order_id The WooCommerce order ID.
 	 * @return void
 	 */
-	public function receipt_page( $order ) {
-		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+	public function receipt_page( $order_id ) {
+		$aco_action    = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$template_name = 'checkout/order-receipt.php';
 		if ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) {
-			require AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php';
+
+			if ( locate_template( 'woocommerce/avarda-change-payment-method.php' ) ) {
+				$avarda_change_payment_method_template = locate_template( 'woocommerce/avarda-change-payment-method.php' );
+			} else {
+				$avarda_change_payment_method_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php', $template_name );
+			}
+			require $avarda_change_payment_method_template;
+		} else {
+
+			if ( locate_template( 'woocommerce/avarda-order-receipt.php' ) ) {
+				$avarda_order_receipt_template = locate_template( 'woocommerce/avarda-order-receipt.php' );
+			} else {
+				$avarda_order_receipt_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-order-receipt.php', $template_name );
+			}
+			require $avarda_order_receipt_template;
+
 		}
 	}
 

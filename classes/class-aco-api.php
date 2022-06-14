@@ -42,11 +42,13 @@ class ACO_API {
 	/**
 	 * Initialize an Avarda Checkout payment.
 	 *
+	 * @param int $order_id The WooCommerce Order id.
+	 *
 	 * @return mixed
 	 */
-	public function request_initialize_payment() {
+	public function request_initialize_payment( $order_id = false ) {
 		$request  = new ACO_Request_Initialize_Payment();
-		$response = $request->request();
+		$response = $request->request( $order_id );
 
 		return $this->check_for_api_error( $response );
 	}
@@ -74,11 +76,13 @@ class ACO_API {
 	 * Updates an Avarda Checkout payment.
 	 *
 	 * @param string $aco_purchase_id Avarda purchase id.
+	 * @param int    $order_id The WooCommerce order id.
+	 * @param bool   $force If true always update the order, even if not needed.
 	 * @return mixed
 	 */
-	public function request_update_payment( $aco_purchase_id, $force = false ) {
+	public function request_update_payment( $aco_purchase_id, $order_id = null, $force = false ) {
 		$request  = new ACO_Request_Update_Payment();
-		$response = $request->request( $aco_purchase_id );
+		$response = $request->request( $aco_purchase_id, $order_id, $force );
 		return $this->check_for_api_error( $response );
 	}
 
