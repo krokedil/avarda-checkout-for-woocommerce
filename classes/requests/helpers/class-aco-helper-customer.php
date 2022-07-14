@@ -40,7 +40,7 @@ class ACO_Helper_Customer {
 			$customer['invoicingAddress']['city'] = $order->get_billing_city();
 		}
 		if ( $order->get_billing_country() ) {
-			$customer['invoicingAddress']['city'] = $order->get_billing_country();
+			$customer['invoicingAddress']['country'] = $order->get_billing_country();
 		}
 
 		// Shipping address.
@@ -63,7 +63,7 @@ class ACO_Helper_Customer {
 			$customer['deliveryAddress']['city'] = $order->get_shipping_city();
 		}
 		if ( $order->get_shipping_country() ) {
-			$customer['deliveryAddress']['city'] = $order->get_shipping_country();
+			$customer['deliveryAddress']['country'] = $order->get_shipping_country();
 		}
 
 		// Phone and email.
@@ -101,7 +101,7 @@ class ACO_Helper_Customer {
 			$customer['invoicingAddress']['city'] = $order->get_billing_city();
 		}
 		if ( $order->get_billing_country() ) {
-			$customer['invoicingAddress']['city'] = $order->get_billing_country();
+			$customer['invoicingAddress']['country'] = $order->get_billing_country();
 		}
 
 		// Shipping address.
@@ -124,7 +124,7 @@ class ACO_Helper_Customer {
 			$customer['deliveryAddress']['city'] = $order->get_shipping_city();
 		}
 		if ( $order->get_shipping_country() ) {
-			$customer['deliveryAddress']['city'] = $order->get_shipping_country();
+			$customer['deliveryAddress']['country'] = $order->get_shipping_country();
 		}
 
 		// Phone and email.
