@@ -2,10 +2,10 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.0
+Tested up to: 6.0.1
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.5.1
+WC tested up to: 6.7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: 1.4.2
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.07.14        - version 1.5.1 =
+* Fix               - Send correct data to customer city & country for redirect flow.
+
 = 2022.06.14        - version 1.5.0 =
 * Feature           - Adds support for pay for order logic. Merchant can now create an order in admin and send a pay link to a customer, where they can finish the payment using Avarda Checkout.
 * Feature           - Adds support for redirect checkout flow. Regular Woo checkout page is used and Avarda Checkout is instead rendered on order recipt page.
