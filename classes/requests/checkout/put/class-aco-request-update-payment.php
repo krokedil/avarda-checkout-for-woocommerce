@@ -20,7 +20,7 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	 * @param string $aco_purchase_id Avarda purchase id.
 	 * @param int    $order_id The WooCommerce order id.
 	 * @param bool   $force If true always update the order, even if not needed.
-	 * @return array
+	 * @return array|string Array if update is needed, otherwise string.
 	 */
 	public function request( $aco_purchase_id, $order_id = null, $force = false ) {
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/items';
@@ -29,6 +29,9 @@ class ACO_Request_Update_Payment extends ACO_Request {
 		// Check if we need to update.
 		// @Todo - return false if no update is needed. Before we can do this change we need to change the return data in check_for_api_error() function.
 		if ( WC()->session->get( 'aco_update_md5' ) && WC()->session->get( 'aco_update_md5' ) === md5( wp_json_encode( $request_args ) ) && ! $force ) {
+			$log = ACO_Logger::format_log( $aco_purchase_id, 'PUT', 'ACO update payment', $request_url, $request_args, 'No update needed', '' );
+			ACO_Logger::log( $log );
+
 			return 'No update needed';
 		}
 

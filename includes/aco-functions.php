@@ -155,6 +155,8 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
+		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ), $aco_state );
+
 		switch ( $aco_state ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
@@ -185,10 +187,13 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 				break;
 		}
 		if ( false === $avarda_order ) {
+			ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+
 			// If update order failed try to create new order.
 			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 			if ( false === $avarda_order ) {
 				// If failed then bail.
+				ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $avarda_purchase_id ) );
 				return;
 			}
 			aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
@@ -196,9 +201,12 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		}
 		return $avarda_order;
 	} else {
+		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
+
 		// Create new order, since we dont have one.
 		$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 		if ( false === $avarda_order ) {
+			ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
 			return;
 		}
 		aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
