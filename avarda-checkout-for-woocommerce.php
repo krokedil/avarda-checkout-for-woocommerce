@@ -177,7 +177,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		}
 
 		/**
-		 * Mayne initialize payment.
+		 * Maybe initialize payment.
 		 *
 		 * @param int $order_id The WooCommerce Order id.
 		 *
@@ -186,7 +186,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public function aco_maybe_initialize_payment( $order_id = null ) {
 
 			if ( ! empty( $order_id ) ) {
-				// Creates a session and store it to order if we don't have aone previous or if it has expired.
+				// Creates a session and store it to order if we don't have a previous one or if it has expired.
 				$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
 				if ( empty( $avarda_jwt_expired_time ) || strtotime( $avarda_jwt_expired_time ) < time() ) {
 					delete_post_meta( $order_id, '_wc_avarda_purchase_id' );

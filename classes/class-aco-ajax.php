@@ -72,7 +72,6 @@ class ACO_AJAX extends WC_AJAX {
 			'redirect' => $redirect,
 		);
 		wp_send_json_success( $data );
-		wp_die();
 	}
 
 	/**
@@ -103,7 +102,6 @@ class ACO_AJAX extends WC_AJAX {
 				ACO_Logger::log( 'Currency or language changed in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
 				$return['redirect_url'] = wc_get_checkout_url();
 				wp_send_json_error( $return );
-				wp_die();
 			}
 
 			// Check that the JWT token in frontend is the same as saved in session, otherwise create a new session.
@@ -114,7 +112,6 @@ class ACO_AJAX extends WC_AJAX {
 				ACO_Logger::log( 'JWT token used in frontend not the same as saved in WC session. Clearing Avarda session and reloading the cehckout page.' );
 				$return['redirect_url'] = wc_get_checkout_url();
 				wp_send_json_error( $return );
-				wp_die();
 
 			}
 
@@ -125,7 +122,6 @@ class ACO_AJAX extends WC_AJAX {
 				ACO_Logger::log( 'Avarda purchase ID is missing in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
 				$return['redirect_url'] = wc_get_checkout_url();
 				wp_send_json_error( $return );
-				wp_die();
 			} else {
 				// Get the Avarda order from Avarda.
 				$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
@@ -135,7 +131,6 @@ class ACO_AJAX extends WC_AJAX {
 					aco_wc_unset_sessions();
 					ACO_Logger::log( 'Avarda GET request failed in update checkout ajax request. Clearing Avarda session.' );
 					wp_send_json_error();
-					wp_die();
 				}
 
 				// Get the Avarda order object.
@@ -151,7 +146,6 @@ class ACO_AJAX extends WC_AJAX {
 								'refreshZeroAmount' => 'refreshZeroAmount',
 							)
 						);
-						wp_die();
 					}
 				}
 				// Get current status of Avarda session.
@@ -167,7 +161,6 @@ class ACO_AJAX extends WC_AJAX {
 					ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
 					$return['redirect_url'] = wc_get_checkout_url();
 					wp_send_json_error( $return );
-					wp_die();
 				}
 
 				if ( ! ( 'Completed' === $aco_state ) ) {
@@ -180,14 +173,12 @@ class ACO_AJAX extends WC_AJAX {
 						aco_wc_unset_sessions();
 						ACO_Logger::log( 'Avarda update request failed in update checkout ajax request. Clearing Avarda session.' );
 						wp_send_json_error();
-						wp_die();
 					}
 				}
 			}
 		}
 		// Everything is okay if we get here. Send empty success and kill wp.
 		wp_send_json_success();
-		wp_die();
 
 	}
 
@@ -206,7 +197,6 @@ class ACO_AJAX extends WC_AJAX {
 		if ( empty( $avarda_purchase_id ) ) {
 			wc_add_notice( 'Avarda purchase id is missing.', 'error' );
 			wp_send_json_error();
-			wp_die();
 		}
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
@@ -244,7 +234,6 @@ class ACO_AJAX extends WC_AJAX {
 
 			if ( false === $avarda_order ) {
 				wp_send_json_error();
-				wp_die();
 			}
 		}
 
@@ -255,7 +244,6 @@ class ACO_AJAX extends WC_AJAX {
 				'customer_country' => $country,
 			)
 		);
-		wp_die();
 	}
 
 	/**
@@ -273,15 +261,12 @@ class ACO_AJAX extends WC_AJAX {
 		$avarda_payment = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
 		if ( ! $avarda_payment ) {
 			wp_send_json_error( $avarda_payment );
-			wp_die();
 		}
 		wp_send_json_success(
 			array(
 				'customer_data' => $avarda_payment,
 			)
 		);
-		wp_die();
-
 	}
 
 	/**
@@ -300,7 +285,6 @@ class ACO_AJAX extends WC_AJAX {
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
 		wp_send_json_success();
-		wp_die();
 	}
 }
 ACO_AJAX::init();
