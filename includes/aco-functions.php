@@ -155,7 +155,7 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
-		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ), $aco_state );
+		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id, $aco_state ) );
 
 		switch ( $aco_state ) {
 			case 'Completed':
