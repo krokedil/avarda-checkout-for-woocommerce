@@ -5,10 +5,10 @@ Requires at least: 5.0
 Tested up to: 6.0.1
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.7.0
+WC tested up to: 6.8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.4.2
+Stable tag: 1.5.2
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.08.16        - version 1.5.2 =
+* Tweak             - Logging improvements.
+
 = 2022.07.14        - version 1.5.1 =
 * Fix               - Send correct data to customer city & country for redirect flow.
 

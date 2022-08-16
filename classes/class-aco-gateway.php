@@ -97,11 +97,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// 1. Redirect to receipt page.
 		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
 		if ( ! empty( $change_payment_method ) ) {
+			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Changing payment method for subscription.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 			return $this->process_subscription_payment_change_handler( $order );
 		}
 
 		// Order pay.
 		if ( is_wc_endpoint_url( 'order-pay' ) || 'redirect' === $this->checkout_flow ) {
+			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Redirecting to order pay page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+
 			return array(
 				'result'   => 'success',
 				'redirect' => $order->get_checkout_payment_url( true ),
@@ -111,6 +114,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// 1. Process the payment.
 		// 2. Redirect to confirmation page.
 		if ( $this->process_payment_handler( $order_id ) ) {
+			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Redirecting to confirmation page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+
 			$confirmation_url = add_query_arg(
 				array(
 					'aco_confirm'     => 'yes',
@@ -119,12 +124,15 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				),
 				wc_get_checkout_url()
 			);
+
 			return array(
 				'result'       => 'success',
 				'redirect_url' => $confirmation_url,
 			);
 		} else {
 			// Something went wrong. Unset sessions and remove previos purchase id from order.
+			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+
 			aco_wc_unset_sessions();
 			delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
 			delete_post_meta( $order_id, '_transaction_id' );
@@ -135,8 +143,13 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
+	/**
+	 * Handle switching payment method for subscription.
+	 *
+	 * @param  WC_Order $order
+	 * @return void
+	 */
 	public function process_subscription_payment_change_handler( $order ) {
-
 		$pay_url = add_query_arg(
 			array(
 				'aco-action' => 'change-subs-payment',
@@ -220,7 +233,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 		}
 		// Return false if we get here. Something went wrong.
-		ACO_Logger::log( 'Avarda general error in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID ' . $order_id . '. Avarda purchase ID ' . $avarda_purchase_id );
+		ACO_Logger::log( 'Avarda general error in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID ' . $order_id . '. Avarda purchase ID ' . $avarda_purchase_id );
 		return false;
 	}
 
