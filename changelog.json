@@ -133,5 +133,10 @@
           "description" : "<ul><li>Fix - Send correct data to customer city & country for redirect flow.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.0.1"
+     },
+     "1.5.2" : {
+          "description" : "<ul><li>Tweak - Logging improvements..</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.0.1"
      }
 }
