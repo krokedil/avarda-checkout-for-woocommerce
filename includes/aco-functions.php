@@ -17,14 +17,14 @@ function aco_maybe_create_token() {
 	$token    = get_transient( 'aco_auth_token' );
 	$currency = get_transient( 'aco_currency' );
 	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
-		$avarda_payment = ACO_WC()->api->request_token();
-		if ( ! $avarda_payment ) {
+		$response = ACO_WC()->api->request_token();
+		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
 			return;
 		}
 		// Set transient with 55minute life time.
-		set_transient( 'aco_auth_token', $avarda_payment['token'], 55 * MINUTE_IN_SECONDS );
+		set_transient( 'aco_auth_token', $response['token'], 55 * MINUTE_IN_SECONDS );
 		set_transient( 'aco_currency', get_woocommerce_currency(), 55 * MINUTE_IN_SECONDS );
-		$token = $avarda_payment['token'];
+		$token = $response['token'];
 	}
 	return $token;
 }
@@ -43,7 +43,7 @@ function aco_wc_initialize_payment() {
 
 	// Initialize payment.
 	$avarda_payment = ACO_WC()->api->request_initialize_payment();
-	if ( ! $avarda_payment ) {
+	if ( is_wp_error( $avarda_payment ) ) {
 		return;
 	}
 
@@ -60,6 +60,7 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
+	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
 	return $avarda_payment;
 
 }
@@ -97,6 +98,13 @@ function aco_wc_initialize_or_update_order() {
 	if ( ! empty( $avarda_purchase_id ) ) {
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+		if ( is_wp_error( $avarda_payment ) ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Avarda GET request failed in aco_wc_initialize_or_update_order. Clearing Avarda session.' );
+			return;
+		}
+
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
@@ -126,7 +134,13 @@ function aco_wc_initialize_or_update_order() {
 				if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 					aco_wc_initialize_payment();
 				} else {
-					ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
+					$avarda_payment = ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
+					// If the update failed - unset sessions and return error.
+					if ( is_wp_error( $avarda_payment ) ) {
+						// Unset sessions.
+						aco_wc_unset_sessions();
+						ACO_Logger::log( 'Avarda update request failed in aco_wc_initialize_or_update_order function. Clearing Avarda session.' );
+					}
 				}
 				break;
 		}
@@ -152,6 +166,11 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+		if ( is_wp_error( $avarda_payment ) ) {
+			return;
+		}
+
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
@@ -470,7 +489,16 @@ function aco_wc_unset_sessions() {
  * @return void
  */
 function aco_extract_error_message( $wp_error ) {
-	wc_print_notice( $wp_error->get_error_message(), 'error' );
+	$error_message = $wp_error->get_error_message();
+
+	if ( is_array( $error_message ) ) {
+		// Rather than assuming the first element is a string, we'll force a string conversion instead.
+		$error_message = implode( ' ', $error_message );
+	}
+
+	if ( function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice( $error_message, 'error' );
+	}
 }
 
 /**

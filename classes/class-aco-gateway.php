@@ -191,7 +191,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_purchase_id = $this->get_avarda_purchase_id( $order );
 
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-		if ( ! $avarda_order ) {
+		if ( is_wp_error( $avarda_order ) ) {
 			// Unset sessions.
 			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 			return false;

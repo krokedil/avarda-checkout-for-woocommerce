@@ -25,7 +25,6 @@ class ACO_AJAX extends WC_AJAX {
 	 */
 	public static function add_ajax_events() {
 		$ajax_events = array(
-			'aco_wc_update_checkout'                => true,
 			'aco_wc_get_avarda_payment'             => true,
 			'aco_wc_iframe_shipping_address_change' => true,
 			'aco_wc_change_payment_method'          => true,
@@ -72,114 +71,6 @@ class ACO_AJAX extends WC_AJAX {
 			'redirect' => $redirect,
 		);
 		wp_send_json_success( $data );
-	}
-
-	/**
-	 * Update checkout.
-	 *
-	 * @return void
-	 */
-	public static function aco_wc_update_checkout() {
-
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
-		if ( ! wp_verify_nonce( $nonce, 'aco_wc_update_checkout' ) ) {
-			wp_send_json_error( 'bad_nonce' );
-			exit;
-		}
-
-		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
-
-		if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
-
-			$avarda_purchase_id = aco_get_purchase_id_from_session();
-
-			// Set empty return array for errors.
-			$return = array();
-
-			// Check that the currency and locale is the same as earlier, otherwise create a new session.
-			if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
-				aco_wc_unset_sessions();
-				ACO_Logger::log( 'Currency or language changed in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
-				$return['redirect_url'] = wc_get_checkout_url();
-				wp_send_json_error( $return );
-			}
-
-			// Check that the JWT token in frontend is the same as saved in session, otherwise create a new session.
-			$aco_jwt_token = filter_input( INPUT_POST, 'aco_jwt_token', FILTER_SANITIZE_STRING );
-			if ( aco_get_jwt_token_from_session() !== $aco_jwt_token ) {
-				aco_wc_unset_sessions();
-				wc_add_notice( 'Avarda JWT token mismatch. Please try again.', 'error' );
-				ACO_Logger::log( 'JWT token used in frontend not the same as saved in WC session. Clearing Avarda session and reloading the cehckout page.' );
-				$return['redirect_url'] = wc_get_checkout_url();
-				wp_send_json_error( $return );
-
-			}
-
-			// Check if we have a avarda purchase id.
-			if ( empty( $avarda_purchase_id ) ) {
-				aco_wc_unset_sessions();
-				wc_add_notice( 'Avarda purchase id is missing.', 'error' );
-				ACO_Logger::log( 'Avarda purchase ID is missing in update checkout ajax request. Clearing Avarda session and reloading the cehckout page.' );
-				$return['redirect_url'] = wc_get_checkout_url();
-				wp_send_json_error( $return );
-			} else {
-				// Get the Avarda order from Avarda.
-				$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-				// Check if we got a wp_error.
-				if ( ! $avarda_order ) {
-					// Unset sessions.
-					aco_wc_unset_sessions();
-					ACO_Logger::log( 'Avarda GET request failed in update checkout ajax request. Clearing Avarda session.' );
-					wp_send_json_error();
-				}
-
-				// Get the Avarda order object.
-				// Calculate cart totals.
-				WC()->cart->calculate_fees();
-				WC()->cart->calculate_totals();
-
-				// Check if order needs payment. If not, send refreshZeroAmount so checkout page is reloaded.
-				if ( apply_filters( 'aco_check_if_needs_payment', true ) ) {
-					if ( ! WC()->cart->needs_payment() ) {
-						wp_send_json_success(
-							array(
-								'refreshZeroAmount' => 'refreshZeroAmount',
-							)
-						);
-					}
-				}
-				// Get current status of Avarda session.
-				if ( 'B2C' === $avarda_order['mode'] ) {
-					$aco_state = $avarda_order['b2C']['step']['current'];
-				} elseif ( 'B2B' === $avarda_order['mode'] ) {
-					$aco_state = $avarda_order['b2B']['step']['current'];
-				}
-
-				// check if session TimedOut.
-				if ( 'TimedOut' === $aco_state ) {
-					aco_wc_unset_sessions();
-					ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
-					$return['redirect_url'] = wc_get_checkout_url();
-					wp_send_json_error( $return );
-				}
-
-				if ( ! ( 'Completed' === $aco_state ) ) {
-					// Update order.
-					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-
-					// If the update failed - unset sessions and return error.
-					if ( false === $avarda_order ) {
-						// Unset sessions.
-						aco_wc_unset_sessions();
-						ACO_Logger::log( 'Avarda update request failed in update checkout ajax request. Clearing Avarda session.' );
-						wp_send_json_error();
-					}
-				}
-			}
-		}
-		// Everything is okay if we get here. Send empty success and kill wp.
-		wp_send_json_success();
-
 	}
 
 	/**
@@ -232,7 +123,7 @@ class ACO_AJAX extends WC_AJAX {
 
 			$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
 
-			if ( false === $avarda_order ) {
+			if ( is_wp_error( $avarda_order ) ) {
 				wp_send_json_error();
 			}
 		}
@@ -259,7 +150,7 @@ class ACO_AJAX extends WC_AJAX {
 		}
 
 		$avarda_payment = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
-		if ( ! $avarda_payment ) {
+		if ( is_wp_error( $avarda_payment ) ) {
 			wp_send_json_error( $avarda_payment );
 		}
 		wp_send_json_success(
