@@ -169,9 +169,8 @@ class ACO_API {
 	 * @return mixed
 	 */
 	private function check_for_api_error( $response ) {
-		if ( is_wp_error( $response ) ) {
+		if ( is_wp_error( $response ) && ! is_admin() ) {
 			aco_extract_error_message( $response );
-			return false;
 		}
 		return $response;
 	}

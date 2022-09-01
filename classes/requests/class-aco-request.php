@@ -184,6 +184,10 @@ class ACO_Request {
 					}
 				}
 			}
+			if ( empty( $error_message ) ) {
+				// Translators: https request response code.
+				$error_message = sprintf( __( 'Avarda request error. Request response code: %s', 'avarda-checkout-for-woocommerce' ), wp_remote_retrieve_response_code( $response ) );
+			}
 			return new WP_Error( wp_remote_retrieve_response_code( $response ), $error_message, $data );
 		}
 		return json_decode( wp_remote_retrieve_body( $response ), true );
