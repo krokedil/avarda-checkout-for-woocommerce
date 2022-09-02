@@ -63,7 +63,7 @@ class ACO_Confirmation {
 			'meta_value'  => $avarda_purchase_id,
 			'date_query'  => array(
 				array(
-					'after' => '2 day ago',
+					'after' => '5 day ago',
 				),
 			),
 		);
