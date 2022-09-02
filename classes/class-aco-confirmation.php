@@ -79,7 +79,7 @@ class ACO_Confirmation {
 		$order    = wc_get_order( $order_id );
 
 		// Confirm the order.
-		ACO_Logger::log( $avarda_purchase_id . ': Confirm the Avarda order from the confirmation page.' );
+		ACO_Logger::log( $avarda_purchase_id . ': Confirm the Avarda order from the confirmation page. Order ID: ' . $order_id );
 		aco_confirm_avarda_order( $order_id, $avarda_purchase_id );
 
 		// Unset sessions.
