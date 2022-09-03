@@ -111,7 +111,7 @@ function aco_wc_initialize_or_update_order() {
 		switch ( $aco_state ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				$order_id = aco_get_order_id_by_transaction_id( $avarda_purchase_id );
+				$order_id = aco_get_order_id_by_purchase_id( $avarda_purchase_id );
 				$order    = wc_get_order( $order_id );
 
 				if ( is_object( $order ) ) {
@@ -246,6 +246,7 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 		return;
 	}
 	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
+	update_post_meta( $order_id, '_transaction_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
 	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
 }
@@ -552,6 +553,37 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 		'post_status' => array_keys( wc_get_order_statuses() ),
 		'meta_key'    => '_transaction_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
 		'meta_value'  => sanitize_text_field( wp_unslash( $transaction_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'date_query'  => array(
+			array(
+				'after' => '30 day ago',
+			),
+		),
+	);
+
+	$orders = get_posts( $query_args );
+
+	if ( $orders ) {
+		$order_id = $orders[0];
+	} else {
+		$order_id = 0;
+	}
+
+	return $order_id;
+}
+
+/**
+ * Finds an Order ID based on a purchase ID (the Avarda order number).
+ *
+ * @param string $purchase_id Avarda order number saved as Purchase ID in WC order.
+ * @return int The ID of an order, or 0 if the order could not be found.
+ */
+function aco_get_order_id_by_purchase_id( $purchase_id ) {
+	$query_args = array(
+		'fields'      => 'ids',
+		'post_type'   => wc_get_order_types(),
+		'post_status' => array_keys( wc_get_order_statuses() ),
+		'meta_key'    => '_wc_avarda_purchase_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'meta_value'  => sanitize_text_field( wp_unslash( $purchase_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
 		'date_query'  => array(
 			array(
 				'after' => '30 day ago',

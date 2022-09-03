@@ -146,8 +146,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Handle switching payment method for subscription.
 	 *
-	 * @param  WC_Order $order
-	 * @return void
+	 * @param  WC_Order $order Woocommerce order.
+	 * @return array.
 	 */
 	public function process_subscription_payment_change_handler( $order ) {
 		$pay_url = add_query_arg(
