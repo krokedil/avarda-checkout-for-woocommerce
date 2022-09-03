@@ -205,12 +205,12 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 				}
 				break;
 		}
-		if ( false === $avarda_order ) {
+		if ( is_wp_error( $avarda_order ) ) {
 			ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 
 			// If update order failed try to create new order.
 			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
-			if ( false === $avarda_order ) {
+			if ( is_wp_error( $avarda_order ) ) {
 				// If failed then bail.
 				ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $avarda_purchase_id ) );
 				return;
@@ -241,6 +241,10 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
  * @return void
  */
 function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
+	// Check that we don't have an error.
+	if ( is_wp_error( $avarda_order ) ) {
+		return;
+	}
 	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
 	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
