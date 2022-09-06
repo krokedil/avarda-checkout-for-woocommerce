@@ -17,14 +17,14 @@ function aco_maybe_create_token() {
 	$token    = get_transient( 'aco_auth_token' );
 	$currency = get_transient( 'aco_currency' );
 	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
-		$avarda_payment = ACO_WC()->api->request_token();
-		if ( ! $avarda_payment ) {
+		$response = ACO_WC()->api->request_token();
+		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
 			return;
 		}
 		// Set transient with 55minute life time.
-		set_transient( 'aco_auth_token', $avarda_payment['token'], 55 * MINUTE_IN_SECONDS );
+		set_transient( 'aco_auth_token', $response['token'], 55 * MINUTE_IN_SECONDS );
 		set_transient( 'aco_currency', get_woocommerce_currency(), 55 * MINUTE_IN_SECONDS );
-		$token = $avarda_payment['token'];
+		$token = $response['token'];
 	}
 	return $token;
 }
@@ -43,7 +43,7 @@ function aco_wc_initialize_payment() {
 
 	// Initialize payment.
 	$avarda_payment = ACO_WC()->api->request_initialize_payment();
-	if ( ! $avarda_payment ) {
+	if ( is_wp_error( $avarda_payment ) ) {
 		return;
 	}
 
@@ -60,6 +60,7 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
+	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
 	return $avarda_payment;
 
 }
@@ -97,13 +98,20 @@ function aco_wc_initialize_or_update_order() {
 	if ( ! empty( $avarda_purchase_id ) ) {
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+		if ( is_wp_error( $avarda_payment ) ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Avarda GET request failed in aco_wc_initialize_or_update_order. Clearing Avarda session.' );
+			return;
+		}
+
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
 		switch ( $aco_state ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				$order_id = aco_get_order_id_by_transaction_id( $avarda_purchase_id );
+				$order_id = aco_get_order_id_by_purchase_id( $avarda_purchase_id );
 				$order    = wc_get_order( $order_id );
 
 				if ( is_object( $order ) ) {
@@ -126,7 +134,13 @@ function aco_wc_initialize_or_update_order() {
 				if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 					aco_wc_initialize_payment();
 				} else {
-					ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
+					$avarda_payment = ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
+					// If the update failed - unset sessions and return error.
+					if ( is_wp_error( $avarda_payment ) ) {
+						// Unset sessions.
+						aco_wc_unset_sessions();
+						ACO_Logger::log( 'Avarda update request failed in aco_wc_initialize_or_update_order function. Clearing Avarda session.' );
+					}
 				}
 				break;
 		}
@@ -152,6 +166,11 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+
+		if ( is_wp_error( $avarda_payment ) ) {
+			return;
+		}
+
 		// Get payment status.
 		$aco_state = aco_get_payment_state( $avarda_payment );
 
@@ -186,12 +205,12 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 				}
 				break;
 		}
-		if ( false === $avarda_order ) {
+		if ( is_wp_error( $avarda_order ) ) {
 			ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 
 			// If update order failed try to create new order.
 			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
-			if ( false === $avarda_order ) {
+			if ( is_wp_error( $avarda_order ) ) {
 				// If failed then bail.
 				ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $avarda_purchase_id ) );
 				return;
@@ -222,6 +241,10 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
  * @return void
  */
 function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
+	// Check that we don't have an error.
+	if ( is_wp_error( $avarda_order ) ) {
+		return;
+	}
 	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
 	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
@@ -470,7 +493,16 @@ function aco_wc_unset_sessions() {
  * @return void
  */
 function aco_extract_error_message( $wp_error ) {
-	wc_print_notice( $wp_error->get_error_message(), 'error' );
+	$error_message = $wp_error->get_error_message();
+
+	if ( is_array( $error_message ) ) {
+		// Rather than assuming the first element is a string, we'll force a string conversion instead.
+		$error_message = implode( ' ', $error_message );
+	}
+
+	if ( function_exists( 'wc_add_notice' ) ) {
+		wc_add_notice( $error_message, 'error' );
+	}
 }
 
 /**
@@ -520,6 +552,37 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 		'post_status' => array_keys( wc_get_order_statuses() ),
 		'meta_key'    => '_transaction_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
 		'meta_value'  => sanitize_text_field( wp_unslash( $transaction_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'date_query'  => array(
+			array(
+				'after' => '30 day ago',
+			),
+		),
+	);
+
+	$orders = get_posts( $query_args );
+
+	if ( $orders ) {
+		$order_id = $orders[0];
+	} else {
+		$order_id = 0;
+	}
+
+	return $order_id;
+}
+
+/**
+ * Finds an Order ID based on a purchase ID (the Avarda order number).
+ *
+ * @param string $purchase_id Avarda order number saved as Purchase ID in WC order.
+ * @return int The ID of an order, or 0 if the order could not be found.
+ */
+function aco_get_order_id_by_purchase_id( $purchase_id ) {
+	$query_args = array(
+		'fields'      => 'ids',
+		'post_type'   => wc_get_order_types(),
+		'post_status' => array_keys( wc_get_order_statuses() ),
+		'meta_key'    => '_wc_avarda_purchase_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
+		'meta_value'  => sanitize_text_field( wp_unslash( $purchase_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
 		'date_query'  => array(
 			array(
 				'after' => '30 day ago',

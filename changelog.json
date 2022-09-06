@@ -138,5 +138,10 @@
           "description" : "<ul><li>Tweak - Logging improvements..</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.0.1"
+     },
+     "1.6.0" : {
+          "description" : "<ul><li>Tweak - Move update request to Avarda from ajax function to woocommerce_after_calculate_totals.</li><li>Tweak - Improve request class logic.</li><li>Tweak - Improve error message notice display in checkout.</li><li>Tweak - Query orders 5 days back in confirm_order sequence.</li><li>Tweak - Remove wc_print_notices in template files. Not needed anymore. WooCommerce handles this.</li><li>Tweak - Callback notifications now handled 2 minutes after purchase if needed.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.0.2"
      }
 }

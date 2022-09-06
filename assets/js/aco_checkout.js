@@ -77,6 +77,11 @@ jQuery(function($) {
 		},
 
 		ACOCheckoutForm: function() {
+
+			// Do not try to display the checkout if JWT token is missing.
+			if('' === aco_wc_params.aco_jwt_token ) {
+				return;
+			}
 			// Stage or Prod javascript file url.
 			var acoJsUrl = ( aco_wc_params.aco_test_mode ) ? "https://avdonl0s0checkout0fe.blob.core.windows.net/frontend/static/js/main.js" : "https://avdonl0p0checkout0fe.blob.core.windows.net/frontend/static/js/main.js";
 
@@ -320,53 +325,9 @@ jQuery(function($) {
 		},
 
 		updateAvardaPayment: function() {
-			$('.woocommerce-checkout-review-order-table').block({
-				message: null,
-				overlayCSS: {
-					background: '#fff',
-					opacity: 0.6
-				}
-			});
-			$.ajax({
-				type: 'POST',
-				url: aco_wc_params.update_payment_url,
-				data: {
-					nonce: aco_wc_params.update_payment_nonce,
-					aco_jwt_token: aco_wc_params.aco_jwt_token
-				},
-				dataType: 'json',
-				success: function(data) {
-				},
-				error: function(data) {
-				},
-				complete: function(data) {
-					console.log('updateAvardaPayment complete');
-					console.log(data);
-					console.log(data.responseJSON);
-
-					if ( data.responseJSON && true === data.responseJSON.success ) {
-
-						if( data.responseJSON.data && data.responseJSON.data.refreshZeroAmount ) {
-							window.location.reload();
-						}
-						if( window.avardaCheckout ) {
-							window.avardaCheckout.refreshForm();
-						}
-						
-						$('.woocommerce-checkout-review-order-table').unblock();
-
-					} else {
-						console.log('updateAvardaPayment error');
-						if( data.responseJSON && data.responseJSON.data && '' !== data.responseJSON.data.redirect_url ) {
-							console.log('Cart do not need payment. Reloading checkout.');
-							window.location.href = data.responseJSON.data.redirect_url;
-						}
-						$('.woocommerce-checkout-review-order-table').unblock();
-					}
-
-					
-				}
-			});
+			if( window.avardaCheckout ) {
+				window.avardaCheckout.refreshForm();
+			}
 		},
 
 		/*
