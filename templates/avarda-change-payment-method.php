@@ -7,7 +7,6 @@
  * @package Avarda_Checkout/Templates
  */
 
-wc_print_notices();
 do_action( 'aco_wc_before_checkout_form' );
 
 ?>
