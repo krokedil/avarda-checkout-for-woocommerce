@@ -8,7 +8,7 @@ WC requires at least: 4.0.0
 WC tested up to: 6.8.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.09.06        - version 1.6.1 =
+* Fix               - Confirm that the JWT token used in frontend is the same as the one stored in backend when sending session updates to Avarda.
+
 = 2022.09.06        - version 1.6.0 =
 * Tweak             - Move update request to Avarda from ajax function to woocommerce_after_calculate_totals.
 * Tweak             - Improve request class logic.
