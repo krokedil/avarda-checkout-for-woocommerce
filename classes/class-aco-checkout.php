@@ -15,7 +15,12 @@ class ACO_Checkout {
 	 * Class constructor
 	 */
 	public function __construct() {
+		$settings = get_option( 'woocommerce_aco_settings' );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 9999 );
+
+		if ( 'embedded' === $settings['checkout_flow'] ) {
+			add_action( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
+		}
 	}
 
 	/**
@@ -54,6 +59,19 @@ class ACO_Checkout {
 			return;
 		}
 
+		// Check if JWT token in checkout is the same as the one stored in session.
+		$avarda_jwt_token = aco_get_jwt_token_from_session();
+		$raw_post_data    = filter_input( INPUT_POST, 'post_data', FILTER_SANITIZE_URL );
+		parse_str( $raw_post_data, $post_data );
+		$checkout_jwt_token = $post_data['aco_jwt_token'] ?? '';
+
+		if ( $avarda_jwt_token !== $checkout_jwt_token ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( sprintf( 'JWT token used in checkout (%s) not the same as the one stored in WC session (%s). Clearing Avarda session.', $checkout_jwt_token, $avarda_jwt_token ) );
+			wc_add_notice( 'Avarda JWT token issue. Please reload the page and try again.', 'error' );
+			return;
+		}
+
 		// Check if the cart hash has been changed since last update.
 		$cart_hash  = WC()->cart->get_cart_hash();
 		$saved_hash = WC()->session->get( 'aco_last_update_hash' );
@@ -62,9 +80,6 @@ class ACO_Checkout {
 		if ( $cart_hash === $saved_hash ) {
 			return;
 		}
-
-		// Set empty return array for errors.
-		$return = array();
 
 		// Check that the currency and locale is the same as earlier, otherwise create a new session.
 		if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
@@ -125,5 +140,26 @@ class ACO_Checkout {
 			$saved_hash = WC()->session->set( 'aco_last_update_hash', $cart_hash );
 		}
 
+	}
+
+	/**
+	 * Adds a hidden aco_jwt_token checkout form field.
+	 * Used to confirm that the token used for the Avarda Checkout widget in frontend is
+	 * the same one currently saved in WC session aco_wc_payment_data.
+	 * We do this to prevent issues if stores have session problems.
+	 *
+	 * @param array $fields WooCommerce checkout form fields.
+	 * @return array
+	 */
+	public function add_hidden_jwt_token_field( $fields ) {
+		$avarda_jwt_token = aco_get_jwt_token_from_session();
+
+		$fields['billing']['aco_jwt_token'] = array(
+			'type'    => 'hidden',
+			'class'   => array( 'aco_jwt_token' ),
+			'default' => $avarda_jwt_token,
+		);
+
+		return $fields;
 	}
 } new ACO_Checkout();
