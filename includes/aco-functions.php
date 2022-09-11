@@ -76,6 +76,7 @@ function aco_wc_show_checkout_form( $order_id = null ) {
 	} else {
 		aco_wc_initialize_or_update_order();
 	}
+	do_action( 'aco_localize_and_enqueue_checkout_script' );
 	?>
 	<div id="checkout-form">
 	</div>
