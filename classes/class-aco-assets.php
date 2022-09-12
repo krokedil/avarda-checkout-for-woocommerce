@@ -30,7 +30,9 @@ class ACO_Assets {
 
 		// Load scripts.
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
-		add_action( 'aco_localize_and_enqueue_checkout_script', array( $this, 'localize_and_enqueue_checkout_script' ) );
+
+		add_action( 'aco_wc_before_checkout_form', array( $this, 'localize_and_enqueue_checkout_script' ) );
+		add_action( 'aco_wc_before_order_receipt', array( $this, 'localize_and_enqueue_checkout_script' ) );
 
 	}
 
@@ -48,6 +50,27 @@ class ACO_Assets {
 
 		if ( is_checkout() && ! is_wc_endpoint_url( 'order-received' ) ) {
 
+			// Checkout utility (change to Avarda payment method in checkout).
+			wp_register_script(
+				'aco_utility',
+				AVARDA_CHECKOUT_URL . '/assets/js/aco_utility.js',
+				array( 'jquery' ),
+				AVARDA_CHECKOUT_VERSION,
+				true
+			);
+
+			$params = array(
+				'change_payment_method_url'   => WC_AJAX::get_endpoint( 'aco_wc_change_payment_method' ),
+				'change_payment_method_nonce' => wp_create_nonce( 'aco_wc_change_payment_method' ),
+			);
+
+			wp_localize_script(
+				'aco_utility',
+				'aco_utility_params',
+				$params
+			);
+			wp_enqueue_script( 'aco_utility' );
+
 			// Checkout script.
 			wp_register_script(
 				'aco_wc',
@@ -57,6 +80,7 @@ class ACO_Assets {
 				true
 			);
 
+			// Checkout style.
 			wp_register_style(
 				'aco',
 				AVARDA_CHECKOUT_URL . '/assets/css/aco_style.css',
