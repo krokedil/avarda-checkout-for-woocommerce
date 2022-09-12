@@ -19,7 +19,7 @@ class ACO_Checkout {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 9999 );
 
 		if ( 'embedded' === $settings['checkout_flow'] ) {
-			add_action( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
+			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
 		}
 	}
 
