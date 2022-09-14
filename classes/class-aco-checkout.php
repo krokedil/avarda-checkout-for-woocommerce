@@ -15,10 +15,11 @@ class ACO_Checkout {
 	 * Class constructor
 	 */
 	public function __construct() {
-		$settings = get_option( 'woocommerce_aco_settings' );
+		$settings            = get_option( 'woocommerce_aco_settings' );
+		$this->checkout_flow = $settings['checkout_flow'] ?? 'embedded';
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 9999 );
 
-		if ( 'embedded' === $settings['checkout_flow'] ) {
+		if ( 'embedded' === $this->checkout_flow ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
 		}
 	}
@@ -29,14 +30,12 @@ class ACO_Checkout {
 	 * @return void
 	 */
 	public function update_avarda_order() {
-		$settings      = get_option( 'woocommerce_aco_settings' );
-		$checkout_flow = $settings['checkout_flow'] ?? 'embedded';
 
 		if ( ! is_checkout() ) {
 			return;
 		}
 
-		if ( 'redirect' === $checkout_flow ) {
+		if ( 'redirect' === $this->checkout_flow ) {
 			return;
 		}
 
