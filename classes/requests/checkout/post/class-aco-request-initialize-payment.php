@@ -51,6 +51,7 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		if ( $order_id ) {
 			$order                 = wc_get_order( $order_id );
 			$request_body['items'] = ACO_WC()->order_items->get_order_items( $order_id );
+			$request_body['extraIdentifiers']['orderReference'] = (string) $order->get_order_number();
 			// Add customer address if it exist.
 			if ( $order->get_billing_company() ) {
 				$customer_address = ACO_WC()->customer->get_b2b_customer( $order_id );

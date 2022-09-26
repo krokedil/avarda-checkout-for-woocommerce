@@ -374,37 +374,6 @@ jQuery(function($) {
 			});
 		},
 
-		// When payment method is changed to ACO in regular WC Checkout page.
-		maybeChangeToACO: function() {
-			if ( 'aco' === $(this).val() ) {
-
-				$(aco_wc.checkoutFormSelector).block({
-					message: null,
-					overlayCSS: {
-						background: '#fff',
-						opacity: 0.6
-					}
-				});
-
-				$('.woocommerce-info').remove();
-
-				$.ajax({
-					type: 'POST',
-					data: {
-						aco: true,
-						nonce: aco_wc_params.change_payment_method_nonce
-					},
-					dataType: 'json',
-					url: aco_wc_params.change_payment_method_url,
-					success: function (data) {},
-					error: function (data) {},
-					complete: function (data) {
-						window.location.href = data.responseJSON.data.redirect;
-					}
-				});
-			}
-		},
-
 		/**
 		 * Maybe freezes the iframe to prevent anyone from completing the order before filling in all required fields.
 		 * 
@@ -548,7 +517,6 @@ jQuery(function($) {
 				aco_wc.bodyEl.on('updated_checkout', aco_wc.updateAvardaPayment);
  				
 			}
-			aco_wc.bodyEl.on('change', 'input[name="payment_method"]', aco_wc.maybeChangeToACO);
 			aco_wc.bodyEl.on( 'click', aco_wc.selectAnotherSelector, aco_wc.changeFromACO );
 		},
 	}

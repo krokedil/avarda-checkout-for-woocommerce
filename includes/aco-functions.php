@@ -421,55 +421,63 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 
 	switch ( $aco_payment_method ) {
 		case 'Invoice':
-			$method_title = __( 'Avarda Invoice', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Invoice', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'Loan':
-			$method_title = __( 'Avarda Loan', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Loan', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'Card':
-			$method_title = __( 'Avarda Card', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Card', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'DirectPayment':
-			$method_title = __( 'Avarda Direct Payment', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Direct Payment', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'PartPayment':
-			$method_title = __( 'Avarda Part Payment', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Part Payment', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'Swish':
-			$method_title = __( 'Avarda Swish', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Swish', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'HighAmountLoan':
 			$method_title = __( 'Avarda High Amount Loan', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'PayPal':
-			$method_title = __( 'Avarda PayPal', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'PayPal', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'PayOnDelivery':
-			$method_title = __( 'Avarda Pay On Delivery', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Pay On Delivery', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'B2BInvoice':
-			$method_title = __( 'Avarda B2B Invoice', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'B2B Invoice', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'DirectInvoice':
-			$method_title = __( 'Avarda Direct Invoice', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Direct Invoice', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'Masterpass':
-			$method_title = __( 'Avarda Masterpass', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Masterpass', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'MobilePay':
-			$method_title = __( 'Avarda MobilePay', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'MobilePay', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'Vipps':
-			$method_title = __( 'Avarda Vipps', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Vipps', 'avarda-checkout-for-woocommerce' );
 			break;
 		case 'ZeroAmount':
-			$method_title = __( 'Avarda Zero Amount', 'avarda-checkout-for-woocommerce' );
+			$method_title = __( 'Zero Amount', 'avarda-checkout-for-woocommerce' );
 			break;
 		default:
 			$method_title = __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
 	}
 
-	$order->set_payment_method_title( $method_title );
+	// pattern substitution.
+	$replacements               = array(
+		'{PAYMENT_METHOD_TITLE}' => $method_title,
+	);
+	$method_title_from_settings = 'Avarda {PAYMENT_METHOD_TITLE}';
+	$method_title_filtered      = str_replace( array_keys( $replacements ), $replacements, $method_title_from_settings );
+	$method_title_filtered      = apply_filters( 'aco_order_set_payment_method_title', $method_title_filtered, $method_title, $order->get_id() );
+
+	$order->set_payment_method_title( $method_title_filtered );
 	$order->save();
 }
 
