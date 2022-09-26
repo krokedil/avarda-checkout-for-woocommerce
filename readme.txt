@@ -5,10 +5,10 @@ Requires at least: 5.0
 Tested up to: 6.0.2
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.8.2
+WC tested up to: 6.9.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.6.1
+Stable tag: 1.6.2
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,12 +31,13 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
-= 2022.09.xx        - version 1.6.x =
-* Feature           - Adds functionality to enable custom payment method names. Can be filtered via aco_order_set_payment_method_title.
-* Tweak             - Move enqueue of JS and CSS to assets class + only run wp_localize_script & wp_enqueue_script if ACO is used. Results in Avarda purchase session only created if Avarda Checkout is about to be displayed.
+= 2022.09.26        - version 1.6.2 =
+* Tweak             - Adds functionality to enable custom payment method names. Can be filtered/tweaked via aco_order_set_payment_method_title.
+* Tweak             - Set orderReference on init call to Avarda when Woo order is vailable (used for redirect flow).
+* Tweak             - Move enqueue of JS and CSS to assets class.
+* Tweak             - Only run wp_localize_script & wp_enqueue_script if ACO is used. Results in Avarda purchase session only created if Avarda Checkout is about to be displayed.
 * Tweak             - Move maybeChangeToACO JS function into separate utility JS file.
-* Tweak             - Send Woo order number in init request to Avarda if available.
-
+* Fix               - Fix bug related to "Avarda JWT token issue" error message displayed in checkout. Could happen if checkout flow settings wasn't saved in plugin settings page.
 
 = 2022.09.06        - version 1.6.1 =
 * Fix               - Confirm that the JWT token used in frontend is the same as the one stored in backend when sending session updates to Avarda.
