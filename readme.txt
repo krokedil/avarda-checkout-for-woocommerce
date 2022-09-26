@@ -31,6 +31,13 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.09.xx        - version 1.6.x =
+* Feature           - Adds functionality to enable custom payment method names. Can be filtered via aco_order_set_payment_method_title.
+* Tweak             - Move enqueue of JS and CSS to assets class + only run wp_localize_script & wp_enqueue_script if ACO is used. Results in Avarda purchase session only created if Avarda Checkout is about to be displayed.
+* Tweak             - Move maybeChangeToACO JS function into separate utility JS file.
+* Tweak             - Send Woo order number in init request to Avarda if available.
+
+
 = 2022.09.06        - version 1.6.1 =
 * Fix               - Confirm that the JWT token used in frontend is the same as the one stored in backend when sending session updates to Avarda.
 
