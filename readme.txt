@@ -8,7 +8,7 @@ WC requires at least: 4.0.0
 WC tested up to: 6.9.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.6.2
+Stable tag: 1.7.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.10.03        - version 1.7.0 =
+* Feature		    - Adds last 15 requests to Avarda that had an API error and display them on the WooCommerce status page. These will also be in the status report that you can send to Krokedil for support tickets.
+* Fix               - Do not try to make update payment session request to Avarda if session is in redirected to payment method state.
+
 = 2022.09.26        - version 1.6.2 =
 * Tweak             - Adds functionality to enable custom payment method names. Can be filtered/tweaked via aco_order_set_payment_method_title.
 * Tweak             - Set orderReference on init call to Avarda when Woo order is vailable (used for redirect flow).

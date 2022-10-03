@@ -115,6 +115,23 @@ class ACO_Checkout {
 			$aco_state = $avarda_order['b2B']['step']['current'];
 		}
 
+		// Check if paymewnt session is in a state where we should avoid an update.
+		$states_that_should_not_update = array(
+			'WaitingForSwish',
+			'RedirectedToDirectPaymentBank',
+			'RedirectedToNets',
+			'WaitingForBankId',
+			'RedirectedToTupas',
+			'HandledByMerchant',
+			'AwaitingCreditApproval',
+			'RedirectedToNetsEident',
+			'RedirectedToVipps',
+		);
+		if ( in_array( $aco_state, $states_that_should_not_update, true ) ) {
+			ACO_Logger::log( sprintf( 'Aborting Avarda update function since Avarda payment session %s in state %s.', $avarda_purchase_id, $aco_state ) );
+			return;
+		}
+
 		// check if session TimedOut.
 		if ( 'TimedOut' === $aco_state ) {
 			aco_wc_unset_sessions();
