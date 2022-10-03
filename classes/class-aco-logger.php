@@ -34,6 +34,10 @@ class ACO_Logger {
 			}
 			self::$log->add( 'Avarda_Checkout', wp_json_encode( $message ) );
 		}
+
+		if ( isset( $data['response']['code'] ) && ( $data['response']['code'] < 200 || $data['response']['code'] > 299 ) ) {
+			self::log_to_db( $data );
+		}
 	}
 
 	/**
@@ -108,6 +112,24 @@ class ACO_Logger {
 			$stack[] = $data['function'] . $extra_data;
 		}
 		return $stack;
+	}
+
+	/**
+	 * Logs an event in the WP DB.
+	 *
+	 * @param array $data The data to be logged.
+	 */
+	public static function log_to_db( $data ) {
+		$logs = get_option( 'krokedil_debuglog_aco', array() );
+
+		if ( ! empty( $logs ) ) {
+			$logs = json_decode( $logs );
+		}
+
+		$logs   = array_slice( $logs, - 14 );
+		$logs[] = $data;
+		$logs   = wp_json_encode( $logs );
+		update_option( 'krokedil_debuglog_aco', $logs );
 	}
 
 }
