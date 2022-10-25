@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.10.xx        - version 1.x.x =
+* Fix               - Solve issue with fee amount and fee tax amount in activate order request. 
+
 = 2022.10.03        - version 1.7.0 =
 * Feature		    - Adds last 15 requests to Avarda that had an API error and display them on the WooCommerce status page. These will also be in the status report that you can send to Krokedil for support tickets.
 * Fix               - Do not try to make update payment session request to Avarda if session is in redirected to payment method state.
