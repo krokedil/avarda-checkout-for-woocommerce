@@ -181,6 +181,23 @@ class ACO_Order_Management {
 			return;
 		}
 
+		// If activation (Delivery) has not yet been done, use Avardas refund endpoint.
+		// Refund in this case means to release funds from the current reservation.
+		if ( empty( get_post_meta( $order_id, '_avarda_reservation_activated', true ) ) ) {
+			$avarda_order = ACO_WC()->api->request_refund_order( $order_id, $amount, $reason );
+			if ( is_wp_error( $avarda_order ) ) {
+				// If error save error message and return false.
+				$code          = $avarda_order->get_error_code();
+				$message       = $avarda_order->get_error_message();
+				$text          = __( 'Avarda API Error on Avarda refund (refund endpoint): ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+				$formated_text = sprintf( $text, $code, $message );
+				$order->add_order_note( $formated_text );
+				return false;
+			}
+			$order->add_order_note( __( 'Avarda Checkout order was successfully refunded (refund endpoint).', 'avarda-checkout-for-woocommerce' ) );
+			return true;
+		}
+
 		$subscription = $this->check_if_subscription( $order );
 
 		// Get the Avarda order.

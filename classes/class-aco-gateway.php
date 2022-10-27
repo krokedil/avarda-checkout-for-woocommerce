@@ -174,7 +174,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		// Refund.
-		return ACO_WC()->order_management->refund_payment( $order_id, $amount = null, $reason = '' );
+		return ACO_WC()->order_management->refund_payment( $order_id, $amount, $reason );
 	}
 
 	/**
