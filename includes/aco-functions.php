@@ -106,9 +106,9 @@ function aco_wc_initialize_or_update_order() {
 		}
 
 		// Get payment status.
-		$aco_state = aco_get_payment_state( $avarda_payment );
+		$aco_step = aco_get_payment_step( $avarda_payment );
 
-		switch ( $aco_state ) {
+		switch ( $aco_step ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
 				$order_id = aco_get_order_id_by_purchase_id( $avarda_purchase_id );
@@ -172,11 +172,11 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		}
 
 		// Get payment status.
-		$aco_state = aco_get_payment_state( $avarda_payment );
+		$aco_step = aco_get_payment_step( $avarda_payment );
 
-		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id, $aco_state ) );
+		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id, $aco_step ) );
 
-		switch ( $aco_state ) {
+		switch ( $aco_step ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
 				if ( is_object( $order ) ) {
@@ -276,14 +276,14 @@ function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
 		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
 
 		// Check if B2C or B2B.
-		$aco_state = '';
+		$aco_step = '';
 		if ( 'B2C' === $avarda_order['mode'] ) {
-			$aco_state = $avarda_order['b2C']['step']['current'];
+			$aco_step = $avarda_order['b2C']['step']['current'];
 		} elseif ( 'B2B' === $avarda_order['mode'] ) {
-			$aco_state = $avarda_order['b2B']['step']['current'];
+			$aco_step = $avarda_order['b2B']['step']['current'];
 		}
 
-		if ( 'Completed' === $aco_state ) {
+		if ( 'Completed' === $aco_step ) {
 			ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
 			// Payment complete and set transaction id.
 			// translators: Avarda purchase ID.
@@ -637,14 +637,14 @@ function aco_get_jwt_token_from_session() {
  * @param array $avarda_payment Avarda payment session.
  * @return string The payment state.
  */
-function aco_get_payment_state( $avarda_payment ) {
-	$aco_state = '';
+function aco_get_payment_step( $avarda_payment ) {
+	$aco_step = '';
 	if ( 'B2C' === $avarda_payment['mode'] ) {
-		$aco_state = $avarda_payment['b2C']['step']['current'];
+		$aco_step = $avarda_payment['b2C']['step']['current'];
 	} elseif ( 'B2B' === $avarda_payment['mode'] ) {
-		$aco_state = $avarda_payment['b2B']['step']['current'];
+		$aco_step = $avarda_payment['b2B']['step']['current'];
 	}
-	return $aco_state;
+	return $aco_step;
 }
 
 /**
