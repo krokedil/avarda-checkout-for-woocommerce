@@ -646,3 +646,24 @@ function aco_get_payment_state( $avarda_payment ) {
 	}
 	return $aco_state;
 }
+
+/**
+ * Returns approved Avarda payment steps where it is ok to send update requests.
+ *
+ * @return array Approved payment steps.
+ */
+function aco_payment_steps_approved_for_update_request() {
+	return array(
+		'EmailZipEntry',
+		'AmountSelection',
+		'PhoneNumberEntry',
+		'PhoneNumberEntryForKnownCustomer',
+		'Initialized',
+		'PersonalInfo',
+		'PersonalInfoWithoutSsn',
+		'SsnEntry',
+		'EnterCompanyInfo',
+		'CompanyAddressInfo',
+		'CompanyAddressInfoWithoutSsn',
+	);
+}
