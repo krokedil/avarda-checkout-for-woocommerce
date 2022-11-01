@@ -134,6 +134,13 @@ function aco_wc_initialize_or_update_order() {
 				if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 					aco_wc_initialize_payment();
 				} else {
+
+					// Make sure that payment session step is ok for an update.
+					if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
+						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order_from_wc_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
+						return;
+					}
+
 					$avarda_payment = ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
 					// If the update failed - unset sessions and return error.
 					if ( is_wp_error( $avarda_payment ) ) {
@@ -200,7 +207,14 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 					$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 					aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
 				} else {
-					// Try to update the order, if it fails try to create new order.
+
+					// Make sure that payment session step is ok for an update.
+					if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
+						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order_from_wc_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
+						return;
+					}
+
+					// Try to update the order.
 					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id, $order_id, true );
 				}
 				break;
