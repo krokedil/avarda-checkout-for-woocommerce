@@ -118,14 +118,9 @@ class ACO_AJAX extends WC_AJAX {
 			WC()->customer->set_props( $customer_data );
 			WC()->customer->save();
 
+			// Calculating totals will trigger the update Avarda session sequence in ACO_Checkout class.
 			WC()->cart->calculate_shipping();
 			WC()->cart->calculate_totals();
-
-			$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-
-			if ( is_wp_error( $avarda_order ) ) {
-				wp_send_json_error();
-			}
 		}
 
 		wp_send_json_success(
