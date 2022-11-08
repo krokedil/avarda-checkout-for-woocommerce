@@ -61,9 +61,9 @@ class ACO_Helper_Order {
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
-			'amount'      => $this->get_product_price( $order_item ), // Float.
+			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
-			'taxAmount'   => $this->get_product_tax_amount( $order, $order_item ), // Float.
+			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
 		);
 	}
 
@@ -76,17 +76,6 @@ class ACO_Helper_Order {
 	public function get_product_name( $order_item ) {
 		$item_name = $order_item->get_name();
 		return strip_tags( $item_name );
-	}
-
-	/**
-	 * Gets the products price.
-	 *
-	 * @param object $order_item The order item.
-	 * @return float
-	 */
-	public function get_product_price( $order_item ) {
-		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
-		return number_format( $items_subtotal, 2, '.', '' );
 	}
 
 	/**
@@ -148,7 +137,7 @@ class ACO_Helper_Order {
 		return array(
 			'description' => substr( $fee->get_name(), 0, 35 ), // String.
 			'notes'       => substr( $fee->get_id(), 0, 35 ), // String.
-			'amount'      => number_format( (float) $fee->get_amount(), 2, '.', '' ), // String.
+			'amount'      => self::get_item_price_incl_vat( $fee ), // String.
 			'taxCode'     => self::get_tax_rate( $order, $fee ), // String.
 			'taxAmount'   => self::get_item_tax_amount( $fee ), // String.
 		);
@@ -181,6 +170,27 @@ class ACO_Helper_Order {
 	}
 
 	/**
+	 * Gets the item price including vat.
+	 *
+	 * @param object $order_item The order item.
+	 * @return float
+	 */
+	public static function get_item_price_incl_vat( $order_item ) {
+		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
+		return number_format( $items_subtotal, 2, '.', '' );
+	}
+
+	/**
+	 * Gets the item tax amount.
+	 *
+	 * @param object $order_item The order item.
+	 * @return float
+	 */
+	public static function get_item_tax_amount( $order_item ) {
+		return number_format( $order_item->get_total_tax(), 2, '.', '' );
+	}
+
+	/**
 	 * Get the tax rate.
 	 *
 	 * @param WC_Order                                                       $order The WooCommerce order.
@@ -203,29 +213,9 @@ class ACO_Helper_Order {
 		foreach ( $tax_items as $tax_item ) {
 			$rate_id = $tax_item->get_rate_id();
 			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
-				return round( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] * 100 );
+				return (string) round( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] );
 			}
 		}
 		return 0;
 	}
-
-	/**
-	 * Calculate item tax percentage.
-	 *
-	 * @param  WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee|WC_Order_Item_Coupon $order_item Order line item.
-	 *
-	 * @return integer $item_tax_amount Item tax amount.
-	 */
-	public static function get_item_tax_amount( $order_item ) {
-
-		if ( in_array( $order_item->get_type(), array( 'line_item', 'fee', 'shipping' ), true ) ) {
-			$item_tax_amount = $order_item->get_total_tax();
-		} elseif ( 'coupon' === $order_item->get_type() ) {
-			$item_tax_amount = $order_item->get_discount_tax();
-		} else {
-			$item_tax_amount = 00;
-		}
-		return number_format( $item_tax_amount, 2, '.', '' );
-	}
-
 }

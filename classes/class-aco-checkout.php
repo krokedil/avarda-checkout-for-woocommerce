@@ -109,53 +109,35 @@ class ACO_Checkout {
 		}
 
 		// Get current status of Avarda session.
-		if ( 'B2C' === $avarda_order['mode'] ) {
-			$aco_state = $avarda_order['b2C']['step']['current'];
-		} elseif ( 'B2B' === $avarda_order['mode'] ) {
-			$aco_state = $avarda_order['b2B']['step']['current'];
-		}
-
-		// Check if paymewnt session is in a state where we should avoid an update.
-		$states_that_should_not_update = array(
-			'WaitingForSwish',
-			'RedirectedToDirectPaymentBank',
-			'RedirectedToNets',
-			'WaitingForBankId',
-			'RedirectedToTupas',
-			'HandledByMerchant',
-			'AwaitingCreditApproval',
-			'RedirectedToNetsEident',
-			'RedirectedToVipps',
-		);
-		if ( in_array( $aco_state, $states_that_should_not_update, true ) ) {
-			ACO_Logger::log( sprintf( 'Aborting Avarda update function since Avarda payment session %s in state %s.', $avarda_purchase_id, $aco_state ) );
-			return;
-		}
+		$aco_step = aco_get_payment_step( $avarda_order );
 
 		// check if session TimedOut.
-		if ( 'TimedOut' === $aco_state ) {
+		if ( 'TimedOut' === $aco_step ) {
 			aco_wc_unset_sessions();
 			ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
 			WC()->session->reload_checkout = true;
 			return;
 		}
 
-		if ( ! ( 'Completed' === $aco_state ) ) {
-			// Update order.
-			$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
-
-			// If the update failed - unset sessions and return error.
-			if ( is_wp_error( $avarda_order ) ) {
-				// Unset sessions.
-				aco_wc_unset_sessions();
-				ACO_Logger::log( 'Avarda update request failed in update Avarda function. Clearing Avarda session.' );
-				wc_add_notice( 'Avarda update request failed.', 'error' );
-				WC()->session->reload_checkout = true;
-			}
-
-			$saved_hash = WC()->session->set( 'aco_last_update_hash', $cart_hash );
+		// Make sure that payment session step is ok.
+		if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
+			ACO_Logger::log( sprintf( 'Aborting Avarda update function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
+			return;
 		}
 
+		// Update order.
+		$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+
+		// If the update failed - unset sessions and return error.
+		if ( is_wp_error( $avarda_order ) ) {
+			// Unset sessions.
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Avarda update request failed in update Avarda function. Clearing Avarda session.' );
+			wc_add_notice( 'Avarda update request failed.', 'error' );
+			WC()->session->reload_checkout = true;
+		}
+
+		$saved_hash = WC()->session->set( 'aco_last_update_hash', $cart_hash );
 	}
 
 	/**

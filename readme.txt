@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.0.2
+Tested up to: 6.0.3
 Requires PHP: 7.0
 WC requires at least: 4.0.0
-WC tested up to: 6.9.4
+WC tested up to: 7.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2022.11.01        - version 1.7.1 =
+* Fix               - Improvement in check that current Avarda session step can be updated before sending update request. Solves potential issue with deleted/missing payment session.
+* Fix               - Solve issue with fee amount and fee tax amount in activate order request.
+
 = 2022.10.03        - version 1.7.0 =
 * Feature		    - Adds last 15 requests to Avarda that had an API error and display them on the WooCommerce status page. These will also be in the status report that you can send to Krokedil for support tickets.
 * Fix               - Do not try to make update payment session request to Avarda if session is in redirected to payment method state.

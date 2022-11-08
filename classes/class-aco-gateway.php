@@ -201,13 +201,13 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			// Get current status of Avarda session.
 			if ( 'B2C' === $avarda_order['mode'] ) {
-				$aco_state = $avarda_order['b2C']['step']['current'];
+				$aco_step = $avarda_order['b2C']['step']['current'];
 			} elseif ( 'B2B' === $avarda_order['mode'] ) {
-				$aco_state = $avarda_order['b2B']['step']['current'];
+				$aco_step = $avarda_order['b2B']['step']['current'];
 			}
 
 			// check if session TimedOut.
-			if ( 'TimedOut' === $aco_state ) {
+			if ( 'TimedOut' === $aco_step ) {
 				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 				return false;
 			}
