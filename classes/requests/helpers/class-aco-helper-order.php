@@ -58,12 +58,14 @@ class ACO_Helper_Order {
 		} else {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
+
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
+			'quantity'    => intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) ),
 		);
 	}
 
@@ -176,7 +178,7 @@ class ACO_Helper_Order {
 	 * @return float
 	 */
 	public static function get_item_price_incl_vat( $order_item ) {
-		$items_subtotal = ( $order_item->get_total() + $order_item->get_total_tax() );
+		$items_subtotal = ( ( $order_item->get_total() + $order_item->get_total_tax() ) / $order_item->get_quantity() );
 		return number_format( $items_subtotal, 2, '.', '' );
 	}
 
@@ -187,7 +189,7 @@ class ACO_Helper_Order {
 	 * @return float
 	 */
 	public static function get_item_tax_amount( $order_item ) {
-		return number_format( $order_item->get_total_tax(), 2, '.', '' );
+		return number_format( $order_item->get_total_tax() / $order_item->get_quantity(), 2, '.', '' );
 	}
 
 	/**

@@ -194,7 +194,10 @@ class ACO_Order_Management {
 				$order->add_order_note( $formated_text );
 				return false;
 			}
-			$order->add_order_note( __( 'Avarda Checkout order was successfully refunded (refund endpoint).', 'avarda-checkout-for-woocommerce' ) );
+
+			$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
+			// Translators: Refunded amount.
+			$order->add_order_note( sprintf( __( '%s successfully refunded via Avarda.', 'avarda-checkout-for-woocommerce' ), $formatted_amount ) );
 			return true;
 		}
 
