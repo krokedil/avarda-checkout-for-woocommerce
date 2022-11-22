@@ -25,7 +25,10 @@ class ACO_Helper_Order {
 		// Get order items.
 		$order_items = $order->get_items();
 		foreach ( $order_items as $order_item ) {
-			$formated_order_items[] = $this->get_order_item( $order, $order_item );
+			$formatted_order_item = $this->get_order_item( $order, $order_item );
+			if ( is_array( $formatted_order_item ) ) {
+				$formated_order_items[] = $formatted_order_item;
+			}
 		}
 
 		// Get order fees.
@@ -59,13 +62,19 @@ class ACO_Helper_Order {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
 
+		$order_line_quantity = intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) );
+
+		// Don't add order item if quantity is 0.
+		if ( empty( $order_line_quantity ) ) {
+			return false;
+		}
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
-			'quantity'    => intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) ),
+			'quantity'    => $order_line_quantity,
 		);
 	}
 
