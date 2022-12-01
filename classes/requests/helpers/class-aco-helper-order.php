@@ -62,18 +62,37 @@ class ACO_Helper_Order {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
 
-		$order_line_quantity = intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) );
+		$order_line_quantity              = intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) );
+		$total_refunded_for_item_incl_vat = self::get_total_refunded_for_item_incl_vat( $order, $order_item );
+		$total_tax_refunded_for_item      = self::get_total_tax_refunded_for_item( $order, $order_item );
+		$item_total_incl_vat              = self::get_item_total_incl_vat( $order_item );
+		$item_total_tax                   = self::get_item_total_tax( $order_item );
+		$item_price_incl_vat              = self::get_item_price_incl_vat( $order_item );
+		$item_tax_amount                  = self::get_item_tax_amount( $order_item );
 
-		// Don't add order item if quantity is 0.
-		if ( empty( $order_line_quantity ) ) {
+		// Don't add order item if quantity is 0 and refunded amount is the same as order line total.
+		// This means that we have refunded (released the reservation) the entire order line alreadys.
+		if ( empty( $order_line_quantity ) && $total_refunded_for_item_incl_vat === $item_total_incl_vat ) {
 			return false;
 		}
+
+		// If the order line has been refunded (reservation has been released) but not the entire order line amount (e.g. goodwiil refund).
+		if ( empty( $order_line_quantity ) && $total_refunded_for_item_incl_vat !== $item_total_incl_vat ) {
+			// Let's change this to one item and activate the remaining order line amount and tax amount.
+			$order_line_quantity = 1;
+			$item_price_incl_vat = number_format( $item_total_incl_vat - $total_refunded_for_item_incl_vat, 2, '.', '' );
+			$item_tax_amount     = number_format( $item_total_tax - $total_tax_refunded_for_item, 2, '.', '' );
+		}
+
+		// @todo - add logic for situations where the order line has a quantity > 1 and a good will refund has been performed.
+		// Also - can a good will refund be done in Woo by adding a price but keep the quantity to 0?
+
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
+			'amount'      => $item_price_incl_vat, // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
-			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
+			'taxAmount'   => $item_tax_amount, // Float.
 			'quantity'    => $order_line_quantity,
 		);
 	}
@@ -228,5 +247,54 @@ class ACO_Helper_Order {
 			}
 		}
 		return 0;
+	}
+
+	/**
+	 * Gets the item price including vat.
+	 *
+	 * @param object $order WooCommerce order.
+	 * @param object $order_item The order item.
+	 * @return string
+	 */
+	public static function get_total_refunded_for_item_incl_vat( $order, $order_item ) {
+		$total_tax_refunded_for_item = self::get_total_tax_refunded_for_item( $order, $order_item );
+		$total_refunded_for_item     = $order->get_total_refunded_for_item( $order_item->get_id() ) + $total_tax_refunded_for_item;
+		return number_format( $total_refunded_for_item, 2, '.', '' );
+	}
+
+	/**
+	 * Gets the item price including vat.
+	 *
+	 * @param object $order WooCommerce order.
+	 * @param object $order_item The order item.
+	 * @return string
+	 */
+	public static function get_total_tax_refunded_for_item( $order, $order_item ) {
+		$tax_amount = 0;
+		foreach ( $order->get_taxes() as $tax_item ) {
+			$tax_amount += $order->get_tax_refunded_for_item( $order_item->get_id(), $tax_item->get_rate_id() );
+		}
+		return number_format( $tax_amount, 2, '.', '' );
+	}
+
+	/**
+	 * Gets the item price including vat.
+	 *
+	 * @param object $order_item The order item.
+	 * @return string
+	 */
+	public static function get_item_total_incl_vat( $order_item ) {
+		$items_subtotal = ( ( $order_item->get_total() + $order_item->get_total_tax() ) );
+		return number_format( $items_subtotal, 2, '.', '' );
+	}
+
+	/**
+	 * Gets the item price including vat.
+	 *
+	 * @param object $order_item The order item.
+	 * @return string
+	 */
+	public static function get_item_total_tax( $order_item ) {
+		return number_format( $order_item->get_total_tax(), 2, '.', '' );
 	}
 }
