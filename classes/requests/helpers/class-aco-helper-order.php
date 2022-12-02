@@ -42,13 +42,20 @@ class ACO_Helper_Order {
 		$order_fees = $order->get_fees();
 		foreach ( $order_fees as $fee ) {
 			$formated_order_items[] = $this->get_fee( $order, $fee );
+			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
+			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $fee );
+			if ( is_array( $formatted_refunded_order_item ) ) {
+				$formated_order_items[] = $formatted_refunded_order_item;
+			}
 		}
 
 		// Get order shipping.
-		if ( $order->get_shipping_method() ) {
-			$shipping = $this->get_shipping( $order );
-			if ( null !== $shipping ) {
-				$formated_order_items[] = $shipping;
+		foreach ( $order->get_items( 'shipping' ) as $order_item ) {
+			$formated_order_items[] = self::process_order_item_shipping( $order, $order_item );
+			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
+			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $order_item );
+			if ( is_array( $formatted_refunded_order_item ) ) {
+				$formated_order_items[] = $formatted_refunded_order_item;
 			}
 		}
 
@@ -70,8 +77,8 @@ class ACO_Helper_Order {
 		}
 
 		return array(
-			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
-			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
+			'description' => substr( self::get_item_name( $order_item ), 0, 35 ), // String.
+			'notes'       => substr( self::get_reference( $order_item ), 0, 35 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
@@ -87,23 +94,18 @@ class ACO_Helper_Order {
 	 * @return array Formated order item.
 	 */
 	public function get_refunded_order_item( $order, $order_item ) {
-		if ( $order_item['variation_id'] ) {
-			$product = wc_get_product( $order_item['variation_id'] );
-		} else {
-			$product = wc_get_product( $order_item['product_id'] );
-		}
 
 		$total_refunded_for_item_incl_vat = self::get_total_refunded_for_item_incl_vat( $order, $order_item );
 		$total_tax_refunded_for_item      = self::get_total_tax_refunded_for_item( $order, $order_item );
 
 		// If no refund has been performed - return.
-		if ( empty( $total_refunded_for_item_incl_vat ) ) {
+		if ( empty( floatval( $total_refunded_for_item_incl_vat ) ) ) {
 			return false;
 		}
 
 		return array(
-			'description' => 'Refunded: ' . substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
-			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
+			'description' => 'Refunded: ' . substr( self::get_item_name( $order_item ), 0, 35 ), // String.
+			'notes'       => substr( self::get_reference( $order_item ), 0, 35 ), // String.
 			'amount'      => $total_refunded_for_item_incl_vat, // string.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => $total_tax_refunded_for_item, // Float.
@@ -117,9 +119,9 @@ class ACO_Helper_Order {
 	 * @param object $order_item The order item.
 	 * @return string
 	 */
-	public function get_product_name( $order_item ) {
+	public static function get_item_name( $order_item ) {
 		$item_name = $order_item->get_name();
-		return strip_tags( $item_name );
+		return wp_strip_all_tags( $item_name );
 	}
 
 	/**
@@ -155,22 +157,6 @@ class ACO_Helper_Order {
 	}
 
 	/**
-	 * Gets the products SKU.
-	 *
-	 * @param object $product The WooCommerce Product.
-	 * @return string
-	 */
-	public function get_product_sku( $product ) {
-		if ( $product->get_sku() ) {
-			$item_reference = $product->get_sku();
-		} else {
-			$item_reference = $product->get_id();
-		}
-
-		return $item_reference;
-	}
-
-	/**
 	 * Formats the fee.
 	 *
 	 * @param object $order WooCommerce order.
@@ -188,29 +174,20 @@ class ACO_Helper_Order {
 	}
 
 	/**
-	 * Formats the shipping.
+	 * Gets the formated order line shipping.
 	 *
-	 * @param WC_Order $order WC order.
+	 * @param WC_Order|null          $order The WooCommerce order.
+	 * @param WC_Order_Item_Shipping $order_item The WooCommerce order line item.
 	 * @return array
 	 */
-	public function get_shipping( $order ) {
-		if ( $order->get_shipping_total() > 0 ) {
-			return array(
-				'description' => substr( $order->get_shipping_method(), 0, 35 ), // String.
-				'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ), // String.
-				'amount'      => number_format( $order->get_shipping_total() + $order->get_shipping_tax(), 2, '.', '' ), // String.
-				'taxCode'     => ( '0' !== $order->get_shipping_tax() ) ? $this->get_product_tax_code( $order, current( $order->get_items( 'shipping' ) ) ) : 0, // Float.
-				'taxAmount'   => number_format( $order->get_shipping_tax(), 2, '.', '' ),
-			);
-		} else {
-			return array(
-				'description' => substr( $order->get_shipping_method(), 0, 35 ), // String.
-				'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ), // String.
-				'amount'      => 0, // Float.
-				'taxCode'     => '0', // String.
-				'taxAmount'   => 0, // Float.
-			);
-		}
+	public static function process_order_item_shipping( $order, $order_item ) {
+		return array(
+			'description' => substr( $order_item->get_name(), 0, 35 ), // String.
+			'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ), // String.
+			'amount'      => self::get_item_price_incl_vat( $order_item ), // String.
+			'taxCode'     => self::get_tax_rate( $order, $order_item ), // Float.
+			'taxAmount'   => self::get_item_tax_amount( $order_item ),
+		);
 	}
 
 	/**
@@ -272,7 +249,7 @@ class ACO_Helper_Order {
 	 */
 	public static function get_total_refunded_for_item_incl_vat( $order, $order_item ) {
 		$total_tax_refunded_for_item = self::get_total_tax_refunded_for_item( $order, $order_item ); // returned negative.
-		$total_refunded_for_item     = -$order->get_total_refunded_for_item( $order_item->get_id() ) + $total_tax_refunded_for_item; // negative number.
+		$total_refunded_for_item     = -$order->get_total_refunded_for_item( $order_item->get_id(), $order_item->get_type() ) + $total_tax_refunded_for_item; // negative number.
 		return number_format( $total_refunded_for_item, 2, '.', '' );
 	}
 
@@ -286,7 +263,7 @@ class ACO_Helper_Order {
 	public static function get_total_tax_refunded_for_item( $order, $order_item ) {
 		$tax_amount = 0;
 		foreach ( $order->get_taxes() as $tax_item ) {
-			$tax_amount += $order->get_tax_refunded_for_item( $order_item->get_id(), $tax_item->get_rate_id() );
+			$tax_amount += $order->get_tax_refunded_for_item( $order_item->get_id(), $tax_item->get_rate_id(), $order_item->get_type() );
 		}
 		return number_format( -$tax_amount, 2, '.', '' );
 	}
@@ -310,5 +287,28 @@ class ACO_Helper_Order {
 	 */
 	public static function get_item_total_tax( $order_item ) {
 		return number_format( $order_item->get_total_tax(), 2, '.', '' );
+	}
+
+	/**
+	 * Gets the reference for the order line.
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $order_item The WooCommerce order item.
+	 * @return string
+	 */
+	public static function get_reference( $order_item ) {
+		if ( 'line_item' === $order_item->get_type() ) {
+			$product = $order_item['variation_id'] ? wc_get_product( $order_item['variation_id'] ) : wc_get_product( $order_item['product_id'] );
+			if ( $product->get_sku() ) {
+				$reference = $product->get_sku();
+			} else {
+				$reference = $product->get_id();
+			}
+		} elseif ( 'shipping' === $order_item->get_type() ) {
+			$reference = $order_item->get_method_id() . ':' . $order_item->get_instance_id();
+		} else {
+			$reference = $order_item->get_id();
+		}
+
+		return $reference;
 	}
 }
