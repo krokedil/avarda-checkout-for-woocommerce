@@ -22,12 +22,19 @@ class ACO_Helper_Order {
 	public function get_order_items( $order_id ) {
 		$formated_order_items = array();
 		$order                = wc_get_order( $order_id );
+
 		// Get order items.
 		$order_items = $order->get_items();
 		foreach ( $order_items as $order_item ) {
+			// Regular order item.
 			$formatted_order_item = $this->get_order_item( $order, $order_item );
 			if ( is_array( $formatted_order_item ) ) {
 				$formated_order_items[] = $formatted_order_item;
+			}
+			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
+			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $order_item );
+			if ( is_array( $formatted_refunded_order_item ) ) {
+				$formated_order_items[] = $formatted_refunded_order_item;
 			}
 		}
 
@@ -62,38 +69,45 @@ class ACO_Helper_Order {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
 
-		$order_line_quantity              = intval( $order_item->get_quantity() - abs( $order->get_qty_refunded_for_item( $order_item->get_id() ) ) );
-		$total_refunded_for_item_incl_vat = self::get_total_refunded_for_item_incl_vat( $order, $order_item );
-		$total_tax_refunded_for_item      = self::get_total_tax_refunded_for_item( $order, $order_item );
-		$item_total_incl_vat              = self::get_item_total_incl_vat( $order_item );
-		$item_total_tax                   = self::get_item_total_tax( $order_item );
-		$item_price_incl_vat              = self::get_item_price_incl_vat( $order_item );
-		$item_tax_amount                  = self::get_item_tax_amount( $order_item );
-
-		// Don't add order item if quantity is 0 and refunded amount is the same as order line total.
-		// This means that we have refunded (released the reservation) the entire order line alreadys.
-		if ( empty( $order_line_quantity ) && $total_refunded_for_item_incl_vat === $item_total_incl_vat ) {
-			return false;
-		}
-
-		// If the order line has been refunded (reservation has been released) but not the entire order line amount (e.g. goodwiil refund).
-		if ( empty( $order_line_quantity ) && $total_refunded_for_item_incl_vat !== $item_total_incl_vat ) {
-			// Let's change this to one item and activate the remaining order line amount and tax amount.
-			$order_line_quantity = 1;
-			$item_price_incl_vat = number_format( $item_total_incl_vat - $total_refunded_for_item_incl_vat, 2, '.', '' );
-			$item_tax_amount     = number_format( $item_total_tax - $total_tax_refunded_for_item, 2, '.', '' );
-		}
-
-		// @todo - add logic for situations where the order line has a quantity > 1 and a good will refund has been performed.
-		// Also - can a good will refund be done in Woo by adding a price but keep the quantity to 0?
-
 		return array(
 			'description' => substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
-			'amount'      => $item_price_incl_vat, // Float.
+			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
-			'taxAmount'   => $item_tax_amount, // Float.
-			'quantity'    => $order_line_quantity,
+			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
+			'quantity'    => $order_item->get_quantity(),
+		);
+	}
+
+	/**
+	 * Gets formated refunded order item.
+	 *
+	 * @param WC_Order $order WC order.
+	 * @param object   $order_item WooCommerce order item object.
+	 * @return array Formated order item.
+	 */
+	public function get_refunded_order_item( $order, $order_item ) {
+		if ( $order_item['variation_id'] ) {
+			$product = wc_get_product( $order_item['variation_id'] );
+		} else {
+			$product = wc_get_product( $order_item['product_id'] );
+		}
+
+		$total_refunded_for_item_incl_vat = self::get_total_refunded_for_item_incl_vat( $order, $order_item );
+		$total_tax_refunded_for_item      = self::get_total_tax_refunded_for_item( $order, $order_item );
+
+		// If no refund has been performed - return.
+		if ( empty( $total_refunded_for_item_incl_vat ) ) {
+			return false;
+		}
+
+		return array(
+			'description' => 'Refunded: ' . substr( $this->get_product_name( $order_item ), 0, 35 ), // String.
+			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
+			'amount'      => $total_refunded_for_item_incl_vat, // string.
+			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
+			'taxAmount'   => $total_tax_refunded_for_item, // Float.
+			'quantity'    => 1,
 		);
 	}
 
@@ -257,8 +271,8 @@ class ACO_Helper_Order {
 	 * @return string
 	 */
 	public static function get_total_refunded_for_item_incl_vat( $order, $order_item ) {
-		$total_tax_refunded_for_item = self::get_total_tax_refunded_for_item( $order, $order_item );
-		$total_refunded_for_item     = $order->get_total_refunded_for_item( $order_item->get_id() ) + $total_tax_refunded_for_item;
+		$total_tax_refunded_for_item = self::get_total_tax_refunded_for_item( $order, $order_item ); // returned negative.
+		$total_refunded_for_item     = -$order->get_total_refunded_for_item( $order_item->get_id() ) + $total_tax_refunded_for_item; // negative number.
 		return number_format( $total_refunded_for_item, 2, '.', '' );
 	}
 
@@ -274,7 +288,7 @@ class ACO_Helper_Order {
 		foreach ( $order->get_taxes() as $tax_item ) {
 			$tax_amount += $order->get_tax_refunded_for_item( $order_item->get_id(), $tax_item->get_rate_id() );
 		}
-		return number_format( $tax_amount, 2, '.', '' );
+		return number_format( -$tax_amount, 2, '.', '' );
 	}
 
 	/**
