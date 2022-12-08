@@ -126,12 +126,13 @@ class ACO_API {
 	/**
 	 * Refund an Avarda Checkout order.
 	 *
-	 * @param int $order_id WC order id.
+	 * @param int   $order_id WC order id.
+	 * @param array $refunded_items The refunded items.
 	 * @return mixed
 	 */
-	public function request_refund_order( $order_id ) {
+	public function request_refund_order( $order_id, $amount, $reason ) {
 		$request  = new ACO_Request_Refund_Order();
-		$response = $request->request( $order_id );
+		$response = $request->request( $order_id, $amount, $reason );
 		return $response;
 	}
 
