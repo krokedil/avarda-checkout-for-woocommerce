@@ -45,9 +45,9 @@ class ACO_Confirmation {
 	 * @return void
 	 */
 	public function confirm_order() {
-		$aco_confirm        = filter_input( INPUT_GET, 'aco_confirm', FILTER_SANITIZE_STRING );
-		$avarda_purchase_id = filter_input( INPUT_GET, 'aco_purchase_id', FILTER_SANITIZE_STRING );
-		$order_key          = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+		$aco_confirm        = filter_input( INPUT_GET, 'aco_confirm', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$avarda_purchase_id = filter_input( INPUT_GET, 'aco_purchase_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$order_key          = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		// Return if we dont have our parameters set.
 		if ( empty( $aco_confirm ) || empty( $avarda_purchase_id ) ) {

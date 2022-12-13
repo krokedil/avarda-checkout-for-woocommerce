@@ -146,7 +146,7 @@ class ACO_Subscription {
 			$request_args['recurringPayments'] = 'checked';
 		}
 		if ( $this->is_aco_subs_change_payment_method() ) {
-			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 			$order_id = wc_get_order_id_by_order_key( $key );
 			if ( $order_id ) {
 				$wc_order = wc_get_order( $order_id );
@@ -196,8 +196,8 @@ class ACO_Subscription {
 	 * @return bool
 	 */
 	public function is_aco_subs_change_payment_method() {
-		$key        = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
-		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$key        = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		if ( ! empty( $key ) && ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) ) {
 			return true;
@@ -212,7 +212,7 @@ class ACO_Subscription {
 	 * @return void
 	 */
 	public function display_thankyou_message_for_payment_method_change() {
-		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		if ( ! empty( $aco_action ) && 'subs-payment-changed' === $aco_action ) {
 			wc_add_notice( __( 'Thank you, your subscription payment method is now updated.', 'avarda-checkout-for-woocommerce' ), 'success' );
 			aco_wc_unset_sessions();
