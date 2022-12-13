@@ -63,6 +63,20 @@ $settings = array(
 		'default'     => 'no',
 		'description' => sprintf( __( 'Log ' . $this->method_title . ' events in <code>%s</code>', 'avarda-checkout-for-woocommerce' ), wc_get_log_file_path( 'avarda_checkout' ) ), // phpcs:ignore
 	),
+	'payment_gateway_icon'       => array(
+		'title'       => __( 'Payment gateway icon', 'avarda-checkout-for-woocommerce' ),
+		'type'        => 'text',
+		'description' => __( 'Enter an URL to the icon you want to display for the payment method. Use <i>default</i> to display the Avarda logo. Leave blank to not show an icon at all.', 'avarda-checkout-for-woocommerce' ),
+		'default'     => 'default',
+		'desc_tip'    => false,
+	),
+	'payment_gateway_icon_width' => array(
+		'title'       => __( 'Payment gateway icon width', 'avarda-checkout-for-woocommerce' ),
+		'type'        => 'number',
+		'description' => __( 'Specify the max width (in px) of the payment gateway icon.', 'avarda-checkout-for-woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => true,
+	),
 	'two_column_checkout'        => array(
 		'title'   => __( 'Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
 		'type'    => 'checkbox',

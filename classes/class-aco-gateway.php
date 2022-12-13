@@ -30,12 +30,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->enabled       = $this->get_option( 'enabled' );
-		$this->title         = $this->get_option( 'title' );
-		$this->description   = $this->get_option( 'description' );
-		$this->debug         = $this->get_option( 'debug' );
-		$this->testmode      = 'yes' === $this->get_option( 'testmode' );
-		$this->checkout_flow = $this->get_option( 'checkout_flow', 'embedded' );
+		$this->enabled                        = $this->get_option( 'enabled' );
+		$this->title                          = $this->get_option( 'title' );
+		$this->description                    = $this->get_option( 'description' );
+		$this->debug                          = $this->get_option( 'debug' );
+		$this->testmode                       = 'yes' === $this->get_option( 'testmode' );
+		$this->checkout_flow                  = $this->get_option( 'checkout_flow', 'embedded' );
+		$this->payment_gateway_icon           = get_option( 'woocommerce_aco_settings', array() )['payment_gateway_icon'] ?? 'default';
+		$this->payment_gateway_icon_max_width = $this->get_option( 'payment_gateway_icon_max_width', '75' );
 
 		// Supports.
 		$this->supports = array(
@@ -55,10 +57,19 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
+		if ( empty( $this->payment_gateway_icon ) ) {
+			return;
+		}
 
-		$icon_src   = AVARDA_CHECKOUT_URL . '/assets/images/avarda.png';
-		$icon_width = '75';
-		$icon_html  = '<img src="' . $icon_src . '" alt="Avarda" style="max-width:' . $icon_width . 'px"/>';
+		if ( 'default' === strtolower( $this->payment_gateway_icon ) ) {
+			$icon_src   = AVARDA_CHECKOUT_URL . '/assets/images/avarda.png';
+			$icon_width = '75';
+		} else {
+			$icon_src   = $this->payment_gateway_icon;
+			$icon_width = $this->payment_gateway_icon_max_width;
+		}
+
+		$icon_html = '<img src="' . $icon_src . '" alt="Avarda" style="max-width:' . $icon_width . 'px"/>';
 		return apply_filters( 'aco_icon_html', $icon_html );
 	}
 
@@ -92,7 +103,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order                 = wc_get_order( $order_id );
 		$avarda_purchase_id    = $this->get_avarda_purchase_id( $order );
-		$change_payment_method = filter_input( INPUT_GET, 'change_payment_method', FILTER_SANITIZE_STRING );
+		$change_payment_method = filter_input( INPUT_GET, 'change_payment_method', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		// Subscription payment method change.
 		// 1. Redirect to receipt page.
 		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
@@ -174,7 +185,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 		// Refund.
-		return ACO_WC()->order_management->refund_payment( $order_id, $amount = null, $reason = '' );
+		return ACO_WC()->order_management->refund_payment( $order_id, $amount, $reason );
 	}
 
 	/**
@@ -290,7 +301,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function receipt_page( $order_id ) {
-		$aco_action    = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_STRING );
+		$aco_action    = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$template_name = 'checkout/order-receipt.php';
 		if ( ! empty( $aco_action ) && 'change-subs-payment' === $aco_action ) {
 

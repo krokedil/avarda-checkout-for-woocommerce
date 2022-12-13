@@ -35,7 +35,7 @@ class ACO_Callbacks {
 		$order_id    = aco_get_order_id_by_purchase_id( $purchase_id );
 		$order       = wc_get_order( $order_id );
 
-		$aco_sub_payment_change = filter_input( INPUT_GET, 'aco-sub-payment-change', FILTER_SANITIZE_STRING );
+		$aco_sub_payment_change = filter_input( INPUT_GET, 'aco-sub-payment-change', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
 		if ( ! empty( $aco_sub_payment_change ) ) {
 			aco_confirm_subscription( $aco_sub_payment_change, $purchase_id );

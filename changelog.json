@@ -163,5 +163,10 @@
           "description" : "<ul><li>Fix - Improvement in check that current Avarda session step can be updated before sending update request. Solves potential issue with deleted/missing payment session.</li><li>Fix - Solve issue with fee amount and fee tax amount in activate order request.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.0.3"
+     },
+     "1.8.0" : {
+          "description" : "<ul><li>Feature - Adds support for Avardas refund order logic (refund/release reserved amount before the payment is captured).</li><li>Feature - Adds settings for custom payment gateway icon.</li><li>Tweak - Specifying quantity on order lines sent to Avarda.</li><li>Fix - PHP 8.1 deprecated notice fix.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.1.1"
      }
 }

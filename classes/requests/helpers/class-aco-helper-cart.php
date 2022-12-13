@@ -65,7 +65,8 @@ class ACO_Helper_Cart {
 			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
 			'amount'      => $this->get_product_price( $cart_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $cart_item ), // String.
-			'taxAmount'   => number_format( $cart_item['line_tax'], 2, '.', '' ), // Float.
+			'taxAmount'   => number_format( $cart_item['line_tax'] / $cart_item['quantity'], 2, '.', '' ), // Float.
+			'quantity'    => $cart_item['quantity'],
 		);
 	}
 
@@ -89,7 +90,7 @@ class ACO_Helper_Cart {
 	 * @return float
 	 */
 	public function get_product_price( $cart_item ) {
-		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] );
+		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] ) / $cart_item['quantity'];
 		return number_format( $items_subtotal, 2, '.', '' );
 	}
 

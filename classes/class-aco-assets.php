@@ -97,7 +97,7 @@ class ACO_Assets {
 	 */
 	public function localize_and_enqueue_checkout_script() {
 
-		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_STRING );
+		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
 
 		$this->aco_maybe_initialize_payment( $order_id );
