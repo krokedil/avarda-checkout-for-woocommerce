@@ -120,12 +120,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
 		}
 		/**
-		 * Private unserialize method to prevent unserializing of the *Singleton*
+		 * Public unserialize method to prevent unserializing of the *Singleton*
 		 * instance.
 		 *
 		 * @return void
 		 */
-		private function __wakeup() {
+		public function __wakeup() {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
 		}
 
