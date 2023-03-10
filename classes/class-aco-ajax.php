@@ -29,6 +29,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_iframe_shipping_address_change' => true,
 			'aco_wc_change_payment_method'          => true,
 			'aco_wc_log_js'                         => true,
+			'aco_refund_remaining_order'            => true,
 		);
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
@@ -170,6 +171,40 @@ class ACO_AJAX extends WC_AJAX {
 		$avarda_purchase_id = aco_get_purchase_id_from_session();
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
+		wp_send_json_success();
+	}
+
+	/**
+	 * Refunds the remaining funds from an Avarda payment.
+	 *
+	 * @return void
+	 */
+	public static function aco_refund_remaining_order() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
+		if ( ! wp_verify_nonce( $nonce, 'aco_refund_remaining_order' ) ) { // Input var okay.
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$order_id = filter_input( INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT );
+		$order    = wc_get_order( $order_id );
+
+		// Not going to do this for non-Walley orders.
+		if ( 'aco' !== $order->get_payment_method() ) {
+			wp_send_json_error( 'Payment method is not Avarda Checkout' );
+			wp_die();
+		}
+
+		$response = ACO_WC()->api->request_refund_remaining_order( $order_id );
+		if ( is_wp_error( $response ) ) {
+			// Translators: Request error message & request error code.
+			$error_message = sprintf( __( 'Could not refund remaining order. Error message: %1$s. Error code: %2$s</i>', 'avarda-checkout-for-woocommerce' ), $response->get_error_message(), $response->get_error_code() );
+			$order->add_order_note( $error_message );
+			wp_send_json_error( $error_message );
+			wp_die();
+		}
+
+		$order->add_order_note( __( 'Refund remaining order request successfully sent to Avarda.', 'avarda-checkout-for-woocommerce' ) );
 		wp_send_json_success();
 	}
 }

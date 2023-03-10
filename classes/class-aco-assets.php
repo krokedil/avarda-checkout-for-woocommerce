@@ -34,6 +34,9 @@ class ACO_Assets {
 		add_action( 'aco_wc_before_checkout_form', array( $this, 'localize_and_enqueue_checkout_script' ) );
 		add_action( 'aco_wc_before_order_receipt', array( $this, 'localize_and_enqueue_checkout_script' ) );
 
+		// JS & CSS for metabox.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_metabox_scripts' ) );
+
 	}
 
 	/**
@@ -185,6 +188,40 @@ class ACO_Assets {
 			$params
 		);
 		wp_enqueue_script( 'aco_wc' );
+	}
+
+	/**
+	 * Enqueues admin page scripts.
+	 *
+	 * @hook admin_enqueue_scripts
+	 */
+	public function enqueue_admin_metabox_scripts( $hook ) {
+
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		if ( get_post_type( $post ) !== 'shop_order' ) {
+			return;
+		}
+
+		wp_register_script( 'aco-admin', AVARDA_CHECKOUT_URL . '/assets/js/aco-meta-box.js', true, AVARDA_CHECKOUT_VERSION, true );
+		wp_localize_script(
+			'aco-admin',
+			'acoParams',
+			array(
+				'aco_refund_remaining_order'       => WC_AJAX::get_endpoint( 'aco_refund_remaining_order' ),
+				'aco_refund_remaining_order_nonce' => wp_create_nonce( 'aco_refund_remaining_order' ),
+				'order_id'                         => get_the_ID(),
+			)
+		);
+		wp_enqueue_script( 'aco-admin' );
+
+		// CSS for metabox.
+		wp_register_style( 'aco-metabox-css', AVARDA_CHECKOUT_URL . '/assets/css/aco-meta-box.css', false, AVARDA_CHECKOUT_VERSION );
+		wp_enqueue_style( 'aco-metabox-css' );
 	}
 
 	/**

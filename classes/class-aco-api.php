@@ -150,6 +150,18 @@ class ACO_API {
 	}
 
 	/**
+	 * Refund remaining Avarda Checkout order.
+	 *
+	 * @param int $order_id WC order id.
+	 * @return mixed
+	 */
+	public function request_refund_remaining_order( $order_id ) {
+		$request  = new ACO_Request_Refund_Remaining_Order();
+		$response = $request->request( $order_id );
+		return $response;
+	}
+
+	/**
 	 *
 	 * Creates recurring order.
 	 *
