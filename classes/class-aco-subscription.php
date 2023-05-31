@@ -147,7 +147,8 @@ class ACO_Subscription {
 	public function set_recurring( $request_args ) {
 		$is_recurring = $this->check_if_subscription() || $this->is_aco_subs_change_payment_method();
 		if ( apply_filters( 'aco_is_subscription', $is_recurring, $request_args ) ) {
-			$request_args['recurringPayments'] = 'checked';
+			$request_args['checkoutSetup']['recurringPayments']                      = 'checked';
+			$request_args['checkoutSetup']['hideUnsupportedRecurringPaymentMethods'] = true;
 		}
 		if ( $this->is_aco_subs_change_payment_method() ) {
 			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
