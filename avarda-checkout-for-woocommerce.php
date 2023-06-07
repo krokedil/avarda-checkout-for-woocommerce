@@ -29,8 +29,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'AVARDA_CHECKOUT_VERSION', '1.8.0' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
-define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://avdonl-p-checkout.avarda.org' );
-define( 'AVARDA_CHECKOUT_TEST_ENV', 'https://avdonl-s-checkout.avarda.org' );
+define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://checkout-api.avarda.com' );
+define( 'AVARDA_CHECKOUT_TEST_ENV', 'https://stage.checkout-api.avarda.com' );
 
 if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
