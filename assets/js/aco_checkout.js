@@ -83,7 +83,7 @@ jQuery(function($) {
 				return;
 			}
 			// Stage or Prod javascript file url.
-			var acoJsUrl = ( aco_wc_params.aco_test_mode ) ? "https://avdonl0s0checkout0fe.blob.core.windows.net/frontend/static/js/main.js" : "https://avdonl0p0checkout0fe.blob.core.windows.net/frontend/static/js/main.js";
+			var acoJsUrl = ( aco_wc_params.aco_test_mode ) ? "https://stage.checkout-cdn.avarda.com/cdn/static/js/main.js" : "https://checkout-cdn.avarda.com/cdn/static/js/main.js";
 
 			(function(e,t,n,a,s,c,o,i,r){e[a]=e[a]||function(){(e[a].q=e[a].q||[
 			]).push(arguments)};e[a].i=s;i=t.createElement(n);i.async=1

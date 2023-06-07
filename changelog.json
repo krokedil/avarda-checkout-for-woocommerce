@@ -168,5 +168,10 @@
           "description" : "<ul><li>Feature - Adds support for Avardas refund order logic (refund/release reserved amount before the payment is captured).</li><li>Feature - Adds settings for custom payment gateway icon.</li><li>Tweak - Specifying quantity on order lines sent to Avarda.</li><li>Fix - PHP 8.1 deprecated notice fix.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.1.1"
+     },
+     "1.9.0" : {
+          "description" : "<ul><li>Tweak - Updates plugin to use new endpoint URLs for Avarda API.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.2.2"
      }
 }

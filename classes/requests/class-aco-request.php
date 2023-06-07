@@ -95,8 +95,8 @@ class ACO_Request {
 	 * @return void
 	 */
 	public function set_environment() {
-		$live_environment = 'https://avdonl-p-checkout.avarda.org';
-		$test_environment = 'https://avdonl-s-checkout.westeurope.cloudapp.azure.com';
+		$live_environment = 'https://checkout-api.avarda.com';
+		$test_environment = 'https://stage.checkout-api.avarda.com';
 		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
 
 		if ( 'no' === $avarda_settings['testmode'] ) {

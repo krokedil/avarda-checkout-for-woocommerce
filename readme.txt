@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.1.1
+Tested up to: 6.2.2
 Requires PHP: 7.2
 WC requires at least: 5.0.0
-WC tested up to: 7.1.1
+WC tested up to: 7.2.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2023.06.07        - version 1.9.0 =
+* Tweak             - Updates plugin to use new endpoint URLs for Avarda API.
+
 = 2022.12.13        - version 1.8.0 =
 * Feature           - Adds support for Avardas refund order logic (refund/release reserved amount before the payment is captured).
 * Feature           - Adds settings for custom payment gateway icon.
