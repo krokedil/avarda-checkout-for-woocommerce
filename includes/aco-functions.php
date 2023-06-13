@@ -273,7 +273,7 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
  * @param string $avarda_purchase_id The Avarda purchase id.
  * @return void
  */
-function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
+function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 	if ( $order_id ) {
 		$order = wc_get_order( $order_id );
 
