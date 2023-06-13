@@ -34,32 +34,35 @@ class ACO_Subscription {
 	 * @return void
 	 */
 	public function set_recurring_token_for_order( $order_id = null, $avarda_order = null ) {
-		$wc_order = wc_get_order( $order_id );
-		if ( class_exists( 'WC_Subscription' ) && ( wcs_order_contains_subscription( $wc_order, array( 'parent', 'renewal', 'resubscribe', 'switch' ) ) || wcs_is_subscription( $wc_order ) ) ) {
-			$subscriptions      = wcs_get_subscriptions_for_order( $order_id );
-			$avarda_purchase_id = $wc_order->get_transaction_id();
-			$avarda_order       = ACO_WC()->api->request_get_payment( $avarda_purchase_id, true );
-			if ( isset( $avarda_order['paymentMethods']['selectedPayment'] ) ) {
-				$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
-				// translators: %s Avarda recurring token.
-				$note = sprintf( __( 'Recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
-				$wc_order->add_order_note( $note );
+		$wc_order        = wc_get_order( $order_id );
+		$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'] ?? '';
 
+		if ( ! empty( $recurring_token ) ) {
+			// translators: %s Avarda recurring token.
+			$note = sprintf( __( 'Avarda subscription ID/recurring token %s saved', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
+			$wc_order->add_order_note( $note );
+			update_post_meta( $order_id, '_aco_recurring_token', $recurring_token );
+
+			// This function is run after WCS has created the subscription order.
+			// Let's add the _aco_recurring_token to the subscription as well.
+			if ( class_exists( 'WC_Subscriptions' ) && ( wcs_order_contains_subscription(
+				$wc_order,
+				array(
+					'parent',
+					'renewal',
+					'resubscribe',
+					'switch',
+				)
+			) || wcs_is_subscription( $wc_order ) ) ) {
+				$subscriptions = wcs_get_subscriptions_for_order( $order_id, array( 'order_type' => 'any' ) );
 				foreach ( $subscriptions as $subscription ) {
-					$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
-					$subscription->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
-					$subscription->save();
-					aco_populate_wc_order( $subscription, $avarda_order );
-				}
-			} else {
-				$wc_order->add_order_note( __( 'Recurring token was missing from the Avarda order during the checkout process. Please contact Avarda for help.', 'avarda-checkout-for-woocommerce' ) );
-				$wc_order->set_status( 'on-hold' );
-				$wc_order->save();
-				foreach ( $subscriptions as $subscription ) {
-					$subscription->set_status( 'on-hold' );
+					// translators: %s Avarda recurring token.
+					$subscription->add_order_note( sprintf( __( 'Avarda subscription ID/recurring token %s saved.', 'avarda-checkout-for-woocommerce' ), $recurring_token ) );
+					update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
 				}
 			}
 		}
+
 	}
 
 	/**
