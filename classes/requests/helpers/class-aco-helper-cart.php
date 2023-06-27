@@ -47,9 +47,9 @@ class ACO_Helper_Cart {
 
 		// Smart coupons.
 		if ( ! empty( WC()->cart->get_coupons() ) ) {
-			foreach ( WC()->cart->get_coupons() as $coupon ) {
+			foreach ( WC()->cart->get_coupons() as $coupon_key => $coupon ) {
 				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
-					$coupon_amount = number_format( $coupon->get_amount() * -1, 2, '.', '' );
+					$coupon_amount = number_format( WC()->cart->get_coupon_discount_amount( $coupon_key ) * -1, 2, '.', '' );
 					$label         = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( __( 'Gift card:', 'avarda-checkout-for-woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
 					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
 					$gift_card     = array(
