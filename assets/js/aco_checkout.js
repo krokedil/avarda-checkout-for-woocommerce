@@ -402,6 +402,11 @@ jQuery(function($) {
 			for ( i = 0; i < form.length; i++ ) {
 				var name = form[i].name;
 
+				// Do not try to move field names that include [ in the name.
+				if( name.includes('[')) {
+					continue;
+				}
+
 				// Check if this is a standard field.
 				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
 

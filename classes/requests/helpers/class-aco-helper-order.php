@@ -59,6 +59,9 @@ class ACO_Helper_Order {
 			}
 		}
 
+		// Process gift cards.
+		$formated_order_items = self::process_gift_cards( $order_id, $order, $formated_order_items );
+
 		return $formated_order_items;
 	}
 
@@ -310,5 +313,45 @@ class ACO_Helper_Order {
 		}
 
 		return $reference;
+	}
+
+	/**
+	 * Process gift cards.
+	 *
+	 * @param string $order_id The WooCommerce order ID.
+	 * @param object $order The WooCommerce order.
+	 * @param array  $items The items about to be sent to Avarda.
+	 * @return array
+	 */
+	public static function process_gift_cards( $order_id, $order, $items ) {
+
+		// Smart coupons.
+		if ( ! empty( $order->get_items( 'coupon' ) ) ) {
+			foreach ( $order->get_items( 'coupon' ) as $item_id => $item ) {
+
+				$code          = ( is_object( $item ) && is_callable( array( $item, 'get_name' ) ) ) ? $item->get_name() : trim( $item['name'] );
+				$coupon        = new WC_Coupon( $code );
+				$discount_type = $coupon->get_discount_type();
+				$discount      = ( is_object( $item ) && is_callable( array( $item, 'get_discount' ) ) ) ? $item->get_discount() : $item['discount_amount'];
+
+				if ( 'smart_coupon' === $discount_type && ! empty( $discount ) ) {
+					$coupon_amount = number_format( $discount * -1, 2, '.', '' );
+					$label         = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( __( 'Gift card:', 'avarda-checkout-for-woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
+					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
+					$gift_card     = array(
+						'notes'       => $giftcard_sku,
+						'description' => $label,
+						'quantity'    => 1,
+						'amount'      => $coupon_amount,
+						'taxCode'     => 0,
+						'taxAmount'   => 0,
+					);
+
+					$items[] = $gift_card;
+				}
+			}
+		}
+
+		return $items;
 	}
 }
