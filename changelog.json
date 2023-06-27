@@ -173,5 +173,10 @@
           "description" : "<ul><li>Tweak - Updates plugin to use new endpoint URLs for Avarda API.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.2.2"
+     },
+     "1.10.0" : {
+          "description" : "<ul><li>Feature - Adds support for gift cards via Smart Coupons plugin.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.2.2"
      }
 }
