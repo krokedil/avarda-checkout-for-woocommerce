@@ -17,7 +17,7 @@ class ACO_Checkout {
 	public function __construct() {
 		$settings            = get_option( 'woocommerce_aco_settings' );
 		$this->checkout_flow = $settings['checkout_flow'] ?? 'embedded';
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 9999 );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 999999 );
 
 		if ( 'embedded' === $this->checkout_flow ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
