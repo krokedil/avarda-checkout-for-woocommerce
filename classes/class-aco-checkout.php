@@ -88,6 +88,20 @@ class ACO_Checkout {
 			return;
 		}
 
+		// Check that no subscription product have been added or removed, otherwise create a new session.
+		if ( isset( WC()->session ) && method_exists( WC()->session, 'get' ) ) {
+			if ( WC()->session->get( 'aco_wc_cart_contains_subscription' ) !== aco_get_wc_cart_contains_subscription() ) {
+				aco_wc_unset_sessions();
+				ACO_Logger::log( 'Subscription product changed in update Avarda function. Clearing Avarda session and reloading the checkout page.' );
+				if ( wp_doing_ajax() ) {
+					WC()->session->reload_checkout = true;
+				} else {
+					wp_safe_redirect( wc_get_checkout_url() );
+				}
+				return;
+			}
+		}
+
 		// Get the Avarda order from Avarda.
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 

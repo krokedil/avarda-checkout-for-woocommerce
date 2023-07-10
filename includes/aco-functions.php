@@ -61,6 +61,7 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
+	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
 	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
 	return $avarda_payment;
 
@@ -501,7 +502,7 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 
 
 /**
- * Unsets the sessions used by the plguin.
+ * Unset the sessions used by the plugin.
  *
  * @return void
  */
@@ -510,6 +511,7 @@ function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_update_md5' );
 	WC()->session->__unset( 'aco_language' );
 	WC()->session->__unset( 'aco_currency' );
+	WC()->session->__unset( 'aco_wc_cart_contains_subscription' );
 }
 
 /**
@@ -677,4 +679,18 @@ function aco_payment_steps_approved_for_update_request() {
 		'CompanyAddressInfo',
 		'CompanyAddressInfoWithoutSsn',
 	);
+}
+
+/**
+ * Returns if WooCommerce cart contains subscription product or not.
+ *
+ * @return string The payment state.
+ */
+function aco_get_wc_cart_contains_subscription() {
+	$contains_subscription = 'no';
+
+	if ( ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) ) {
+		$contains_subscription = 'yes';
+	}
+	return apply_filters( 'aco_wc_cart_contains_subscription', $contains_subscription );
 }
