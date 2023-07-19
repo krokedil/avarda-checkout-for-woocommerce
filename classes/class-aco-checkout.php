@@ -71,15 +71,6 @@ class ACO_Checkout {
 			return;
 		}
 
-		// Check if the cart hash has been changed since last update.
-		$cart_hash  = WC()->cart->get_cart_hash();
-		$saved_hash = WC()->session->get( 'aco_last_update_hash' );
-
-		// If they are the same, return.
-		if ( $cart_hash === $saved_hash ) {
-			return;
-		}
-
 		// Check that the currency and locale is the same as earlier, otherwise create a new session.
 		if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
 			aco_wc_unset_sessions();
@@ -100,6 +91,15 @@ class ACO_Checkout {
 				}
 				return;
 			}
+		}
+
+		// Check if the cart hash has been changed since last update.
+		$cart_hash  = WC()->cart->get_cart_hash();
+		$saved_hash = WC()->session->get( 'aco_last_update_hash' );
+
+		// If they are the same, return.
+		if ( $cart_hash === $saved_hash ) {
+			return;
 		}
 
 		// Get the Avarda order from Avarda.
