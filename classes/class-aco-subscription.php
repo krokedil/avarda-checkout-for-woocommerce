@@ -148,7 +148,7 @@ class ACO_Subscription {
 	 * @return array
 	 */
 	public function set_recurring( $request_args ) {
-		$is_recurring = $this->check_if_subscription() || $this->is_aco_subs_change_payment_method();
+		$is_recurring = aco_get_wc_cart_contains_subscription() || $this->is_aco_subs_change_payment_method();
 		if ( apply_filters( 'aco_is_subscription', $is_recurring, $request_args ) ) {
 			$request_args['checkoutSetup']['recurringPayments']                      = 'checked';
 			$request_args['checkoutSetup']['hideUnsupportedRecurringPaymentMethods'] = true;
@@ -187,17 +187,6 @@ class ACO_Subscription {
 		return $request_args;
 	}
 
-	/**
-	 * Checks the cart if it has a subscription product in it.
-	 *
-	 * @return bool
-	 */
-	public function check_if_subscription() {
-		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
-			return true;
-		}
-		return false;
-	}
 	/**
 	 * Checks if this is a ACO subscription payment method change.
 	 *

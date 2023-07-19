@@ -687,10 +687,10 @@ function aco_payment_steps_approved_for_update_request() {
  * @return string The payment state.
  */
 function aco_get_wc_cart_contains_subscription() {
-	$contains_subscription = 'no';
+	$contains_subscription = false;
 
 	if ( ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) ) {
-		$contains_subscription = 'yes';
+		$contains_subscription = true;
 	}
 	return apply_filters( 'aco_wc_cart_contains_subscription', $contains_subscription );
 }
