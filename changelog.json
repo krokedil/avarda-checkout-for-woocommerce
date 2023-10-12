@@ -183,5 +183,11 @@
           "description" : "<ul><li>Fix - Trigger update to Avarda on a later priority (999999) in woocommerce_after_calculate_totals action to be compatible with newer versions of Smart Coupons.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.2.2"
+     },
+     "1.10.2" : {
+          "description" : "<ul><li>Fix - Fix compatibility with Smart Coupons.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.2.2"
      }
+
 }
