@@ -8,7 +8,7 @@ WC requires at least: 5.0.0
 WC tested up to: 7.8.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2023.10.12        - version 1.10.2 =
+* Fix               - Fix compatibility with Smart Coupons.
+
 = 2023.06.28        - version 1.10.1 =
 * Fix               - Trigger update to Avarda on a later priority (999999) in woocommerce_after_calculate_totals action to be compatible with newer versions of Smart Coupons.
 

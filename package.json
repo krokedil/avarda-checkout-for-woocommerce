@@ -1,0 +1,19 @@
+{
+  "name": "avarda-checkout-for-woocommerce",
+  "version": "1.10.2",
+  "description": "Avarda Checkout for WooCOmmerce",
+  "author": "Krokedil AB",
+  "main": "gulpfile.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krokedil/avarda-checkout-for-woocommerce.git"
+  },
+  "scripts": {
+    "build": "npx gulp makePOT"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-sort": "^2.0.0",
+    "gulp-wp-pot": "^2.5.0"
+  }
+}
