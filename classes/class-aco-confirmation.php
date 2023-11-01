@@ -67,15 +67,15 @@ class ACO_Confirmation {
 				),
 			),
 		);
-
-		$orders = wc_get_orders( $query_args );
+		$orders = get_posts( $query_args );
 		if ( ! $orders ) {
 			// If no order is found, bail. @TODO Add a fallback order creation here?
 			wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
 			ACO_Logger::log( ': No WC order found in confirmation page. Avarda Purchase ID: ' . $avarda_purchase_id );
 			return;
 		}
-		$order = $orders[0];
+		$order_id = $orders[0];
+		$order    = wc_get_order( $order_id); 
 
 		// Confirm the order.
 		ACO_Logger::log( $avarda_purchase_id . ': Confirm the Avarda order from the confirmation page. Order ID: ' . $order_id );
