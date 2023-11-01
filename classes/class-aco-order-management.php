@@ -51,7 +51,7 @@ class ACO_Order_Management {
 		$subscription = $this->check_if_subscription( $order );
 
 		// Check if we have a purchase id.
-		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
 			$order->set_status( 'on-hold' );
@@ -59,7 +59,7 @@ class ACO_Order_Management {
 		}
 
 		// If this reservation was already cancelled, do nothing.
-		if ( get_post_meta( $order_id, '_avarda_reservation_cancelled', true ) ) {
+		if ($order->get_meta( '_avarda_reservation_cancelled', true ) ) {
 			$order->add_order_note( __( 'Could not cancel Avarda Checkout reservation, Avarda Checkout reservation is already cancelled.', 'avarda-checkout-for-woocommerce' ) );
 			return;
 		}
@@ -116,7 +116,7 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
 			$order->set_status( 'on-hold' );
@@ -124,7 +124,7 @@ class ACO_Order_Management {
 		}
 
 		// If this reservation was already activated, do nothing.
-		if ( get_post_meta( $order_id, '_avarda_reservation_activated', true ) ) {
+		if ($order->get_meta( '_avarda_reservation_activated', true ) ) {
 			$order->add_order_note( __( 'Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already activated.', 'avarda-checkout-for-woocommerce' ) );
 			$order->set_status( 'on-hold' );
 			return;
@@ -174,7 +174,7 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout order could not be refunded. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
 			$order->set_status( 'on-hold' );
@@ -183,7 +183,7 @@ class ACO_Order_Management {
 
 		// If activation (Delivery) has not yet been done, use Avardas refund endpoint.
 		// Refund in this case means to release funds from the current reservation.
-		if ( empty( get_post_meta( $order_id, '_avarda_reservation_activated', true ) ) ) {
+		if ( empty( $order->get_meta( '_avarda_reservation_activated', true ) ) ) {
 			$avarda_order = ACO_WC()->api->request_refund_order( $order_id, $amount, $reason );
 			if ( is_wp_error( $avarda_order ) ) {
 				// If error save error message and return false.
@@ -279,7 +279,7 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout order could not be updated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
 			return;

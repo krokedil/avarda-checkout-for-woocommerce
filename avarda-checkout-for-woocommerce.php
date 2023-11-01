@@ -265,6 +265,14 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			);
 		}
 	}
+
+	// Declare HPOS compatibility
+	add_action( 'before_woocommerce_init', function() {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+		}
+	} );
+
 	Avarda_Checkout_For_WooCommerce::get_instance();
 
 	/**

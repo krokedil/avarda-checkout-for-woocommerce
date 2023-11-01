@@ -165,14 +165,13 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
+		$order = wc_get_order($order_id);
+		if ($order->get_meta('_wc_avarda_purchase_id') )  { // Check if we have an order id.
+			$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
+			$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
 
-	if ( get_post_meta( $order_id, '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
-		$order                   = wc_get_order( $order_id );
-		$avarda_purchase_id      = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
-		$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
-
-		// We ha ve a purchase ID, get payment from Avarda.
-		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+			// We ha ve a purchase ID, get payment from Avarda.
+			$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
 		if ( is_wp_error( $avarda_payment ) ) {
 			return;
@@ -581,8 +580,8 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 		),
 	);
 
-	$orders = get_posts( $query_args );
-
+	$orders = wc_get_orders($query_args);
+	
 	if ( $orders ) {
 		$order_id = $orders[0];
 	} else {
@@ -612,7 +611,7 @@ function aco_get_order_id_by_purchase_id( $purchase_id ) {
 		),
 	);
 
-	$orders = get_posts( $query_args );
+	$orders = wc_get_orders($query_args);
 
 	if ( $orders ) {
 		$order_id = $orders[0];
