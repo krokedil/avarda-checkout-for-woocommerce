@@ -146,7 +146,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			aco_wc_unset_sessions();
 			delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
-			delete_post_meta( $order_id, '_transaction_id' );
+			$order->set_transaction_id(''); 
+			$order->save();
 			return array(
 				'result' => 'error',
 				'reload' => true,
@@ -227,7 +228,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
 			update_post_meta( $order_id, '_transaction_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
-
+			$order->set_transaction_id( sanitize_text_field( $avarda_order['purchaseId'] ) );
 			$environment = $this->testmode ? 'test' : 'live';
 			update_post_meta( $order_id, '_wc_avarda_environment', $environment );
 
@@ -239,7 +240,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			do_action( 'aco_wc_process_payment', $order_id, $avarda_order );
 
 			// Check that the transaction id got set correctly.
-			if ( strtolower( get_post_meta( $order_id, '_transaction_id', true ) ) === strtolower( $avarda_purchase_id ) ) {
+			if  (strtolower( $order->get_transaction_id() === strtolower( $avarda_purchase_id ) )) {
 				return true;
 			}
 		}
@@ -284,8 +285,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_avarda_purchase_id( $order ) {
 		$avarda_purchase_id = '';
-		if ( is_object( $order ) && ! empty( get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true ) ) ) {
-			$avarda_purchase_id = get_post_meta( $order->get_id(), '_wc_avarda_purchase_id', true );
+		if ( is_object( $order ) && ! empty( $order->get_meta('_wc_avarda_purchase_id', true ) ) ) {
+			$avarda_purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 			ACO_Logger::log( 'Get Avarda purchase ID from order. Order ID' . $order->get_id() . '. Avarda purchase ID: ' . $avarda_purchase_id );
 		} else {
 			$avarda_purchase_id = aco_get_purchase_id_from_session();
