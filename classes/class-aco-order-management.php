@@ -79,7 +79,8 @@ class ACO_Order_Management {
 			$order->set_status( 'on-hold' );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
-			update_post_meta( $order_id, '_avarda_reservation_cancelled', current_time( 'mysql' ) );
+			$order->update_meta_data( $order_id, '_avarda_reservation_cancelled', current_time( 'mysql' ) );
+			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully cancelled.', 'avarda-checkout-for-woocommerce' ) );
 		}
 	}

@@ -199,9 +199,10 @@ class ACO_Assets {
 			// Creates a session and store it to order if we don't have a previous one or if it has expired.
 			$avarda_jwt_expired_time = $order->get_meta('_wc_avarda_expiredUtc', true);
 			if ( empty( $avarda_jwt_expired_time ) || strtotime( $avarda_jwt_expired_time ) < time() ) {
-				delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
-				delete_post_meta( $order_id, '_wc_avarda_jwt' );
-				delete_post_meta( $order_id, '_wc_avarda_expiredUtc' );
+				$order->delete_meta('_wc_avarda_purchase_id');
+				$order->delete_meta('_wc_avarda_jwt');
+				$order->delete_meta('_wc_avarda_expiredUtc');
+				$order->save();
 				aco_wc_initialize_or_update_order_from_wc_order( $order_id );
 			}
 		} else {
