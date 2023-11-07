@@ -223,12 +223,11 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 				return false;
 			}
-
+			//Martin behöver Hjälp av Montazar
 			// Set WC order transaction ID.
 			update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 
 			update_post_meta( $order_id, '_transaction_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
-			$order->set_transaction_id( sanitize_text_field( $avarda_order['purchaseId'] ) );
 			$environment = $this->testmode ? 'test' : 'live';
 			update_post_meta( $order_id, '_wc_avarda_environment', $environment );
 

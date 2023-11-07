@@ -52,8 +52,8 @@ function aco_wc_initialize_payment() {
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
 		$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
+		$order->set_transaction_id('');
 		$order->save();
-		delete_post_meta( $order_id, '_transaction_id' );
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
 		ACO_Logger::log( 'Delete _wc_avarda_purchase_id & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 	}
