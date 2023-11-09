@@ -52,7 +52,7 @@ function aco_wc_initialize_payment() {
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
 		$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
-		$order->set_transaction_id('');
+		$order->set_transaction_id( '' );
 		$order->save();
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
 		ACO_Logger::log( 'Delete _wc_avarda_purchase_id & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
@@ -166,13 +166,13 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-		$order = wc_get_order($order_id);
-		if ($order->get_meta('_wc_avarda_purchase_id') )  { // Check if we have an order id.
-			$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
-			$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
+		$order = wc_get_order( $order_id );
+	if ( $order->get_meta( '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
+		$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
 
-			// We ha ve a purchase ID, get payment from Avarda.
-			$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		// We ha ve a purchase ID, get payment from Avarda.
+		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
 		if ( is_wp_error( $avarda_payment ) ) {
 			return;
@@ -584,8 +584,8 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 		),
 	);
 
-	$orders = wc_get_orders($query_args);
-	
+	$orders = wc_get_orders( $query_args );
+
 	if ( $orders ) {
 		$order_id = $orders[0];
 	} else {
@@ -602,28 +602,21 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
  * @return int The ID of an order, or 0 if the order could not be found.
  */
 function aco_get_order_id_by_purchase_id( $purchase_id ) {
-	$query_args = array(
-		'fields'      => 'ids',
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'meta_key'    => '_wc_avarda_purchase_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'meta_value'  => sanitize_text_field( wp_unslash( $purchase_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'date_query'  => array(
-			array(
-				'after' => '30 day ago',
+	$orders = wc_get_orders(
+		array(
+			'meta_query' => array(
+				'meta_key'   => '_wc_avarda_purchase_id',
+				'meta_value' => sanitize_text_field( wp_unslash( $purchase_id ) ),
+				'limit'      => 1,
+				'orderby'    => 'date',
+				'order'      => 'DESC',
+				'compare'    => '=',
 			),
-		),
+		)
 	);
 
-	$orders = wc_get_orders($query_args);
-
-	if ( $orders ) {
-		$order_id = $orders[0];
-	} else {
-		$order_id = 0;
-	}
-
-	return $order_id;
+	$order = reset( $orders );
+	return $order->get_id() ?? 0;
 }
 
 /**
