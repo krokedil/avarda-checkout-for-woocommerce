@@ -48,31 +48,48 @@ class ACO_Confirmation {
 		$aco_confirm        = filter_input( INPUT_GET, 'aco_confirm', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$avarda_purchase_id = filter_input( INPUT_GET, 'aco_purchase_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_key          = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$order_id           = filter_input( INPUT_GET, 'wc_order_id', FILTER_SANITIZE_NUMBER_INT );
 
 		// Return if we dont have our parameters set.
 		if ( empty( $aco_confirm ) || empty( $avarda_purchase_id ) ) {
 			return;
 		}
 
-		// Find relevant order in Woo.
-		$orders = wc_get_orders(
-			array(
-				'meta_query' => array(
-					'meta_key'   => '_wc_avarda_purchase_id',
-					'meta_value' => $avarda_purchase_id,
-					'compare'    => '=',
-				),
-			)
-		);
+		$order = wc_get_order( $order_id );
+		$order = empty( $order ) || $order->get_meta( '_wc_avarda_purchase_id' ) !== $avarda_purchase_id ? false : $order;
+		if ( empty( $order ) ) {
+			// Find relevant order in Woo.
+			$orders = wc_get_orders(
+				array(
+					'meta_query' => array(
+						'meta_key'   => '_wc_avarda_purchase_id',
+						'meta_value' => $avarda_purchase_id,
+						'limit'      => 1,
+						'orderby'    => 'date',
+						'order'      => 'DESC',
+						'compare'    => '=',
+					),
+				)
+			);
 
-		if ( ! $orders ) {
+			$order = reset( $orders );
+
+		}
+
+		if ( empty( $order ) ) {
+			$order_key = sanitize_text_field( $order_key );
+			$order_id  = wc_get_order_id_by_order_key( $order_key );
+			$order     = wc_get_order( $order_id );
+		}
+
+		if ( ! $order ) {
 			// If no order is found, bail. @TODO Add a fallback order creation here?
 			wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
 			ACO_Logger::log( ': No WC order found in confirmation page. Avarda Purchase ID: ' . $avarda_purchase_id );
 			return;
 		}
 
-		$order = reset( $orders );
+		$order_id = $order->get_id();
 
 		// Confirm the order.
 		ACO_Logger::log( $avarda_purchase_id . ': Confirm the Avarda order from the confirmation page. Order ID: ' . $order_id );
