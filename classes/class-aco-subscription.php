@@ -41,7 +41,8 @@ class ACO_Subscription {
 			// translators: %s Avarda recurring token.
 			$note = sprintf( __( 'Avarda subscription ID/recurring token %s saved', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
 			$wc_order->add_order_note( $note );
-			update_post_meta( $order_id, '_aco_recurring_token', $recurring_token );
+			$wc_order->update_meta_data( '_aco_recurring_token', $recurring_token );
+			$wc_order->save();
 
 			// This function is run after WCS has created the subscription order.
 			// Let's add the _aco_recurring_token to the subscription as well.
@@ -58,7 +59,8 @@ class ACO_Subscription {
 				foreach ( $subscriptions as $subscription ) {
 					// translators: %s Avarda recurring token.
 					$subscription->add_order_note( sprintf( __( 'Avarda subscription ID/recurring token %s saved.', 'avarda-checkout-for-woocommerce' ), $recurring_token ) );
-					update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
+					$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
+					$subscription->save();
 				}
 			}
 		}
