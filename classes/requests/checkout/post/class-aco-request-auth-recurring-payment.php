@@ -48,10 +48,10 @@ class ACO_Request_Auth_Recurring_Payment extends ACO_Request {
 	 */
 	public function request() {
 		$order         = wc_get_order( $this->order_id );
-		$purchase_id = $order->get_meta('_wc_avarda_purchase_id', true);
+		$purchase_id   = $order->get_meta( '_wc_avarda_purchase_id', true );
 		$subscriptions = wcs_get_subscriptions_for_renewal_order( $order );
 		foreach ( $subscriptions as $subscription ) {
-			$purchase_id = wc_get_order($subscription->get_id())->get_meta('_wc_avarda_purchase_id', true);
+			$purchase_id = $subscription->get_meta( '_wc_avarda_purchase_id', true );
 		}
 		$request_url  = $this->base_url . "/api/partner/payments/$purchase_id/authorizerecurringpayment";
 		$request_args = apply_filters( 'aco_auth_recurring_payment_args', $this->get_request_args() );
@@ -72,11 +72,18 @@ class ACO_Request_Auth_Recurring_Payment extends ACO_Request {
 	 * @return array
 	 */
 	public function get_body() {
+
+		$order = wc_get_order( $this->order_id );
+
+		if ( ! $order ) {
+			return array();
+		}
+
 		return array(
-			'purchase_id'           => wc_get_order( $this->order_id )->get_meta('_wc_avarda_purchase_id', true),
+			'purchase_id'           => $order->get_meta( '_wc_avarda_purchase_id', true ),
 			'recurringPaymentToken' => $this->recurring_payment_token,
 			'items'                 => ACO_WC()->order_items->get_order_items( $this->order_id ),
-			'orderReference'        => ( wc_get_order( $this->order_id ) )->get_order_number(),
+			'orderReference'        => $order->get_order_number(),
 		);
 	}
 
