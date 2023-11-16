@@ -113,15 +113,14 @@ function aco_wc_initialize_or_update_order() {
 		switch ( $aco_step ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				$order_id = aco_get_order_id_by_purchase_id( $avarda_purchase_id );
-				$order    = wc_get_order( $order_id );
+				$order = aco_get_order_by_purchase_id( $avarda_purchase_id );
 
 				if ( is_object( $order ) ) {
 					$confirmation_url = add_query_arg(
 						array(
 							'aco_confirm'     => 'yes',
 							'aco_purchase_id' => $avarda_purchase_id,
-							'wc_order_id'     => $order_id,
+							'wc_order_id'     => $order->get_id(),
 						),
 						$order->get_checkout_order_received_url()
 					);
@@ -568,27 +567,45 @@ function aco_wc_add_extra_checkout_fields() {
 }
 
 /**
- * Finds an Order ID based on a purchase ID (the Avarda order number).
+ * Returns the WooCommerce order that has a matching Avarda purchase id saved as a meta field. If no order is found, returns false, and if many orders are found the newest one is returned.
  *
- * @param string $purchase_id Avarda order number saved as Purchase ID in WC order.
- * @return int The ID of an order, or 0 if the order could not be found.
+ * @param string      $purchase_id Avarda purchase id.
+ * @param string|null $date_after Possibility to add a date limit to the check.
+ * @return WC_Order|false
  */
-function aco_get_order_id_by_purchase_id( $purchase_id ) {
-	$orders = wc_get_orders(
-		array(
-			'meta_query' => array(
-				'meta_key'   => '_wc_avarda_purchase_id',
-				'meta_value' => sanitize_text_field( wp_unslash( $purchase_id ) ),
-				'limit'      => 1,
-				'orderby'    => 'date',
-				'order'      => 'DESC',
-				'compare'    => '=',
-			),
-		)
+function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
+	$args = array(
+		'meta_key'     => '_wc_avarda_purchase_id',
+		'meta_value'   => $purchase_id,
+		'meta_compare' => '=',
+		'order'        => 'DESC',
+		'orderby'      => 'date',
+		'limit'        => 1,
 	);
 
+	if ( $date_after ) {
+		$args['date_after'] = $date_after;
+	}
+
+	$orders = wc_get_orders( $args );
+
+	// If the orders array is empty, return false.
+	if ( empty( $orders ) ) {
+		return false;
+	}
+
+	// Get the first order in the array.
 	$order = reset( $orders );
-	return $order->get_id() ?? 0;
+
+	// Validate that the order actual has the metadata we're looking for, and that it is the same.
+	$meta_value = $order->get_meta( '_wc_avarda_purchase_id', true );
+
+	// If the meta value is not the same as the Avarda purchase id, return false.
+	if ( $meta_value !== $purchase_id ) {
+		return false;
+	}
+
+	return $order;
 }
 
 /**
