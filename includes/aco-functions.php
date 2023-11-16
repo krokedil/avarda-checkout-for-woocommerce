@@ -417,6 +417,70 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 
 }
 
+function aco_format_address_data( $avarda_order ) {
+	$customer_address = array();
+
+	$user_inputs       = array();
+	$invoicing_address = array();
+	$delivery_address  = array();
+	if ( 'B2C' === $avarda_order['mode'] ) {
+		$user_inputs       = $avarda_order['b2C']['userInputs'];
+		$invoicing_address = $avarda_order['b2C']['invoicingAddress'];
+		$delivery_address  = $avarda_order['b2C']['deliveryAddress'];
+
+		$customer_address['billing']['first_name'] = $invoicing_address['firstName'] ?? '';
+		$customer_address['billing']['last_name']  = $invoicing_address['lastName'] ?? '';
+		$customer_address['billing']['address1']   = $invoicing_address['address1'] ?? '';
+		$customer_address['billing']['address2']   = $invoicing_address['address2'] ?? '';
+		$customer_address['billing']['zip']        = $invoicing_address['zip'] ?? '';
+		$customer_address['billing']['city']       = $invoicing_address['city'] ?? '';
+		$customer_address['billing']['country']    = $invoicing_address['country'] ?? '';
+
+		$customer_address['billing']['email']         = $user_inputs['email'] ?? '';
+		$customer_address['billing']['phone']         = $user_inputs['phone'] ?? '';
+		$customer_address['billing']['date_of_birth'] = $user_inputs['dateOfBirth'] ?? '';
+
+		$customer_address['shipping']['first_name'] = $delivery_address['firstName'] ?? '';
+		$customer_address['shipping']['last_name']  = $delivery_address['lastName'] ?? '';
+		$customer_address['shipping']['address1']   = $delivery_address['address1'] ?? '';
+		$customer_address['shipping']['address2']   = $delivery_address['address2'] ?? '';
+		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
+		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
+		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+
+	} elseif ( 'B2B' === $avarda_order['mode'] ) {
+
+		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? '';
+		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? '';
+		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? '';
+
+		$customer_address['billing']['first_name'] = $avarda_order['b2B']['customerInfo']['firstName'] ?? '';
+		$customer_address['billing']['last_name']  = $avarda_order['b2B']['customerInfo']['lastName'] ?? '';
+		$customer_address['billing']['company']    = $invoicing_address['name'] ?? '';
+		$customer_address['billing']['address1']   = $invoicing_address['address1'] ?? '';
+		$customer_address['billing']['address2']   = $invoicing_address['address2'] ?? '';
+		$customer_address['billing']['zip']        = $invoicing_address['zip'] ?? '';
+		$customer_address['billing']['city']       = $invoicing_address['city'] ?? '';
+		$customer_address['billing']['country']    = $invoicing_address['country'] ?? '';
+
+		$customer_address['billing']['email']         = $user_inputs['email'] ?? '';
+		$customer_address['billing']['phone']         = $user_inputs['phone'] ?? '';
+		$customer_address['billing']['date_of_birth'] = $user_inputs['dateOfBirth'] ?? '';
+
+		$customer_address['shipping']['first_name'] = $delivery_address['firstName'] ?? '';
+		$customer_address['shipping']['last_name']  = $delivery_address['lastName'] ?? '';
+		$customer_address['shipping']['company']    = $invoicing_address['name'] ?? '';
+		$customer_address['shipping']['address1']   = $delivery_address['address1'] ?? '';
+		$customer_address['shipping']['address2']   = $delivery_address['address2'] ?? '';
+		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
+		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
+		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+
+	}
+
+	return $customer_address;
+}
+
 /**
  * Get Avarda Checkout order payment method title.
  *
