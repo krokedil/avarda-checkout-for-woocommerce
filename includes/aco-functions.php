@@ -51,8 +51,9 @@ function aco_wc_initialize_payment() {
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
-		delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
-		delete_post_meta( $order_id, '_transaction_id' );
+		$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
+		$order->set_transaction_id( '' );
+		$order->save();
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
 		ACO_Logger::log( 'Delete _wc_avarda_purchase_id & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 	}
@@ -165,11 +166,10 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-
-	if ( get_post_meta( $order_id, '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
-		$order                   = wc_get_order( $order_id );
-		$avarda_purchase_id      = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
-		$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
+		$order = wc_get_order( $order_id );
+	if ( $order->get_meta( '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
+		$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
 
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
@@ -259,9 +259,11 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 	if ( is_wp_error( $avarda_order ) ) {
 		return;
 	}
-	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
-	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
-	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
+	$order = wc_get_order( $order_id );
+	$order->update_meta_data( '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
+	$order->update_meta_data( '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
+	$order->update_meta_data( '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
+	$order->save();
 }
 
 /**
@@ -320,8 +322,9 @@ function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
 	$subscription    = wc_get_order( $subscription_id );
 	$avarda_order    = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
-	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
-	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+	$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
+	$subscription->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
+	$subscription->save();
 
 	// translators: %s Avarda recurring token.
 	$note = sprintf( __( 'New recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
@@ -425,12 +428,13 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	$aco_payment_method = '';
 	if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 		$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
-		update_post_meta( $order->get_id(), '_avarda_payment_method', $aco_payment_method );
+		$order->update_meta_data( '_avarda_payment_method', $aco_payment_method );
 
 		$aco_payment_fee = isset( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) ? sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) : '';
 		if ( ! empty( $aco_payment_fee ) ) {
-			update_post_meta( $order->get_id(), '_avarda_payment_method_fee', $aco_payment_fee );
+			$order->update_meta_data( '_avarda_payment_method_fee', $aco_payment_fee );
 		}
+		$order->save();
 	}
 
 	switch ( $aco_payment_method ) {
@@ -581,7 +585,7 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
 		),
 	);
 
-	$orders = get_posts( $query_args );
+	$orders = wc_get_orders( $query_args );
 
 	if ( $orders ) {
 		$order_id = $orders[0];
@@ -599,28 +603,21 @@ function aco_get_order_id_by_transaction_id( $transaction_id ) {
  * @return int The ID of an order, or 0 if the order could not be found.
  */
 function aco_get_order_id_by_purchase_id( $purchase_id ) {
-	$query_args = array(
-		'fields'      => 'ids',
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'meta_key'    => '_wc_avarda_purchase_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'meta_value'  => sanitize_text_field( wp_unslash( $purchase_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'date_query'  => array(
-			array(
-				'after' => '30 day ago',
+	$orders = wc_get_orders(
+		array(
+			'meta_query' => array(
+				'meta_key'   => '_wc_avarda_purchase_id',
+				'meta_value' => sanitize_text_field( wp_unslash( $purchase_id ) ),
+				'limit'      => 1,
+				'orderby'    => 'date',
+				'order'      => 'DESC',
+				'compare'    => '=',
 			),
-		),
+		)
 	);
 
-	$orders = get_posts( $query_args );
-
-	if ( $orders ) {
-		$order_id = $orders[0];
-	} else {
-		$order_id = 0;
-	}
-
-	return $order_id;
+	$order = reset( $orders );
+	return $order->get_id() ?? 0;
 }
 
 /**

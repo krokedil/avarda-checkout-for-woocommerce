@@ -99,6 +99,7 @@ class ACO_Assets {
 
 		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
+		$order    = wc_get_order( $order_id );
 
 		$this->aco_maybe_initialize_payment( $order_id );
 
@@ -108,11 +109,10 @@ class ACO_Assets {
 		// Confirmation url for order pay.
 		if ( is_wc_endpoint_url( 'order-pay' ) ) {
 			$is_aco_action    = 'yes';
-			$order            = wc_get_order( $order_id );
 			$confirmation_url = add_query_arg(
 				array(
 					'aco_confirm'     => 'yes',
-					'aco_purchase_id' => get_post_meta( $order_id, '_wc_avarda_purchase_id', true ),
+					'aco_purchase_id' => $order->get_meta('_wc_avarda_purchase_id', true),
 				),
 				$order->get_checkout_order_received_url()
 			);
@@ -121,7 +121,6 @@ class ACO_Assets {
 		// Confirmation url for subscription payment change.
 		if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$is_aco_action    = 'yes';
-			$order            = wc_get_order( $order_id );
 			$confirmation_url = add_query_arg(
 				array(
 					'aco-action'   => 'subs-payment-changed',
@@ -138,7 +137,7 @@ class ACO_Assets {
 			$redirect_url        = wc_get_checkout_url();
 		} else {
 			// We have a WC order - get info from that.
-			$avarda_jwt_token = get_post_meta( $order_id, '_wc_avarda_jwt', true );
+			$avarda_jwt_token = $order->get_meta('_wc_avarda_jwt', true);
 			// Get current url (pay page).
 			$redirect_url = $order->get_checkout_payment_url( true );
 		}
@@ -195,14 +194,15 @@ class ACO_Assets {
 	 * @return void
 	 */
 	public function aco_maybe_initialize_payment( $order_id = null ) {
-
 		if ( ! empty( $order_id ) ) {
+			$order = wc_get_order($order_id);
 			// Creates a session and store it to order if we don't have a previous one or if it has expired.
-			$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
+			$avarda_jwt_expired_time = $order->get_meta('_wc_avarda_expiredUtc', true);
 			if ( empty( $avarda_jwt_expired_time ) || strtotime( $avarda_jwt_expired_time ) < time() ) {
-				delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
-				delete_post_meta( $order_id, '_wc_avarda_jwt' );
-				delete_post_meta( $order_id, '_wc_avarda_expiredUtc' );
+				$order->delete_meta('_wc_avarda_purchase_id');
+				$order->delete_meta('_wc_avarda_jwt');
+				$order->delete_meta('_wc_avarda_expiredUtc');
+				$order->save();
 				aco_wc_initialize_or_update_order_from_wc_order( $order_id );
 			}
 		} else {

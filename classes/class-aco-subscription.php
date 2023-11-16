@@ -46,8 +46,9 @@ class ACO_Subscription {
 				$wc_order->add_order_note( $note );
 
 				foreach ( $subscriptions as $subscription ) {
-					update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
-					update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+					$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
+					$subscription->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
+					$subscription->save();
 					aco_populate_wc_order( $subscription, $avarda_order );
 				}
 			} else {
@@ -71,13 +72,15 @@ class ACO_Subscription {
 		$order_id = $renewal_order->get_id();
 
 		$subscriptions   = wcs_get_subscriptions_for_renewal_order( $renewal_order->get_id() );
-		$recurring_token = get_post_meta( $order_id, '_aco_recurring_token', true );
+		$recurring_token = $renewal_order->get_meta( '_aco_recurring_token', true );
 
 		if ( empty( $recurring_token ) ) {
-			$recurring_token = get_post_meta( $order_id, '_aco_recurring_token', true );
-			$purchase_id     = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
-			update_post_meta( $order_id, '_aco_recurring_token', $recurring_token );
-			update_post_meta( $order_id, '_wc_avarda_purchase_id', $purchase_id );
+			$recurring_token = $renewal_order->get_meta( '_aco_recurring_token', true );
+			$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id', true );
+
+			$renewal_order->update_meta_data( '_aco_recurring_token', $recurring_token );
+			$renewal_order->update_meta_data( '_wc_avarda_purchase_id', $purchase_id );
+			$renewal_order->save();
 		}
 
 		$create_order_response = ACO_WC()->api->create_recurring_order( $order_id, $recurring_token );
