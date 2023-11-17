@@ -202,7 +202,7 @@ jQuery(function($) {
 			console.log('fillForm', customerAddress);
 			var billing_first_name = customerAddress.billing.first_name ? customerAddress.billing.first_name : '.';
 			var billing_last_name = customerAddress.billing.last_name ? customerAddress.billing.last_name : '.';
-			var billing_company = customerAddress.billing.company ? customerAddress.billing.company : '.';
+			var billing_company = customerAddress.billing.company ? customerAddress.billing.company : '';
 			var billing_address_1 = customerAddress.billing.address1;
 			var billing_address_2 = customerAddress.billing.address2;
 			var billing_city = customerAddress.billing.city ? customerAddress.billing.city : '.';
