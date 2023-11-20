@@ -158,8 +158,8 @@ class ACO_API {
 	 *
 	 * @return array
 	 */
-	public function create_recurring_order( $order_id, $recurring_token ) {
-		return ( new ACO_Request_Auth_Recurring_Payment( $order_id, $recurring_token, false ) )->request();
+	public function create_recurring_order( $order_id, $recurring_token = null, $purchase_id = null ) {
+		return ( new ACO_Request_Auth_Recurring_Payment( $order_id, $recurring_token, $purchase_id, false ) )->request();
 
 	}
 
