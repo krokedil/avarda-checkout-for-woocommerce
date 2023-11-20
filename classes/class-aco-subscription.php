@@ -24,6 +24,9 @@ class ACO_Subscription {
 		add_action( 'woocommerce_scheduled_subscription_payment_aco', array( $this, 'trigger_scheduled_payment' ), 10, 2 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
 		add_action( 'init', array( $this, 'display_thankyou_message_for_payment_method_change' ) );
+
+		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+		$this->testmode  = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
 	}
 
 	/**
@@ -36,6 +39,7 @@ class ACO_Subscription {
 	public function set_recurring_token_for_order( $order_id = null, $avarda_order = null ) {
 		$wc_order        = wc_get_order( $order_id );
 		$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'] ?? '';
+		$purchase_id     = $avarda_order['purchaseId'] ?? '';
 
 		if ( ! empty( $recurring_token ) ) {
 			// translators: %s Avarda recurring token.
@@ -60,6 +64,8 @@ class ACO_Subscription {
 					// translators: %s Avarda recurring token.
 					$subscription->add_order_note( sprintf( __( 'Avarda subscription ID/recurring token %s saved.', 'avarda-checkout-for-woocommerce' ), $recurring_token ) );
 					$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
+					$subscription->update_meta_data( '_wc_avarda_purchase_id', $purchase_id );
+					$subscription->update_meta_data( '_wc_avarda_environment', $this->testmode ? 'test' : 'live' );
 					$subscription->save();
 				}
 			}
@@ -78,17 +84,43 @@ class ACO_Subscription {
 
 		$subscriptions   = wcs_get_subscriptions_for_renewal_order( $renewal_order->get_id() );
 		$recurring_token = $renewal_order->get_meta( '_aco_recurring_token', true );
+		$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id', true );
 
+		// Check that we have a recurring token.
 		if ( empty( $recurring_token ) ) {
-			$recurring_token = $renewal_order->get_meta( '_aco_recurring_token', true );
-			$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id', true );
+			// Try getting it from parent order.
+			$parent_order_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_aco_recurring_token', true );
 
-			$renewal_order->update_meta_data( '_aco_recurring_token', $recurring_token );
-			$renewal_order->update_meta_data( '_wc_avarda_purchase_id', $purchase_id );
-			$renewal_order->save();
+			if ( ! empty( $parent_order_recurring_token ) ) {
+				$renewal_order->update_meta_data( '_aco_recurring_token', $parent_order_recurring_token );
+				$renewal_order->save();
+
+				foreach ( $subscriptions as $subscription ) {
+					$subscription->update_meta_data( '_aco_recurring_token', $parent_order_recurring_token );
+					$subscription->save();
+				}
+			}
 		}
 
-		$create_order_response = ACO_WC()->api->create_recurring_order( $order_id, $recurring_token );
+		// Check that we have a purchase id. This is also needed in the request to Avarda.
+		if ( empty( $purchase_id ) ) {
+			// Try getting it from parent order.
+			$parent_order_purchase_id = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_wc_avarda_purchase_id', true );
+
+			if ( ! empty( $parent_order_purchase_id ) ) {
+				$renewal_order->update_meta_data( '_wc_avarda_purchase_id', $parent_order_purchase_id );
+				$renewal_order->save();
+
+				foreach ( $subscriptions as $subscription ) {
+					$subscription->update_meta_data( '_wc_avarda_purchase_id', $parent_order_purchase_id );
+					$subscription->save();
+				}
+			}
+		}
+
+		// Create recurring Avarda order.
+		$create_order_response = ACO_WC()->api->create_recurring_order( $order_id );
+
 		if ( ! is_wp_error( $create_order_response ) && is_array( $create_order_response ) ) {
 			$avarda_purchase_id = $create_order_response['purchaseId'];
 			// Translators: Avarda purchase id.
