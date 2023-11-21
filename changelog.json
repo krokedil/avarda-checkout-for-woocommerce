@@ -184,9 +184,15 @@
           "requires" : "5.0.0",
           "tested" : "6.2.2"
      },
+     "1.10.2" : {
+          "description" : "<ul><li>Fix - Fix compatibility with Smart Coupons.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.2.2"
+     },
      "1.11.0" : {
           "description" : "<ul><li>Feature - Adds support for recurring payments via WooCommerce Subscriptions plugin.</li><li>Feature - Adds support for WooCommerce \"High-Performance Order Storage\" (HPOS) feature.</li><li>Feature - Add setting and logic for age validation.</li><li>Tweak - Improvements in how and when customer full address data is fetched from Avarda during creation of Woo order.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.4.1"
      }
+
 }
