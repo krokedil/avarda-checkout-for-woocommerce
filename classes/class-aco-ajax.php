@@ -150,7 +150,7 @@ class ACO_AJAX extends WC_AJAX {
 		}
 		wp_send_json_success(
 			array(
-				'customer_data' => $avarda_payment,
+				'customer_data' => aco_format_address_data( $avarda_payment ),
 			)
 		);
 	}

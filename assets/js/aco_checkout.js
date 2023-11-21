@@ -184,27 +184,8 @@ jQuery(function($) {
 		handleBeforeSubmitCallback: function(data, callback) {
 			aco_wc.logToFile( 'Received "beforeSubmitCallback" from Avarda' );
 
-			// Set customer data with data that we get from the aco.
-			Object.keys(aco_wc.customerData).forEach((key) => {
-				if (typeof aco_wc.customerData[key] === 'object') {
-					Object.keys(aco_wc.customerData[key]).forEach((k) => {
-						aco_wc.customerData[key][k] = data[key][k];
-					});
-				}
-
-				if (typeof aco_wc.customerData[key] === 'string' && aco_wc.customerData[key] === '') {
-					aco_wc.customerData[key] = data[key];
-				}
-			});
-
-			aco_wc.setCustomerData();
-
-			// Check Terms checkbox, if it exists.
-			if ($("form.checkout #terms").length > 0) {
-				$("form.checkout #terms").prop("checked", true);
-			}
-			// Submit wc order.
-			aco_wc.submitForm();
+			// Get address data from Avarda payment.
+			aco_wc.getAvardaPayment();
 
 			$( 'body' ).on( 'aco_order_validation', function( event, bool ) {
 				if ( false === bool ) {
@@ -217,96 +198,23 @@ jQuery(function($) {
 			});
 		},
 
-		getAvardaData: function (data, obj) {
-			if (data === null) {
-				throw Error("Data can't be null");
-			}
-			if (obj === null) {
-				throw Error("Obj can't be null");
-			}
-
-			Object.keys(obj).forEach((key) => {
-				if (data.hasOwnProperty(key) && data[key] !== null) {
-					obj[key] = data[key];
-				}
-			});
-
-			return obj;
-		},
-
-		getBillingData: function(data)  {
-			const billingData = {
-				address1: '',
-				address2: '',
-				city: '',
-				country: '',
-				firstName: '',
-				lastName: '',
-				zip: ''
-			};
-
-			return this.getAvardaData(data, billingData);
-		},
-
-		getShippingData: function (data)  {
-			const shippingData = {
-				firstName: "",
-				lastName: "",
-				address1: "",
-				address2: "",
-				city: "",
-				zip: "",
-				country: ""
-			};
-			return this.getAvardaData(data, shippingData);
-		},
-
-		getAvardaAddresses: function(billing, shipping) {
-			var customerBillingAddress = this.getBillingData(billing);
-			var customerShippingAddress = this.getShippingData(shipping);
-			var address1, address2 = '';
-			if (customerBillingAddress.address1 !== null) {
-				address1 = customerBillingAddress.address1;
-				if (customerBillingAddress.address2 !== null) {
-					address2 = customerBillingAddress.address2;
-				}
-			} else if (customerShippingAddress.address1 !== null) {
-				address1 = customerShippingAddress.address1;
-				if (customerShippingAddress.address2 !== null) {
-					address2 = customerShippingAddress.address2;
-				}
-			}
-
-			return {
-				address1: address1 ? address1 : '.',
-				address2: address2 ? address2 : '',
-			}
-		},
-
-		getUserInputs: function(data) {
-			var userInputData = {
-				email: '',
-				phone: '',
-				ssn: '',
-				zip: ''
-			};
-
-			return this.getAvardaData(data, userInputData);
-		},
-
-		setCustomerData: function() {
-			var billing_first_name = aco_wc.customerData.invoicingAddress.firstName ? aco_wc.customerData.invoicingAddress.firstName : '.';
-			var billing_last_name = aco_wc.customerData.invoicingAddress.lastName ? aco_wc.customerData.invoicingAddress.lastName : '.';
-			var billing_address_1 = aco_wc.customerData.invoicingAddress.address1;
-			var billing_address_2 = aco_wc.customerData.invoicingAddress.address2;
-			var billing_city = aco_wc.customerData.invoicingAddress.city ? aco_wc.customerData.invoicingAddress.city : '.';
-			var billing_postcode = aco_wc.customerData.invoicingAddress.zip ? aco_wc.customerData.invoicingAddress.zip: '';
-			var billing_phone = aco_wc.customerData.phone ? aco_wc.customerData.phone : '.';
-			var billing_email = aco_wc.customerData.email ?  aco_wc.customerData.email : 'krokedil@krokedil.se';
+		fillForm: function( customerAddress ) {
+			console.log('fillForm', customerAddress);
+			var billing_first_name = customerAddress.billing.first_name ? customerAddress.billing.first_name : '.';
+			var billing_last_name = customerAddress.billing.last_name ? customerAddress.billing.last_name : '.';
+			var billing_company = customerAddress.billing.company ? customerAddress.billing.company : '';
+			var billing_address_1 = customerAddress.billing.address1;
+			var billing_address_2 = customerAddress.billing.address2;
+			var billing_city = customerAddress.billing.city ? customerAddress.billing.city : '.';
+			var billing_postcode = customerAddress.billing.zip ? customerAddress.billing.zip: '';
+			var billing_phone = customerAddress.billing.phone ? customerAddress.billing.phone : '.';
+			var billing_email = customerAddress.billing.email ?  customerAddress.billing.email : 'krokedil@krokedil.se';
 
 			$( '#billing_first_name' ).val( billing_first_name  );
 			$( '#billing_last_name' ).val( billing_last_name );
-			$( '#billing_address_1' ).val(  billing_address_1 );
+			$( '#billing_company' ).val( billing_company );
+			
+			$( '#billing_address_1' ).val( billing_address_1 );
 			$( '#billing_address_2' ).val( billing_address_2 );
 			$( '#billing_city' ).val( billing_city );
 			$( '#billing_postcode' ).val( billing_postcode );
@@ -316,12 +224,13 @@ jQuery(function($) {
 			if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
 				$("form.checkout #ship-to-different-address-checkbox").prop("checked", true);
 			}
-			$( '#shipping_first_name' ).val( aco_wc.customerData.deliveryAddress.firstName ? aco_wc.customerData.deliveryAddress.firstName : billing_first_name );
-			$( '#shipping_last_name' ).val( aco_wc.customerData.deliveryAddress.lastName ? aco_wc.customerData.deliveryAddress.lastName : billing_last_name );
-			$( '#shipping_address_1' ).val( aco_wc.customerData.deliveryAddress.address1 ? aco_wc.customerData.deliveryAddress.address1 : billing_address_1 );
-			$( '#shipping_address_2' ).val( aco_wc.customerData.deliveryAddress.address2 ? aco_wc.customerData.deliveryAddress.address2 : billing_address_2 );
-			$( '#shipping_city' ).val( aco_wc.customerData.deliveryAddress.city ? aco_wc.customerData.deliveryAddress.city : billing_city );
-			$( '#shipping_postcode' ).val( aco_wc.customerData.deliveryAddress.zip ? aco_wc.customerData.deliveryAddress.zip : '11111' );
+			$( '#shipping_first_name' ).val( customerAddress.shipping.first_name ? customerAddress.shipping.first_name : billing_first_name );
+			$( '#shipping_last_name' ).val( customerAddress.shipping.last_name ? customerAddress.shipping.last_name : billing_last_name );
+			$( '#shipping_company' ).val( customerAddress.shipping.company ? customerAddress.shipping.company : billing_company );
+			$( '#shipping_address_1' ).val( customerAddress.shipping.address1 ? customerAddress.shipping.address1 : billing_address_1 );
+			$( '#shipping_address_2' ).val( customerAddress.shipping.address2 ? customerAddress.shipping.address2 : billing_address_2 );
+			$( '#shipping_city' ).val( customerAddress.shipping.city ? customerAddress.shipping.city : billing_city );
+			$( '#shipping_postcode' ).val( customerAddress.shipping.zip ? customerAddress.shipping.zip : billing_postcode );
 		},
 
 		updateAvardaPayment: function() {
@@ -421,9 +330,59 @@ jQuery(function($) {
 		},
 
 		/**
+		 * Get address data from Avarda payment.
+		 */
+		getAvardaPayment: function() {
+			console.log( 'get_avarda_payment' );
+			$( '.woocommerce-checkout-review-order-table' ).block({
+				message: null,
+				overlayCSS: {
+					background: '#fff',
+					opacity: 0.6
+				}
+			});
+			$.ajax(
+				{
+					url: aco_wc_params.get_avarda_payment_url,
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						nonce: aco_wc_params.get_avarda_payment_nonce
+					},
+					success: function( response ) {
+						console.log( 'getAvardaPayment', response );
+						
+					},
+					error: function( response ) {
+						console.log('getAvardaPayment error',  response );
+					},
+					complete: function( response ) {
+						
+						if (response.responseJSON.data.hasOwnProperty('customer_data')) {
+							// Set data from wc form
+							aco_wc.fillForm(response.responseJSON.data.customer_data);
+							// Submit wc order.
+							aco_wc.submitForm();
+						} else {
+							$( '.woocommerce-checkout-review-order-table' ).unblock();
+							aco_wc.logToFile( 'getAvardaPayment | Customer data missing in response from Avarda.' );
+							aco_wc.failOrder( 'getAvardaPayment', '<div class="woocommerce-error">' + 'Customer data missing in response from Avarda.' + '</div>' );
+						}
+					}
+				}
+			);
+		},
+
+
+		/**
 		 * Submit the order using the WooCommerce AJAX function.
 		 */
 		submitForm: function() {
+
+			if ( 0 < $( 'form.checkout #terms' ).length ) {
+				$( 'form.checkout #terms' ).prop( 'checked', true );
+			}
+
 			$( '.woocommerce-checkout-review-order-table' ).block({
 				message: null,
 				overlayCSS: {
