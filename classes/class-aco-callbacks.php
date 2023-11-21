@@ -32,8 +32,7 @@ class ACO_Callbacks {
 		$post_body   = file_get_contents( 'php://input' );
 		$data        = json_decode( $post_body, true );
 		$purchase_id = sanitize_text_field( $data['purchaseId'] );
-		$order_id    = aco_get_order_id_by_purchase_id( $purchase_id );
-		$order       = wc_get_order( $order_id );
+		$order       = aco_get_order_by_purchase_id( $purchase_id );
 
 		$aco_sub_payment_change = filter_input( INPUT_GET, 'aco-sub-payment-change', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
@@ -44,19 +43,19 @@ class ACO_Callbacks {
 			exit;
 		}
 
-		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order_id );
+		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order->get_id() );
 
 		if ( ! is_object( $order ) ) {
-			ACO_Logger::log( 'Aborting notification callback for Purchase ID ' . $purchase_id . '. No WooCommerce order found. Order id retreived from aco_get_order_id_by_purchase_id: ' . $order_id );
+			ACO_Logger::log( 'Aborting notification callback for Purchase ID ' . $purchase_id . '. No WooCommerce order found.' );
 			header( 'HTTP/1.1 200 OK' );
 			exit;
 		}
 		// Maybe abort the callback (if the order already has been processed in Woo).
 		if ( ! empty( $order->get_date_paid() ) ) {
-			ACO_Logger::log( 'Aborting notification callback. Order ' . $order->get_order_number() . ' (order ID ' . $order_id . ') already processed.' );
+			ACO_Logger::log( 'Aborting notification callback. Order ' . $order->get_order_number() . ' (order ID ' . $order->get_id() . ') already processed.' );
 		} else {
-			as_schedule_single_action( time() + 120, 'aco_payment_created_callback', array( $purchase_id, $order_id ) );
-			ACO_Logger::log( 'Scheduling notification callback to be handled in 2 minutes for Purchase ID ' . $purchase_id . '. Order ' . $order->get_order_number() . ' (order ID ' . $order_id . ').' );
+			as_schedule_single_action( time() + 120, 'aco_payment_created_callback', array( $purchase_id, $order->get_id() ) );
+			ACO_Logger::log( 'Scheduling notification callback to be handled in 2 minutes for Purchase ID ' . $purchase_id . '. Order ' . $order->get_order_number() . ' (order ID ' . $order->get_id() . ').' );
 		}
 		header( 'HTTP/1.1 200 OK' );
 		exit;

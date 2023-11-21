@@ -71,20 +71,34 @@ class ACO_Checkout {
 			return;
 		}
 
+		// Check that the currency and locale is the same as earlier, otherwise create a new session.
+		if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Currency or language changed in update Avarda function. Clearing Avarda session and reloading the cehckout page.' );
+			WC()->session->reload_checkout = true;
+			return;
+		}
+
+		// Check that no subscription product have been added or removed, otherwise create a new session.
+		if ( isset( WC()->session ) && method_exists( WC()->session, 'get' ) ) {
+			if ( WC()->session->get( 'aco_wc_cart_contains_subscription' ) !== aco_get_wc_cart_contains_subscription() ) {
+				aco_wc_unset_sessions();
+				ACO_Logger::log( 'Subscription product changed in update Avarda function. Clearing Avarda session and reloading the checkout page.' );
+				if ( wp_doing_ajax() ) {
+					WC()->session->reload_checkout = true;
+				} else {
+					wp_safe_redirect( wc_get_checkout_url() );
+				}
+				return;
+			}
+		}
+
 		// Check if the cart hash has been changed since last update.
 		$cart_hash  = WC()->cart->get_cart_hash();
 		$saved_hash = WC()->session->get( 'aco_last_update_hash' );
 
 		// If they are the same, return.
 		if ( $cart_hash === $saved_hash ) {
-			return;
-		}
-
-		// Check that the currency and locale is the same as earlier, otherwise create a new session.
-		if ( get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
-			aco_wc_unset_sessions();
-			ACO_Logger::log( 'Currency or language changed in update Avarda function. Clearing Avarda session and reloading the cehckout page.' );
-			WC()->session->reload_checkout = true;
 			return;
 		}
 
