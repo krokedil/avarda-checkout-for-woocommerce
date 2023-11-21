@@ -17,9 +17,13 @@ class ACO_Helper_Checkout_Setup {
 	 * Gets checkout setup.
 	 *
 	 * @param int $order_id The WooCommerce order id.
-	 * @return array Formated checkout setup.
+	 * @return array Formatted checkout setup.
 	 */
 	public function get_checkout_setup( $order_id = null ) {
+
+		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+		$age_validation  = $avarda_settings['age_validation'] ?? '';
+
 		$checkout_setup = array();
 		$terms_url      = $this->get_terms_url();
 
@@ -44,6 +48,11 @@ class ACO_Helper_Checkout_Setup {
 			}
 		}
 		$checkout_setup['mode'] = $customer_type;
+
+		// Age validation.
+		if ( ! empty( $age_validation ) ) {
+			$checkout_setup['ageValidation'] = $age_validation;
+		}
 
 		return $checkout_setup;
 	}

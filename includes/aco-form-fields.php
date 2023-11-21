@@ -50,6 +50,13 @@ $settings = array(
 		'label'   => __( 'Enable Avarda Checkout testmode', 'avarda-checkout-for-woocommerce' ),
 		'default' => 'no',
 	),
+	'age_validation'             => array(
+		'title'       => __( 'Age validation', 'avarda-checkout-for-woocommerce' ),
+		'type'        => 'number',
+		'description' => __( 'Enter an age if you only want to offer purchases from customers older than the specified age. Leave blank or set to 0 to disable age validation.', 'avarda-checkout-for-woocommerce' ),
+		'default'     => '',
+		'desc_tip'    => false,
+	),
 	'order_management'           => array(
 		'title'   => __( 'Enable Order Management', 'avarda-checkout-for-woocommerce' ),
 		'type'    => 'checkbox',
