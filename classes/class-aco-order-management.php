@@ -59,7 +59,7 @@ class ACO_Order_Management {
 		}
 
 		// If this reservation was already cancelled, do nothing.
-		if ($order->get_meta( '_avarda_reservation_cancelled', true ) ) {
+		if ( $order->get_meta( '_avarda_reservation_cancelled', true ) ) {
 			$order->add_order_note( __( 'Could not cancel Avarda Checkout reservation, Avarda Checkout reservation is already cancelled.', 'avarda-checkout-for-woocommerce' ) );
 			return;
 		}
@@ -79,7 +79,7 @@ class ACO_Order_Management {
 			$order->set_status( 'on-hold' );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
-			$order->update_meta_data( $order_id, '_avarda_reservation_cancelled', current_time( 'mysql' ) );
+			$order->update_meta_data( '_avarda_reservation_cancelled', current_time( 'mysql' ) );
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully cancelled.', 'avarda-checkout-for-woocommerce' ) );
 		}
@@ -125,7 +125,7 @@ class ACO_Order_Management {
 		}
 
 		// If this reservation was already activated, do nothing.
-		if ($order->get_meta( '_avarda_reservation_activated', true ) ) {
+		if ( $order->get_meta( '_avarda_reservation_activated', true ) ) {
 			$order->add_order_note( __( 'Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already activated.', 'avarda-checkout-for-woocommerce' ) );
 			$order->set_status( 'on-hold' );
 			return;
@@ -146,7 +146,7 @@ class ACO_Order_Management {
 			$order->set_status( 'on-hold' );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
-			$order->update_meta_data( $order_id, '_avarda_reservation_activated', current_time( 'mysql' ) );
+			$order->update_meta_data( '_avarda_reservation_activated', current_time( 'mysql' ) );
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully activated.', 'avarda-checkout-for-woocommerce' ) );
 		}
@@ -321,7 +321,7 @@ class ACO_Order_Management {
 				return;
 			}
 			$order->add_order_note( __( 'Avarda Checkout order was successfully updated.', 'avarda-checkout-for-woocommerce' ) );
-			$order->update_meta_data( $order_id, '_avarda_payment_amount', $order->get_total() );
+			$order->update_meta_data( '_avarda_payment_amount', $order->get_total() );
 			$order->save();
 			return;
 		}
