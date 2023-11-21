@@ -99,9 +99,12 @@ class ACO_Assets {
 
 		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
-		$order    = wc_get_order( $order_id );
 
 		$this->aco_maybe_initialize_payment( $order_id );
+
+		// Instantiate order after we have run aco_maybe_initialize_payment so we
+		// know that we have updated meta data. Needed if this is a redirect flow purchase.
+		$order = wc_get_order( $order_id );
 
 		$is_aco_action    = 'no';
 		$confirmation_url = '';
