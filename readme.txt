@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.2.2
+Tested up to: 6.4.1
 Requires PHP: 7.2
 WC requires at least: 5.0.0
-WC tested up to: 7.8.0
+WC tested up to: 8.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.10.2
+Stable tag: 1.11.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2023.11.21        - version 1.11.0 =
+* Feature           - Adds support for recurring payments via WooCommerce Subscriptions plugin.
+* Feature           - Adds support for WooCommerce "High-Performance Order Storage" (HPOS) feature.
+* Feature           - Add setting and logic for age validation.
+* Tweak             - Improvements in how and when customer full address data is fetched from Avarda during creation of Woo order.
+
 = 2023.10.12        - version 1.10.2 =
 * Fix               - Fix compatibility with Smart Coupons.
 

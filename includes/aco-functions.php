@@ -51,8 +51,9 @@ function aco_wc_initialize_payment() {
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
-		delete_post_meta( $order_id, '_wc_avarda_purchase_id' );
-		delete_post_meta( $order_id, '_transaction_id' );
+		$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
+		$order->set_transaction_id( '' );
+		$order->save();
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
 		ACO_Logger::log( 'Delete _wc_avarda_purchase_id & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 	}
@@ -60,6 +61,7 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
+	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
 	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
 	return $avarda_payment;
 
@@ -111,15 +113,14 @@ function aco_wc_initialize_or_update_order() {
 		switch ( $aco_step ) {
 			case 'Completed':
 				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				$order_id = aco_get_order_id_by_purchase_id( $avarda_purchase_id );
-				$order    = wc_get_order( $order_id );
+				$order = aco_get_order_by_purchase_id( $avarda_purchase_id );
 
 				if ( is_object( $order ) ) {
 					$confirmation_url = add_query_arg(
 						array(
 							'aco_confirm'     => 'yes',
 							'aco_purchase_id' => $avarda_purchase_id,
-							'wc_order_id'     => $order_id,
+							'wc_order_id'     => $order->get_id(),
 						),
 						$order->get_checkout_order_received_url()
 					);
@@ -165,11 +166,10 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-
-	if ( get_post_meta( $order_id, '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
-		$order                   = wc_get_order( $order_id );
-		$avarda_purchase_id      = get_post_meta( $order_id, '_wc_avarda_purchase_id', true );
-		$avarda_jwt_expired_time = get_post_meta( $order_id, '_wc_avarda_expiredUtc', true );
+		$order = wc_get_order( $order_id );
+	if ( $order->get_meta( '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
+		$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
 
 		// We ha ve a purchase ID, get payment from Avarda.
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
@@ -259,9 +259,11 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 	if ( is_wp_error( $avarda_order ) ) {
 		return;
 	}
-	update_post_meta( $order_id, '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
-	update_post_meta( $order_id, '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
-	update_post_meta( $order_id, '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
+	$order = wc_get_order( $order_id );
+	$order->update_meta_data( '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
+	$order->update_meta_data( '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
+	$order->update_meta_data( '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
+	$order->save();
 }
 
 /**
@@ -271,7 +273,7 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
  * @param string $avarda_purchase_id The Avarda purchase id.
  * @return void
  */
-function aco_confirm_avarda_order( $order_id = null, $avarda_purchase_id ) {
+function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 	if ( $order_id ) {
 		$order = wc_get_order( $order_id );
 
@@ -320,8 +322,9 @@ function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
 	$subscription    = wc_get_order( $subscription_id );
 	$avarda_order    = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 	$recurring_token = $avarda_order['paymentMethods']['selectedPayment']['recurringPaymentToken'];
-	update_post_meta( $subscription->get_id(), '_aco_recurring_token', $recurring_token );
-	update_post_meta( $subscription->get_id(), '_wc_avarda_purchase_id', $avarda_purchase_id );
+	$subscription->update_meta_data( '_aco_recurring_token', $recurring_token );
+	$subscription->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
+	$subscription->save();
 
 	// translators: %s Avarda recurring token.
 	$note = sprintf( __( 'New recurring token for subscription: %s', 'avarda-checkout-for-woocommerce' ), sanitize_key( $recurring_token ) );
@@ -414,6 +417,70 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 
 }
 
+function aco_format_address_data( $avarda_order ) {
+	$customer_address = array();
+
+	$user_inputs       = array();
+	$invoicing_address = array();
+	$delivery_address  = array();
+	if ( 'B2C' === $avarda_order['mode'] ) {
+		$user_inputs       = $avarda_order['b2C']['userInputs'];
+		$invoicing_address = $avarda_order['b2C']['invoicingAddress'];
+		$delivery_address  = $avarda_order['b2C']['deliveryAddress'];
+
+		$customer_address['billing']['first_name'] = $invoicing_address['firstName'] ?? '';
+		$customer_address['billing']['last_name']  = $invoicing_address['lastName'] ?? '';
+		$customer_address['billing']['address1']   = $invoicing_address['address1'] ?? '';
+		$customer_address['billing']['address2']   = $invoicing_address['address2'] ?? '';
+		$customer_address['billing']['zip']        = $invoicing_address['zip'] ?? '';
+		$customer_address['billing']['city']       = $invoicing_address['city'] ?? '';
+		$customer_address['billing']['country']    = $invoicing_address['country'] ?? '';
+
+		$customer_address['billing']['email']         = $user_inputs['email'] ?? '';
+		$customer_address['billing']['phone']         = $user_inputs['phone'] ?? '';
+		$customer_address['billing']['date_of_birth'] = $user_inputs['dateOfBirth'] ?? '';
+
+		$customer_address['shipping']['first_name'] = $delivery_address['firstName'] ?? '';
+		$customer_address['shipping']['last_name']  = $delivery_address['lastName'] ?? '';
+		$customer_address['shipping']['address1']   = $delivery_address['address1'] ?? '';
+		$customer_address['shipping']['address2']   = $delivery_address['address2'] ?? '';
+		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
+		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
+		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+
+	} elseif ( 'B2B' === $avarda_order['mode'] ) {
+
+		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? '';
+		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? '';
+		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? '';
+
+		$customer_address['billing']['first_name'] = $avarda_order['b2B']['customerInfo']['firstName'] ?? '';
+		$customer_address['billing']['last_name']  = $avarda_order['b2B']['customerInfo']['lastName'] ?? '';
+		$customer_address['billing']['company']    = $invoicing_address['name'] ?? '';
+		$customer_address['billing']['address1']   = $invoicing_address['address1'] ?? '';
+		$customer_address['billing']['address2']   = $invoicing_address['address2'] ?? '';
+		$customer_address['billing']['zip']        = $invoicing_address['zip'] ?? '';
+		$customer_address['billing']['city']       = $invoicing_address['city'] ?? '';
+		$customer_address['billing']['country']    = $invoicing_address['country'] ?? '';
+
+		$customer_address['billing']['email']         = $user_inputs['email'] ?? '';
+		$customer_address['billing']['phone']         = $user_inputs['phone'] ?? '';
+		$customer_address['billing']['date_of_birth'] = $user_inputs['dateOfBirth'] ?? '';
+
+		$customer_address['shipping']['first_name'] = $delivery_address['firstName'] ?? '';
+		$customer_address['shipping']['last_name']  = $delivery_address['lastName'] ?? '';
+		$customer_address['shipping']['company']    = $invoicing_address['name'] ?? '';
+		$customer_address['shipping']['address1']   = $delivery_address['address1'] ?? '';
+		$customer_address['shipping']['address2']   = $delivery_address['address2'] ?? '';
+		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
+		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
+		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+
+	}
+
+	return $customer_address;
+}
+
 /**
  * Get Avarda Checkout order payment method title.
  *
@@ -425,12 +492,13 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	$aco_payment_method = '';
 	if ( isset( $avarda_order['paymentMethods']['selectedPayment']['type'] ) ) {
 		$aco_payment_method = sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['type'] );
-		update_post_meta( $order->get_id(), '_avarda_payment_method', $aco_payment_method );
+		$order->update_meta_data( '_avarda_payment_method', $aco_payment_method );
 
 		$aco_payment_fee = isset( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) ? sanitize_text_field( $avarda_order['paymentMethods']['selectedPayment']['paymentFee'] ) : '';
 		if ( ! empty( $aco_payment_fee ) ) {
-			update_post_meta( $order->get_id(), '_avarda_payment_method_fee', $aco_payment_fee );
+			$order->update_meta_data( '_avarda_payment_method_fee', $aco_payment_fee );
 		}
+		$order->save();
 	}
 
 	switch ( $aco_payment_method ) {
@@ -497,7 +565,7 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 
 
 /**
- * Unsets the sessions used by the plguin.
+ * Unset the sessions used by the plugin.
  *
  * @return void
  */
@@ -506,6 +574,7 @@ function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_update_md5' );
 	WC()->session->__unset( 'aco_language' );
 	WC()->session->__unset( 'aco_currency' );
+	WC()->session->__unset( 'aco_wc_cart_contains_subscription' );
 }
 
 /**
@@ -562,65 +631,45 @@ function aco_wc_add_extra_checkout_fields() {
 }
 
 /**
- * Finds an Order ID based on a transaction ID (the Avarda order number).
+ * Returns the WooCommerce order that has a matching Avarda purchase id saved as a meta field. If no order is found, returns false, and if many orders are found the newest one is returned.
  *
- * @param string $transaction_id Avarda order number saved as Transaction ID in WC order.
- * @return int The ID of an order, or 0 if the order could not be found.
+ * @param string      $purchase_id Avarda purchase id.
+ * @param string|null $date_after Possibility to add a date limit to the check.
+ * @return WC_Order|false
  */
-function aco_get_order_id_by_transaction_id( $transaction_id ) {
-	$query_args = array(
-		'fields'      => 'ids',
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'meta_key'    => '_transaction_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'meta_value'  => sanitize_text_field( wp_unslash( $transaction_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'date_query'  => array(
-			array(
-				'after' => '30 day ago',
-			),
-		),
+function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
+	$args = array(
+		'meta_key'     => '_wc_avarda_purchase_id',
+		'meta_value'   => $purchase_id,
+		'meta_compare' => '=',
+		'order'        => 'DESC',
+		'orderby'      => 'date',
+		'limit'        => 1,
 	);
 
-	$orders = get_posts( $query_args );
-
-	if ( $orders ) {
-		$order_id = $orders[0];
-	} else {
-		$order_id = 0;
+	if ( $date_after ) {
+		$args['date_after'] = $date_after;
 	}
 
-	return $order_id;
-}
+	$orders = wc_get_orders( $args );
 
-/**
- * Finds an Order ID based on a purchase ID (the Avarda order number).
- *
- * @param string $purchase_id Avarda order number saved as Purchase ID in WC order.
- * @return int The ID of an order, or 0 if the order could not be found.
- */
-function aco_get_order_id_by_purchase_id( $purchase_id ) {
-	$query_args = array(
-		'fields'      => 'ids',
-		'post_type'   => wc_get_order_types(),
-		'post_status' => array_keys( wc_get_order_statuses() ),
-		'meta_key'    => '_wc_avarda_purchase_id', // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'meta_value'  => sanitize_text_field( wp_unslash( $purchase_id ) ), // phpcs:ignore WordPress.DB.SlowDBQuery -- Slow DB Query is ok here, we need to limit to our meta key.
-		'date_query'  => array(
-			array(
-				'after' => '30 day ago',
-			),
-		),
-	);
-
-	$orders = get_posts( $query_args );
-
-	if ( $orders ) {
-		$order_id = $orders[0];
-	} else {
-		$order_id = 0;
+	// If the orders array is empty, return false.
+	if ( empty( $orders ) ) {
+		return false;
 	}
 
-	return $order_id;
+	// Get the first order in the array.
+	$order = reset( $orders );
+
+	// Validate that the order actual has the metadata we're looking for, and that it is the same.
+	$meta_value = $order->get_meta( '_wc_avarda_purchase_id', true );
+
+	// If the meta value is not the same as the Avarda purchase id, return false.
+	if ( $meta_value !== $purchase_id ) {
+		return false;
+	}
+
+	return $order;
 }
 
 /**
@@ -680,4 +729,18 @@ function aco_payment_steps_approved_for_update_request() {
 		'CompanyAddressInfo',
 		'CompanyAddressInfoWithoutSsn',
 	);
+}
+
+/**
+ * Returns if WooCommerce cart contains subscription product or not.
+ *
+ * @return string The payment state.
+ */
+function aco_get_wc_cart_contains_subscription() {
+	$contains_subscription = false;
+
+	if ( ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) ) {
+		$contains_subscription = true;
+	}
+	return apply_filters( 'aco_wc_cart_contains_subscription', $contains_subscription );
 }
