@@ -49,12 +49,6 @@ class ACO_Helper_Checkout_Setup {
 		}
 		$checkout_setup['mode'] = $customer_type;
 
-		// wc subscription.
-		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
-			// Indicate that it's a recurring payment - Avarda.
-			$checkout_setup['recurringPayments'] = 'checked';
-		}
-
 		// Age validation.
 		if ( ! empty( $age_validation ) ) {
 			$checkout_setup['ageValidation'] = $age_validation;
