@@ -8,7 +8,7 @@ WC requires at least: 5.0.0
 WC tested up to: 8.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.11.1
+Stable tag: 1.11.2
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,11 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2023.11.29        - version 1.11.2 =
+* Fix               - Fixed an incorrect meta query during the confirmation step if the order id was missing from the url.
+* Fix               - Improved checks before we confirm an order to ensure the payment id from Avarda matches the stored payment id in the order.
+* Fix               - Fixed a potential fatal error when handling a callback from Avarda, that happened due to logging the order id before ensuring we had an order.
+
 = 2023.11.21        - version 1.11.1 =
 * Fix               - Delete meta data fix for redirect flow. Could cause fatal error.
 
