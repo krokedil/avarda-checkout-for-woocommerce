@@ -64,7 +64,6 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
 	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
 	return $avarda_payment;
-
 }
 
 /**
@@ -285,8 +284,8 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		// Get the Avarda order.
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
-		// Populate wc order address.
-		aco_populate_wc_order( $order, $avarda_order );
+		// Set Avarda payment method title.
+		aco_set_payment_method_title( $order, $avarda_order );
 
 		// Let other plugins hook into this sequence.
 		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
@@ -414,7 +413,6 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 
 	// Save order.
 	$order->save();
-
 }
 
 function aco_format_address_data( $avarda_order ) {

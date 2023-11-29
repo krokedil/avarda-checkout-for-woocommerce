@@ -198,6 +198,11 @@
           "description" : "<ul><li>Fix - Delete meta data fix for redirect flow. Could cause fatal error.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.4.1"
+     },
+     "1.11.2" : {
+          "description" : "<ul><li>Fix - Fixed an incorrect meta query during the confirmation step if the order id was missing from the url.</li><li>Fix - Improved checks before we confirm an order to ensure the payment id from Avarda matches the stored payment id in the order.</li><li>Fix - Fixed a potential fatal error when handling a callback from Avarda, that happened due to logging the order id before ensuring we had an order.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.4.1"
      }
 
 }
