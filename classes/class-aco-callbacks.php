@@ -43,13 +43,14 @@ class ACO_Callbacks {
 			exit;
 		}
 
-		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order->get_id() );
-
 		if ( ! is_object( $order ) ) {
 			ACO_Logger::log( 'Aborting notification callback for Purchase ID ' . $purchase_id . '. No WooCommerce order found.' );
 			header( 'HTTP/1.1 200 OK' );
 			exit;
 		}
+
+		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order->get_id() );
+
 		// Maybe abort the callback (if the order already has been processed in Woo).
 		if ( ! empty( $order->get_date_paid() ) ) {
 			ACO_Logger::log( 'Aborting notification callback. Order ' . $order->get_order_number() . ' (order ID ' . $order->get_id() . ') already processed.' );
