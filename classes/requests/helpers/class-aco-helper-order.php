@@ -340,7 +340,7 @@ class ACO_Helper_Order {
 					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
 					$gift_card     = array(
 						'notes'       => $giftcard_sku,
-						'description' => $label,
+						'description' => substr( $label, 0, 35 ),
 						'quantity'    => 1,
 						'amount'      => $coupon_amount,
 						'taxCode'     => 0,
