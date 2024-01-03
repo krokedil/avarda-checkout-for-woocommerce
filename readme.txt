@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.4.1
+Tested up to: 6.4.2
 Requires PHP: 7.2
 WC requires at least: 5.0.0
-WC tested up to: 8.3.0
+WC tested up to: 8.4.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.11.2
+Stable tag: 1.11.3
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2024.01.03        - version 1.11.3 =
+* Fix               - Limit name of Smart coupon gift card names sent to Avarda to 35 characters.
+
 = 2023.11.29        - version 1.11.2 =
 * Fix               - Fixed an incorrect meta query during the confirmation step if the order id was missing from the url.
 * Fix               - Improved checks before we confirm an order to ensure the payment id from Avarda matches the stored payment id in the order.
