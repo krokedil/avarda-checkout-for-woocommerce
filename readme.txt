@@ -5,10 +5,10 @@ Requires at least: 5.0
 Tested up to: 6.4.2
 Requires PHP: 7.2
 WC requires at least: 5.0.0
-WC tested up to: 8.4.0
+WC tested up to: 8.5.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.11.3
+Stable tag: 1.11.4
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -18,7 +18,7 @@ Avarda Checkout is an e-commerce checkout solution that gives you more than the 
 
 To get started with Avarda Checkout you need to [sign up](https://www.avarda.com/se/foretag/) for an account.
 
-More information on how to get started can be found in the [plugin documentation](https://docs.krokedil.com/collection/337-avarda-checkout).
+More information on how to get started can be found in the [plugin documentation](https://docs.krokedil.com/avarda-checkout-for-woocommerce/).
 
 
 == INSTALLATION	 ==
@@ -27,10 +27,13 @@ More information on how to get started can be found in the [plugin documentation
 3. Upload the entire plugin directory to your /wp-content/plugins/ directory.
 4. Activate the plugin through the 'Plugins' menu in WordPress Administration.
 5. Go WooCommerce Settings --> Payment Gateways and configure your Avarda Checkout settings.
-6. Read more about the configuration process in the [plugin documentation](https://docs.krokedil.com/collection/337-avarda-checkout).
+6. Read more about the configuration process in the [plugin documentation](https://docs.krokedil.com/avarda-checkout-for-woocommerce/).
 
 
 == CHANGELOG ==
+= 2024.01.16        - version 1.11.4 =
+* Fix               - Use update_status instead of set_status so order status changes are saved correctly when cancel and activate requests fails.
+
 = 2024.01.03        - version 1.11.3 =
 * Fix               - Limit name of Smart coupon gift card names sent to Avarda to 35 characters.
 
