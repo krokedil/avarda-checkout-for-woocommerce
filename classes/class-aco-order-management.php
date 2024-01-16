@@ -53,8 +53,8 @@ class ACO_Order_Management {
 		// Check if we have a purchase id.
 		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
-			$order->add_order_note( __( 'Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
-			$order->set_status( 'on-hold' );
+			$note = __( 'Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
+			$order->update_status( 'on-hold', $note );
 			return;
 		}
 
@@ -71,12 +71,11 @@ class ACO_Order_Management {
 		// Check if we were successful.
 		if ( is_wp_error( $avarda_order ) ) {
 			// If error save error message.
-			$code          = $avarda_order->get_error_code();
-			$message       = $avarda_order->get_error_message();
-			$text          = __( 'Avarda API Error on Avarda cancel order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
-			$formated_text = sprintf( $text, $code, $message );
-			$order->add_order_note( $formated_text );
-			$order->set_status( 'on-hold' );
+			$code    = $avarda_order->get_error_code();
+			$message = $avarda_order->get_error_message();
+			$text    = __( 'Avarda API Error on Avarda cancel order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+			$note    = sprintf( $text, $code, $message );
+			$order->update_status( 'on-hold', $note );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
 			$order->update_meta_data( '_avarda_reservation_cancelled', current_time( 'mysql' ) );
@@ -119,15 +118,14 @@ class ACO_Order_Management {
 		// Check if we have a purchase id.
 		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
-			$order->add_order_note( __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
-			$order->set_status( 'on-hold' );
+			$note = __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
+			$order->update_status( 'on-hold', $note );
 			return;
 		}
 
 		// If this reservation was already activated, do nothing.
 		if ( $order->get_meta( '_avarda_reservation_activated', true ) ) {
 			$order->add_order_note( __( 'Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already activated.', 'avarda-checkout-for-woocommerce' ) );
-			$order->set_status( 'on-hold' );
 			return;
 		}
 
@@ -138,12 +136,11 @@ class ACO_Order_Management {
 		// Check if we were successful.
 		if ( is_wp_error( $avarda_order ) ) {
 			// If error save error message.
-			$code          = $avarda_order->get_error_code();
-			$message       = $avarda_order->get_error_message();
-			$text          = __( 'Avarda API Error on Avarda activate order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
-			$formated_text = sprintf( $text, $code, $message );
-			$order->add_order_note( $formated_text );
-			$order->set_status( 'on-hold' );
+			$code    = $avarda_order->get_error_code();
+			$message = $avarda_order->get_error_message();
+			$text    = __( 'Avarda API Error on Avarda activate order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+			$note    = sprintf( $text, $code, $message );
+			$order->update_status( 'on-hold', $note );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
 			$order->update_meta_data( '_avarda_reservation_activated', current_time( 'mysql' ) );
@@ -179,8 +176,7 @@ class ACO_Order_Management {
 		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout order could not be refunded. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
-			$order->set_status( 'on-hold' );
-			return;
+			return false;
 		}
 
 		// If activation (Delivery) has not yet been done, use Avardas refund endpoint.

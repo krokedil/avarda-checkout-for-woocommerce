@@ -208,6 +208,11 @@
           "description" : "<ul><li>Fix - Limit name of Smart coupon gift card names sent to Avarda to 35 characters.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.4.2"
+     },
+     "1.11.4" : {
+          "description" : "<ul><li>Fix - Use update_status instead of set_status so order status changes are saved correctly when cancel and activate requests fails.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.4.2"
      }
 
 }
