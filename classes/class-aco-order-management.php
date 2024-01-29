@@ -21,6 +21,11 @@ class ACO_Order_Management {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
 		// Update an order.
 		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); // for aco refund .
+
+		// Order actions - manually trigger activate & cancel order requests.
+		add_filter( 'woocommerce_order_actions', array( $this, 'add_order_actions' ), 10, 2 );
+		add_action( 'woocommerce_order_action_aco_cancel_order', array( $this, 'cancel_reservation' ) );
+		add_action( 'woocommerce_order_action_aco_activate_order', array( $this, 'activate_reservation' ) );
 	}
 
 	/**
@@ -325,6 +330,35 @@ class ACO_Order_Management {
 			$order->save();
 			return;
 		}
+	}
+
+	/**
+	 * Add custom actions to order actions select box on edit order page
+	 * Only added for paid orders that haven't fired this action yet.
+	 *
+	 * @param array  $actions order actions array to display.
+	 * @param object $order WooCommerce order.
+	 * @return array - updated actions
+	 */
+	public function add_order_actions( $actions, $order ) {
+
+		// If this order wasn't created using aco payment method, bail.
+		if ( ! in_array( $order->get_payment_method(), array( 'aco' ), true ) ) {
+			return $actions;
+		}
+
+		// If the order has not been paid for, bail.
+		if ( empty( $order->get_date_paid() ) ) {
+			return $actions;
+		}
+
+		// If order hasn't already been cancelled or activated - add cancel and activate action.
+		if ( empty( $order->get_meta( '_avarda_reservation_cancelled', true ) ) && empty( $order->get_meta( '_avarda_reservation_activated', true ) ) ) {
+			$actions['aco_activate_order'] = __( 'Activate Avarda order', 'avarda-checkout-for-woocommerce' );
+			$actions['aco_cancel_order']   = __( 'Cancel Avarda order', 'avarda-checkout-for-woocommerce' );
+		}
+
+		return $actions;
 	}
 
 
