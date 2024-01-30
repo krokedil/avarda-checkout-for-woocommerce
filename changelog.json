@@ -218,6 +218,11 @@
           "description" : "<ul><li>Enhancement - Adds aco_om_failed hook so other plugins can listen to and take action if activation and cancellation logic fails.</li><li>Fix - Use transaction id in activate and cancel requests if _wc_avarda_purchase_id is missing in order.</li><li>Fix - Add note and set order status to On hold if order totals do not match between Woo and Avarda during confirmation step.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.4.2"
+     },
+     "1.12.0" : {
+          "description" : "<ul><li>Feature - Adds logic to trigger activate and cancel order request to Avarda without changing order status. This is done via WooCommerce Order action logic.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.4.2"
      }
 
 }
