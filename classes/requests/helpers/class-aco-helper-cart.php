@@ -50,7 +50,7 @@ class ACO_Helper_Cart {
 			$apply_before_tax = 'yes' === get_option( 'woocommerce_smart_coupon_apply_before_tax', 'no' );
 			foreach ( WC()->cart->get_coupons() as $coupon_key => $coupon ) {
 				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
-					if ( wc_tax_enabled() && 'yes' === $apply_before_tax ) {
+					if ( wc_tax_enabled() && $apply_before_tax ) {
 						// The discount is applied directly to the cart item. Send gift card amount as zero for bookkeeping.
 						$coupon_amount = 0;
 					} else {
