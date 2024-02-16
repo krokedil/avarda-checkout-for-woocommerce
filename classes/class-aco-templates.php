@@ -42,7 +42,6 @@ class ACO_Templates {
 		// Template hooks.
 		add_action( 'aco_wc_after_wrapper', array( $this, 'add_wc_form' ), 10 );
 		add_action( 'aco_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-		add_action( 'aco_wc_before_checkout_form', 'woocommerce_checkout_coupon_form', 20 );
 		add_action( 'aco_wc_after_order_review', 'aco_wc_add_extra_checkout_fields', 10 );
 		add_action( 'aco_wc_after_order_review', 'aco_wc_show_another_gateway_button', 20 );
 	}
