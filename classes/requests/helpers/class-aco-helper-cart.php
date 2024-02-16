@@ -47,12 +47,20 @@ class ACO_Helper_Cart {
 
 		// Smart coupons.
 		if ( ! empty( WC()->cart->get_coupons() ) ) {
+			$apply_before_tax = 'yes' === get_option( 'woocommerce_smart_coupon_apply_before_tax', 'no' );
 			foreach ( WC()->cart->get_coupons() as $coupon_key => $coupon ) {
 				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
-					$coupon_amount = number_format( $coupon->get_amount() * -1, 2, '.', '' );
-					$label         = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( __( 'Gift card:', 'avarda-checkout-for-woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
-					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
-					$gift_card     = array(
+					if ( wc_tax_enabled() && $apply_before_tax ) {
+						// The discount is applied directly to the cart item. Send gift card amount as zero for bookkeeping.
+						$coupon_amount = 0;
+					} else {
+						$coupon_amount = $coupon->get_amount() * -1;
+					}
+					$coupon_amount = number_format( $coupon_amount, 2, '.', '' );
+					// translators: %s is the gift card reference.
+					$label        = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( sprintf( __( 'Gift card: %s', 'avarda-checkout-for-woocommerce' ), $coupon->get_code() ) ), $coupon );
+					$giftcard_sku = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
+					$gift_card    = array(
 						'notes'       => $giftcard_sku,
 						'description' => substr( $label, 0, 35 ),
 						'quantity'    => 1,
