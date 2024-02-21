@@ -21,8 +21,11 @@ class ACO_Order_Management {
 	public function __construct() {
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_reservation' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
-		// Update an order.
-		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); // for aco refund .
+
+		// Order actions - manually trigger activate & cancel order requests.
+		add_filter( 'woocommerce_order_actions', array( $this, 'add_order_actions' ), 10, 2 );
+		add_action( 'woocommerce_order_action_aco_cancel_order', array( $this, 'cancel_reservation' ) );
+		add_action( 'woocommerce_order_action_aco_activate_order', array( $this, 'activate_reservation' ) );
 
 		// Add the shipping metabox to the edit order page.
 		$shipping_edit_order_page = new EditOrderPage( ACO_WC()->pickup_points );
@@ -46,7 +49,7 @@ class ACO_Order_Management {
 			return;
 		}
 
-		// Check Avarda settings to see if we have the ordermanagement enabled.
+		// Check Avarda settings to see if we have the order management enabled.
 		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
 		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
 		if ( ! $order_management ) {
@@ -61,10 +64,11 @@ class ACO_Order_Management {
 		$subscription = $this->check_if_subscription( $order );
 
 		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true ) ?? $order->get_transaction_id() ?? '';
 		if ( empty( $purchase_id ) ) {
 			$note = __( 'Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
 			$order->update_status( 'on-hold', $note );
+			do_action( 'aco_om_failed', 'cancel', $note, $order );
 			return;
 		}
 
@@ -74,7 +78,7 @@ class ACO_Order_Management {
 			return;
 		}
 
-		// TODO: Should we do different request if order is subcription?
+		// TODO: Should we do different request if order is subscription?
 		// Cancel order.
 		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_cancel_order( $order_id ) : ACO_WC()->api->request_cancel_order( $order_id );
 
@@ -86,6 +90,7 @@ class ACO_Order_Management {
 			$text    = __( 'Avarda API Error on Avarda cancel order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
 			$note    = sprintf( $text, $code, $message );
 			$order->update_status( 'on-hold', $note );
+			do_action( 'aco_om_failed', 'cancel', $note, $order );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
 			$order->update_meta_data( '_avarda_reservation_cancelled', current_time( 'mysql' ) );
@@ -126,10 +131,11 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true ) ?? $order->get_transaction_id() ?? '';
 		if ( empty( $purchase_id ) ) {
 			$note = __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
 			$order->update_status( 'on-hold', $note );
+			do_action( 'aco_om_failed', 'activate', $note, $order );
 			return;
 		}
 
@@ -139,7 +145,7 @@ class ACO_Order_Management {
 			return;
 		}
 
-		// TODO: Should we do different request if order is subcription?
+		// TODO: Should we do different request if order is subscription?
 		// Activate order.
 		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_activate_order( $order_id ) : ACO_WC()->api->request_activate_order( $order_id );
 
@@ -151,6 +157,7 @@ class ACO_Order_Management {
 			$text    = __( 'Avarda API Error on Avarda activate order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
 			$note    = sprintf( $text, $code, $message );
 			$order->update_status( 'on-hold', $note );
+			do_action( 'aco_om_failed', 'activate', $note, $order );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
 			$order->update_meta_data( '_avarda_reservation_activated', current_time( 'mysql' ) );
@@ -211,7 +218,7 @@ class ACO_Order_Management {
 		$subscription = $this->check_if_subscription( $order );
 
 		// Get the Avarda order.
-		// TODO: Should we do different request if order is subcription?
+		// TODO: Should we do different request if order is subscription?
 		$avarda_order_tmp = ( $subscription ) ? ACO_WC()->api->request_get_payment( $purchase_id, true ) : ACO_WC()->api->request_get_payment( $purchase_id, true );
 		if ( is_wp_error( $avarda_order_tmp ) ) {
 			// If error save error message.
@@ -252,83 +259,32 @@ class ACO_Order_Management {
 	}
 
 	/**
-	 * Update order.
+	 * Add custom actions to order actions select box on edit order page
+	 * Only added for paid orders that haven't fired this action yet.
 	 *
-	 * @param int     $order_id Order id.
-	 * @param array   $items Items.
-	 * @param boolean $action Action.
-	 * @return void
+	 * @param array  $actions order actions array to display.
+	 * @param object $order WooCommerce order.
+	 * @return array - updated actions
 	 */
-	public function update_order( $order_id, $items, $action = false ) {
-		$order = wc_get_order( $order_id );
+	public function add_order_actions( $actions, $order ) {
 
-		// Check if the order has been paid.
+		// If this order wasn't created using aco payment method, bail.
+		if ( ! in_array( $order->get_payment_method(), array( 'aco' ), true ) ) {
+			return $actions;
+		}
+
+		// If the order has not been paid for, bail.
 		if ( empty( $order->get_date_paid() ) ) {
-			return;
+			return $actions;
 		}
 
-		// If this order wasn't created using Avarda Checkout payment method, bail.
-		if ( 'aco' !== $order->get_payment_method() ) {
-			return;
+		// If order hasn't already been cancelled or activated - add cancel and activate action.
+		if ( empty( $order->get_meta( '_avarda_reservation_cancelled', true ) ) && empty( $order->get_meta( '_avarda_reservation_activated', true ) ) ) {
+			$actions['aco_activate_order'] = __( 'Activate Avarda order', 'avarda-checkout-for-woocommerce' );
+			$actions['aco_cancel_order']   = __( 'Cancel Avarda order', 'avarda-checkout-for-woocommerce' );
 		}
 
-		// Check Avarda settings to see if we have the ordermanagement enabled.
-		$avarda_settings  = get_option( 'woocommerce_aco_settings' );
-		$order_management = 'yes' === $avarda_settings['order_management'] ? true : false;
-		if ( ! $order_management ) {
-			return;
-		}
-
-		// Changes only possible if order is set to On Hold.
-		if ( ! in_array( $order->get_status(), apply_filters( 'aco_allowed_update_statuses', array( 'on-hold' ) ), true ) ) {
-			return;
-		}
-
-		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
-		if ( empty( $purchase_id ) ) {
-			$order->add_order_note( __( 'Avarda Checkout order could not be updated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
-			return;
-		}
-
-		$subscription = $this->check_if_subscription( $order );
-
-		// TODO: Should we do different request if order is subcription?
-		$avarda_order_tmp = ( $subscription ) ? ACO_WC()->api->request_get_payment( $purchase_id, true ) : ACO_WC()->api->request_get_payment( $purchase_id, true );
-		if ( is_wp_error( $avarda_order_tmp ) ) {
-			// If error save error message.
-			$code          = $avarda_order_tmp->get_error_code();
-			$message       = $avarda_order_tmp->get_error_message();
-			$text          = __( 'Avarda API Error on get avarda order before update: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
-			$formated_text = sprintf( $text, $code, $message );
-			$order->add_order_note( $formated_text );
-			return;
-		}
-
-		// Check if B2C or B2B.
-		$aco_step = '';
-		if ( 'B2C' === $avarda_order_tmp['mode'] ) {
-			$aco_step = $avarda_order_tmp['b2C']['step']['current'];
-		} elseif ( 'B2B' === $avarda_order_tmp['mode'] ) {
-			$aco_step = $avarda_order_tmp['b2B']['step']['current'];
-		}
-
-		if ( 'Completed' === $aco_step ) {
-			$avarda_order = ACO_WC()->api->request_refund_order( $order_id );
-			if ( is_wp_error( $avarda_order ) ) {
-				// If error save error message and return false.
-				$code          = $avarda_order->get_error_code();
-				$message       = $avarda_order->get_error_message();
-				$text          = __( 'Avarda API Error on Avarda update: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
-				$formated_text = sprintf( $text, $code, $message );
-				$order->add_order_note( $formated_text );
-				return;
-			}
-			$order->add_order_note( __( 'Avarda Checkout order was successfully updated.', 'avarda-checkout-for-woocommerce' ) );
-			$order->update_meta_data( '_avarda_payment_amount', $order->get_total() );
-			$order->save();
-			return;
-		}
+		return $actions;
 	}
 
 

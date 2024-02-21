@@ -300,12 +300,18 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 
 		if ( 'Completed' === $aco_step ) {
 			ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
-			// Payment complete and set transaction id.
-			// translators: Avarda purchase ID.
-			$note = sprintf( __( 'Payment via Avarda Checkout. Purchase ID: %s', 'avarda-checkout-for-woocommerce' ), sanitize_text_field( $avarda_order['purchaseId'] ) );
-			$order->add_order_note( $note );
-			$order->payment_complete( $avarda_purchase_id );
-			do_action( 'aco_wc_payment_complete', $order_id, $avarda_order );
+
+			// Check order totals.
+			if ( aco_check_order_totals( $order, $avarda_order ) ) {
+				// Payment complete and set transaction id.
+				// translators: Avarda purchase ID.
+				$note = sprintf( __( 'Payment via Avarda Checkout. Purchase ID: %s', 'avarda-checkout-for-woocommerce' ), sanitize_text_field( $avarda_order['purchaseId'] ) );
+				$order->add_order_note( $note );
+				$order->payment_complete( $avarda_purchase_id );
+				do_action( 'aco_wc_payment_complete', $order_id, $avarda_order );
+			} else {
+				$order->update_status( 'on-hold' );
+			}
 		}
 	}
 }
@@ -741,6 +747,33 @@ function aco_get_wc_cart_contains_subscription() {
 		$contains_subscription = true;
 	}
 	return apply_filters( 'aco_wc_cart_contains_subscription', $contains_subscription );
+}
+
+/**
+ * Check order totals
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @param array    $avarda_order The Collector order.
+ *
+ * @return bool TRUE If the WC and Avarda total amounts match, otherwise FALSE.
+ */
+function aco_check_order_totals( $order, $avarda_order ) {
+	// Check order total and compare it with Woo.
+	$woo_order_total    = intval( round( $order->get_total() * 100, 2 ) );
+	$avarda_order_total = intval( round( $avarda_order['totalPrice'] * 100, 2 ) );
+	if ( ( $woo_order_total > $avarda_order_total && ( $woo_order_total - $avarda_order_total ) > 3 ) ||
+		( $avarda_order_total > $woo_order_total && ( $avarda_order_total - $woo_order_total ) > 3 )
+	) {
+
+		// Translators: Woo order number, Woo order total, Avarda order total.
+		$note = sprintf( __( 'Order total mismatch in order number: %1$s. Woo order total: %2$s, Avarda order total: %3$s (converted to minor units).', 'avarda-checkout-for-woocommerce' ), $order->get_order_number(), $woo_order_total, $avarda_order_total );
+		ACO_Logger::log( $note );
+		$order->add_order_note( $note );
+		do_action( 'aco_confirm_order_failed', 'order_total_mismatch', $note, $order );
+		return false;
+	}
+
+	return true;
 }
 
 /**
