@@ -21,6 +21,8 @@
  * @package Avarda_Checkout
  */
 
+use Krokedil\Shipping\PickupPoints;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -80,6 +82,14 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @var $order_management ACO_Order_Management
 		 */
 		public $order_management;
+
+		/**
+		 * Pickup points class instance.
+		 *
+		 * @var PickupPoints $pickup_points
+		 */
+		public $pickup_points;
+
 		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
@@ -143,12 +153,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			load_plugin_textdomain( 'avarda-checkout-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
+			if ( ! $this->init_composer() ) {
+				return;
+			}
+
 			$this->include_files();
 
 			// Delete transient when aco settings is saved.
 			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'aco_delete_transients' ) );
 
+			// Register the shipping method with WooCommerce.
+			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
+
 			// Set class variables.
+			$this->pickup_points    = new PickupPoints();
 			$this->api              = new ACO_API();
 			$this->logger           = new ACO_Logger();
 			$this->cart_items       = new ACO_Helper_Cart();
@@ -157,7 +175,56 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 
+			// Create initial instance of the session class.
+			ACO_Session::get_instance();
+
 			do_action( 'aco_initiated' );
+		}
+
+		/**
+		 * Initialize composers autoloader.
+		 *
+		 * @return bool|mixed
+		 */
+		public function init_composer() {
+			$autoloader = AVARDA_CHECKOUT_PATH . '/vendor/autoload.php';
+
+			if ( ! is_readable( $autoloader ) ) {
+				self::missing_autoloader();
+				return false;
+			}
+
+			$autoloader_result = require $autoloader;
+			if ( ! $autoloader_result ) {
+				return false;
+			}
+
+			return $autoloader_result;
+		}
+
+		/**
+		 * Checks if the autoloader is missing and displays an admin notice.
+		 *
+		 * @return void
+		 */
+		protected static function missing_autoloader() {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( // phpcs:ignore
+					esc_html__( 'Your installation of Avarda Checkout is not complete. If you installed this plugin directly from Github please refer to the README.DEV.md file in the plugin.', 'avarda-checkout-for-woocommerce' )
+				);
+			}
+			add_action(
+				'admin_notices',
+				function () {
+					?>
+					<div class="notice notice-error">
+						<p>
+							<?php echo esc_html__( 'Your installation of Avarda Checkout is not complete. If you installed this plugin directly from Github please refer to the README.DEV.md file in the plugin.', 'avarda-checkout-for-woocommerce' ); ?>
+						</p>
+					</div>
+					<?php
+				}
+			);
 		}
 
 
@@ -195,6 +262,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-status.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-shipping.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-session.php';
 
 			// Compatibility classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-wc-carrier-agents.php';
@@ -221,7 +290,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Includes.
 			include_once AVARDA_CHECKOUT_PATH . '/includes/aco-functions.php';
-
 		}
 
 		/**
@@ -264,12 +332,21 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				'avarda-checkout-for-woocommerce'
 			);
 		}
+
+		/**
+		 * Return the instance of the Avarda session class.
+		 *
+		 * @return ACO_Session
+		 */
+		public function session() {
+			return ACO_Session::get_instance();
+		}
 	}
 
 	// Declare HPOS compatibility
 	add_action(
 		'before_woocommerce_init',
-		function() {
+		function () {
 			if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 			}
