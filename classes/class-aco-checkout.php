@@ -12,6 +12,13 @@ defined( 'ABSPATH' ) || exit;
  */
 class ACO_Checkout {
 	/**
+	 * Checkout flow.
+	 *
+	 * @var string
+	 */
+	private $checkout_flow;
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct() {
@@ -22,6 +29,8 @@ class ACO_Checkout {
 		if ( 'embedded' === $this->checkout_flow ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
 		}
+
+		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
 	}
 
 	/**
@@ -103,7 +112,7 @@ class ACO_Checkout {
 		}
 
 		// Get the Avarda order from Avarda.
-		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		$avarda_order = ACO_WC()->session()->get_avarda_order();
 
 		// Check if we got a wp_error.
 		if ( is_wp_error( $avarda_order ) ) {
@@ -128,7 +137,7 @@ class ACO_Checkout {
 		// check if session TimedOut.
 		if ( 'TimedOut' === $aco_step ) {
 			aco_wc_unset_sessions();
-			ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
+			ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the checkout page.' );
 			WC()->session->reload_checkout = true;
 			return;
 		}
@@ -151,7 +160,7 @@ class ACO_Checkout {
 			WC()->session->reload_checkout = true;
 		}
 
-		$saved_hash = WC()->session->set( 'aco_last_update_hash', $cart_hash );
+		WC()->session->set( 'aco_last_update_hash', $cart_hash );
 	}
 
 	/**
@@ -174,4 +183,52 @@ class ACO_Checkout {
 
 		return $fields;
 	}
-} new ACO_Checkout();
+
+	/**
+	 * Print the extra shipping info.
+	 *
+	 * @param WC_Shipping_Rate $rate The shipping rate.
+	 *
+	 * @return void
+	 */
+	public function print_extra_shipping_info( $rate ) {
+		if ( false === strpos( $rate->get_id(), 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
+			return;
+		}
+
+		$selected_pickup_point = ACO_WC()->pickup_points->get_selected_pickup_point_from_rate( $rate );
+		if ( empty( $selected_pickup_point ) ) {
+			return;
+		}
+
+		$name        = $selected_pickup_point->get_name();
+		$description = $selected_pickup_point->get_description();
+		$address     = $selected_pickup_point->get_address();
+
+		?>
+		<div class="avarda-shipping-info">
+			<small>
+			<?php if ( ! empty( $name ) ) : ?>
+				<p><?php echo esc_html( $name ); ?></p>
+			<?php endif; ?>
+			<?php if ( ! empty( $description ) ) : ?>
+				<p><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
+			<?php if ( ! empty( $address ) ) : ?>
+				<p>
+				<?php
+				echo WC()->countries->get_formatted_address( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					array(
+						'address_1' => $address->get_street(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						'city'      => $address->get_city(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					)
+				);
+				?>
+				</p>
+			<?php endif; ?>
+			</small>
+		</div>
+		<?php
+	}
+}
+new ACO_Checkout();
