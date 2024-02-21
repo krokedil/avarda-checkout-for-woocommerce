@@ -65,7 +65,8 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 				}
 			}
 		} else {
-			$request_body['items'] = ACO_WC()->cart_items->get_cart_items();
+			$request_body['items']            = ACO_WC()->cart_items->get_cart_items();
+			$request_body['shippingSettings'] = ACO_WC()->cart_items->get_shipping_settings();
 		}
 
 		return apply_filters( 'aco_create_args', $request_body, $order_id );
@@ -86,4 +87,3 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		);
 	}
 }
-
