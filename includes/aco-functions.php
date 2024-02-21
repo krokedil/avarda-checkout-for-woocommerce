@@ -785,3 +785,24 @@ function aco_check_order_totals( $order, $avarda_order ) {
 
 	return true;
 }
+
+/**
+ * Clear any stored shipping package hashes in the WC Session to ensure that shipping rates are recalculated.
+ *
+ * @param array $packages Array of shipping packages.
+ *
+ * @return array
+ */
+function aco_clear_shipping_package_hashes( $packages ) {
+	// Get all package keys.
+	$package_keys = array_keys( $packages );
+
+	// Loop them to ensure we clear the shipping rates for all of them.
+	foreach ( $package_keys as $package_key ) {
+		$wc_session_key = 'shipping_for_package_' . $package_key;
+		WC()->session->__unset( $wc_session_key );
+	}
+
+	// Return the packages unchanged.
+	return $packages;
+}
