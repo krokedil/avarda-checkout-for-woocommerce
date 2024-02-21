@@ -143,7 +143,7 @@ class ACO_Request {
 	/**
 	 * Checks response for any error.
 	 *
-	 * @param object $response The response.
+	 * @param array  $response The response.
 	 * @param array  $request_args The request args.
 	 * @param string $request_url The request URL.
 	 * @return object|array
@@ -190,6 +190,7 @@ class ACO_Request {
 			}
 			return new WP_Error( wp_remote_retrieve_response_code( $response ), $error_message, $data );
 		}
+
 		return json_decode( wp_remote_retrieve_body( $response ), true );
 	}
 }
