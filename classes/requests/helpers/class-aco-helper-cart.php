@@ -14,13 +14,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ACO_Helper_Cart {
 	/**
-	 * Gets formated cart items.
+	 * Is integrated shipping used or not.
+	 *
+	 * @return bool
+	 */
+	public function is_integrated_shipping() {
+		return apply_filters( 'aco_integrated_shipping', false );
+	}
+
+	/**
+	 * Gets formatted cart items.
 	 *
 	 * @param object $cart The WooCommerce cart object.
-	 * @return array Formated cart items.
+	 * @return array Formatted cart items.
 	 */
 	public function get_cart_items( $cart = null ) {
-		$formated_cart_items = array();
+		$formatted_cart_items = array();
 
 		if ( null === $cart ) {
 			$cart = WC()->cart->get_cart();
@@ -28,20 +37,23 @@ class ACO_Helper_Cart {
 
 		// Get cart items.
 		foreach ( $cart as $cart_item ) {
-			$formated_cart_items[] = $this->get_cart_item( $cart_item );
+			$formatted_cart_items[] = $this->get_cart_item( $cart_item );
 		}
 
 		// Get cart fees.
 		$cart_fees = WC()->cart->get_fees();
 		foreach ( $cart_fees as $fee ) {
-			$formated_cart_items[] = $this->get_fee( $fee );
+			$formatted_cart_items[] = $this->get_fee( $fee );
 		}
 
 		// Get cart shipping.
 		if ( WC()->cart->needs_shipping() ) {
-			$shipping = $this->get_shipping();
-			if ( null !== $shipping ) {
-				$formated_cart_items[] = $shipping;
+			// If integrated shipping is not used, then add shipping as a separate line item.
+			if ( ! $this->is_integrated_shipping() ) {
+				$shipping = $this->get_shipping();
+				if ( null !== $shipping ) {
+					$formatted_cart_items[] = $shipping;
+				}
 			}
 		}
 
@@ -69,19 +81,19 @@ class ACO_Helper_Cart {
 						'taxAmount'   => 0,
 					);
 
-					$formated_cart_items[] = $gift_card;
+					$formatted_cart_items[] = $gift_card;
 				}
 			}
 		}
 
-		return $formated_cart_items;
+		return $formatted_cart_items;
 	}
 
 	/**
-	 * Gets formated cart item.
+	 * Gets formatted cart item.
 	 *
 	 * @param object $cart_item WooCommerce cart item object.
-	 * @return array Formated cart item.
+	 * @return array Formatted cart item.
 	 */
 	public function get_cart_item( $cart_item ) {
 		if ( $cart_item['variation_id'] ) {
@@ -90,13 +102,90 @@ class ACO_Helper_Cart {
 			$product = wc_get_product( $cart_item['product_id'] );
 		}
 		return array(
-			'description' => substr( $this->get_product_name( $cart_item ), 0, 34 ), // String.
-			'notes'       => substr( $this->get_product_sku( $product ), 0, 34 ), // String.
-			'amount'      => $this->get_product_price( $cart_item ), // Float.
-			'taxCode'     => $this->get_product_tax_code( $cart_item ), // String.
-			'taxAmount'   => number_format( $cart_item['line_tax'] / $cart_item['quantity'], 2, '.', '' ), // Float.
-			'quantity'    => $cart_item['quantity'],
+			'description'        => substr( $this->get_product_name( $cart_item ), 0, 34 ), // String.
+			'notes'              => substr( $this->get_product_sku( $product ), 0, 34 ), // String.
+			'amount'             => $this->get_product_price( $cart_item ), // Float.
+			'taxCode'            => $this->get_product_tax_code( $cart_item ), // String.
+			'taxAmount'          => number_format( $cart_item['line_tax'] / $cart_item['quantity'], 2, '.', '' ), // Float.
+			'quantity'           => $cart_item['quantity'],
+			'shippingParameters' => $this->get_product_shipping_params( $product ),
 		);
+	}
+
+	/**
+	 * Gets the shipping parameters for the product.
+	 *
+	 * @param WC_Product $product The WooCommerce Product.
+	 * @return array
+	 */
+	public function get_product_shipping_params( $product ) {
+		// Get any shipping classes the product has.
+		$shipping_class = $product->get_shipping_class();
+
+		$weight = $product->get_weight();
+		$length = $product->get_length();
+		$width  = $product->get_width();
+		$height = $product->get_height();
+
+		// Default empty values to 0.
+		$weight = empty( $weight ) ? 0 : $weight;
+		$length = empty( $length ) ? 0 : $length;
+		$width  = empty( $width ) ? 0 : $width;
+		$height = empty( $height ) ? 0 : $height;
+
+		$shipping_params = array(
+			'weight'     => wc_get_weight( $weight, 'g' ),
+			'length'     => wc_get_dimension( $length, 'mm' ),
+			'width'      => wc_get_dimension( $width, 'mm' ),
+			'height'     => wc_get_dimension( $height, 'mm' ),
+			'attributes' => array( $shipping_class ),
+		);
+
+		$shipping_params = apply_filters( 'aco_item_shipping_params', $shipping_params, $product );
+
+		return $shipping_params;
+	}
+
+	/**
+	 * Get the shipping settings for the cart.
+	 *
+	 * @return array
+	 */
+	public function get_shipping_settings() {
+		$cart       = WC()->cart->get_cart();
+		$vouchers   = array();
+		$attributes = array();
+
+		// Check if any free shipping coupons are used.
+		$has_free_shipping_coupon = false;
+		if ( ! empty( WC()->cart->get_applied_coupons() ) ) {
+			foreach ( WC()->cart->get_applied_coupons() as $coupon ) {
+				$coupon_object = new WC_Coupon( $coupon );
+				if ( $coupon_object->get_free_shipping() ) {
+					$has_free_shipping_coupon = true;
+					break;
+				}
+			}
+		}
+
+		if ( $has_free_shipping_coupon ) {
+			$vouchers[] = 'FREESHIPPING';
+		}
+
+		// Get all shipping classes applied to the cart items.
+		foreach ( $cart as $cart_item ) {
+			$product = wc_get_product( $cart_item['product_id'] );
+			if ( $product->get_shipping_class() ) {
+				$attributes[] = $product->get_shipping_class();
+			}
+		}
+
+		$shipping_settings = array(
+			'vouchers'   => $vouchers,
+			'attributes' => $attributes,
+		);
+
+		return apply_filters( 'aco_shipping_settings', $shipping_settings, $cart );
 	}
 
 	/**
@@ -181,34 +270,49 @@ class ACO_Helper_Cart {
 	/**
 	 * Formats the shipping.
 	 *
-	 * @return array
+	 * @return array|null
 	 */
 	public function get_shipping() {
 		$packages        = WC()->shipping->get_packages();
 		$chosen_methods  = WC()->session->get( 'chosen_shipping_methods' );
 		$chosen_shipping = $chosen_methods[0];
+
+		$formatted_shipping = null;
 		foreach ( $packages as $i => $package ) {
-			foreach ( $package['rates'] as $method ) {
-				if ( $chosen_shipping === $method->id ) {
-					if ( $method->cost > 0 ) {
-						return array(
-							'description' => substr( $method->label, 0, 34 ), // String.
-							'notes'       => substr( 'shipping|' . $method->id, 0, 34 ), // String.
-							'amount'      => number_format( $method->cost + array_sum( $method->taxes ), 2, '.', '' ), // String.
-							'taxCode'     => (string) ( array_sum( $method->taxes ) / $method->cost * 100 ), // String.
-							'taxAmount'   => number_format( array_sum( $method->taxes ), 2, '.', '' ), // Float.
-						);
-					} else {
-						return array(
-							'description' => substr( $method->label, 0, 34 ), // String.
-							'notes'       => substr( 'shipping|' . $method->id, 0, 34 ), // String.
-							'amount'      => 0, // Float.
-							'taxCode'     => '0', // String.
-							'taxAmount'   => 0, // Float.
-						);
-					}
+			/**
+			 * Loop each rate to get the correct one.
+			 *
+			 * @var WC_Shipping_Rate $rate Shipping rate.
+			 */
+			foreach ( $package['rates'] as $rate ) {
+				if ( $this->is_integrated_shipping() ) {
+					return array(
+						'description' => substr( $rate->get_label(), 0, 34 ), // String.
+						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
+						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
+						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_taxes() * 100 ), // String.
+						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
+					);
+				}
+
+				if ( $chosen_shipping === $rate->get_id() ) {
+					$formatted_shipping = ( $rate->get_cost() > 0 ) ? array(
+						'description' => substr( $rate->get_label(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
+						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 ), // String.
+						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
+					) : array(
+						'description' => substr( $rate->get_label(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'amount'      => 0, // Float.
+						'taxCode'     => '0', // String.
+						'taxAmount'   => 0, // Float.
+					);
 				}
 			}
 		}
+
+		return $formatted_shipping;
 	}
 }
