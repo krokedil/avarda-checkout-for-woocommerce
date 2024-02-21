@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Krokedil\Shipping\Admin\EditOrderPage;
+
 /**
  * Order management class.
  */
@@ -21,6 +23,10 @@ class ACO_Order_Management {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
 		// Update an order.
 		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); // for aco refund .
+
+		// Add the shipping metabox to the edit order page.
+		$shipping_edit_order_page = new EditOrderPage( ACO_WC()->pickup_points );
+		$shipping_edit_order_page->set_metabox_title( __( 'Avarda Shipping Information', 'avarda-checkout-for-woocommerce' ) );
 	}
 
 	/**
@@ -147,7 +153,6 @@ class ACO_Order_Management {
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully activated.', 'avarda-checkout-for-woocommerce' ) );
 		}
-
 	}
 
 	/**
@@ -240,7 +245,6 @@ class ACO_Order_Management {
 		}
 		$order->add_order_note( __( 'Avarda Checkout order could not be refunded.', 'avarda-checkout-for-woocommerce' ) );
 		return false;
-
 	}
 
 	/**
