@@ -37,6 +37,8 @@ class ACO_Order_Management {
 		$shipping_edit_order_page
 			->set_metabox_title( __( 'Avarda Shipping Information', 'avarda-checkout-for-woocommerce' ) )
 			->set_can_change_pickup_point( false );
+
+		add_filter( 'woocommerce_hidden_order_itemmeta', array( $this, 'add_hidden_order_itemmeta' ) );
 	}
 
 	/**
@@ -360,5 +362,17 @@ class ACO_Order_Management {
 		$aco_order_sync_status = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
 
 		return $aco_order_sync_status;
+	}
+
+	/**
+	 * Add hidden order itemmeta.
+	 *
+	 * @param array $hidden_order_itemmeta Array of hidden order itemmeta.
+	 * @return array
+	 */
+	public function add_hidden_order_itemmeta( $hidden_order_itemmeta ) {
+		$hidden_order_itemmeta[] = 'avarda_shipping_option_id';
+		$hidden_order_itemmeta[] = 'avarda_shipping_option';
+		return $hidden_order_itemmeta;
 	}
 }
