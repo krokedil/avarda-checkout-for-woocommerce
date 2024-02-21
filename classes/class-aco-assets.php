@@ -168,6 +168,8 @@ class ACO_Assets {
 			'get_avarda_payment_nonce'             => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
 			'iframe_shipping_address_change_url'   => WC_AJAX::get_endpoint( 'aco_wc_iframe_shipping_address_change' ),
 			'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
+			'iframe_shipping_option_change_url'    => WC_AJAX::get_endpoint( 'aco_iframe_shipping_option_change' ),
+			'iframe_shipping_option_change_nonce'  => wp_create_nonce( 'aco_iframe_shipping_option_change' ),
 			'log_to_file_url'                      => WC_AJAX::get_endpoint( 'aco_wc_log_js' ),
 			'log_to_file_nonce'                    => wp_create_nonce( 'aco_wc_log_js' ),
 			'submit_order'                         => WC_AJAX::get_endpoint( 'checkout' ),
@@ -219,41 +221,6 @@ class ACO_Assets {
 				aco_wc_initialize_payment();
 			}
 		}
-	}
-
-	/**
-	 * Enqueue admin assets.
-	 *
-	 * @param string $hook The current admin page.
-	 *
-	 * @return void
-	 */
-	public function enqueue_admin_assets( $hook ) {
-		$screen    = get_current_screen();
-		$screen_id = $screen ? $screen->id : '';
-
-		if ( ! in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) && ! in_array( $screen_id, array( 'shop_order' ), true ) ) {
-			return;
-		}
-
-		$order_id = ! empty( filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) ) ? filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) : get_the_ID();
-
-		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery', 'jquery-blockui' ), AVARDA_CHECKOUT_VERSION, true );
-
-		$params = array(
-			'aco_order_sync_toggle_nonce' => wp_create_nonce( 'aco_wc_order_sync_toggle' ),
-			'order_id'                    => $order_id,
-		);
-
-		wp_localize_script(
-			'aco_admin_js',
-			'aco_admin_params',
-			$params
-		);
-		wp_enqueue_script( 'aco_admin_js' );
-
-		wp_register_style( 'aco_admin_css', AVARDA_CHECKOUT_URL . '/assets/css/aco-admin.css', array(), AVARDA_CHECKOUT_VERSION );
-		wp_enqueue_style( 'aco_admin_css' );
 	}
 }
 new ACO_Assets();
