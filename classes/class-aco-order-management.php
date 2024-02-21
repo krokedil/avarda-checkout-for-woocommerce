@@ -34,7 +34,9 @@ class ACO_Order_Management {
 
 		// Add the shipping metabox to the edit order page.
 		$shipping_edit_order_page = new EditOrderPage( ACO_WC()->pickup_points );
-		$shipping_edit_order_page->set_metabox_title( __( 'Avarda Shipping Information', 'avarda-checkout-for-woocommerce' ) );
+		$shipping_edit_order_page
+			->set_metabox_title( __( 'Avarda Shipping Information', 'avarda-checkout-for-woocommerce' ) )
+			->set_can_change_pickup_point( false );
 	}
 
 	/**
