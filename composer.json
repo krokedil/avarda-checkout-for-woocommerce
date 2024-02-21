@@ -1,6 +1,35 @@
 {
+    "name": "krokedil/avarda-checkout-for-woocommerce",
+    "description": "Provides an Avarda Checkout gateway for WooCommerce",
+    "type": "wordpress-plugin",
     "require-dev": {
         "php-stubs/woocommerce-stubs": "^8.5",
         "wp-coding-standards/wpcs": "^2.3"
+    },
+    "require": {
+        "php": ">=7.4",
+        "krokedil/shipping": "dev-develop-fraktjakt"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:krokedil/shipping.git"
+        }
+    ],
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Krokedil",
+            "email": "info@krokedil.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "platform": {
+            "php": "7.4"
+        }
     }
 }
