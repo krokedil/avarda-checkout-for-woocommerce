@@ -29,7 +29,9 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_iframe_shipping_address_change' => true,
 			'aco_wc_change_payment_method'          => true,
 			'aco_wc_log_js'                         => true,
+			'aco_iframe_shipping_option_change'     => true,
 		);
+
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			if ( $nopriv ) {
@@ -196,6 +198,43 @@ class ACO_AJAX extends WC_AJAX {
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
 		wp_send_json_success();
+	}
+
+	/**
+	 * Shipping option changed in Avarda Checkout.
+	 *
+	 * @return void
+	 */
+	public static function aco_iframe_shipping_option_change() {
+		check_ajax_referer( 'aco_iframe_shipping_option_change', 'nonce' );
+
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		// Force shipping to be re-calculated.
+		WC()->cart->calculate_shipping();
+		remove_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		WC()->cart->calculate_totals();
+
+		// Get the order review HTML.
+		ob_start();
+		woocommerce_order_review();
+		$order_review = ob_get_clean();
+
+		// Send it as a fragment in the json response.
+		wp_send_json_success(
+			array(
+				'fragments' => array(
+					'.woocommerce-checkout-review-order-table' => $order_review,
+				),
+			)
+		);
 	}
 }
 ACO_AJAX::init();
