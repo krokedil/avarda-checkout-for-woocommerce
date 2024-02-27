@@ -34,6 +34,9 @@ class ACO_Assets {
 		add_action( 'aco_wc_before_checkout_form', array( $this, 'localize_and_enqueue_checkout_script' ) );
 		add_action( 'aco_wc_before_order_receipt', array( $this, 'localize_and_enqueue_checkout_script' ) );
 
+		// Admin scripts.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+
 	}
 
 	/**
@@ -217,6 +220,29 @@ class ACO_Assets {
 				aco_wc_initialize_payment();
 			}
 		}
+
+	}
+
+	/**
+	 * Enqueue admin assets.
+	 *
+	 * @param string $hook The current admin page.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_assets( $hook ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+
+		if ( ! in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) && ! in_array( $screen_id, array( 'shop_order' ), true ) ) {
+			return;
+		}
+
+		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery' ), AVARDA_CHECKOUT_VERSION, true );
+		wp_enqueue_script( 'aco_admin_js' );
+
+		wp_register_style( 'aco_admin_css', AVARDA_CHECKOUT_URL . '/assets/css/aco-admin.css', array(), AVARDA_CHECKOUT_VERSION );
+		wp_enqueue_style( 'aco_admin_css' );
 
 	}
 }
