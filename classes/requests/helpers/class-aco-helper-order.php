@@ -80,8 +80,8 @@ class ACO_Helper_Order {
 		}
 
 		return array(
-			'description' => substr( self::get_item_name( $order_item ), 0, 35 ), // String.
-			'notes'       => substr( self::get_reference( $order_item ), 0, 35 ), // String.
+			'description' => substr( self::get_item_name( $order_item ), 0, 34 ), // String.
+			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
@@ -107,8 +107,8 @@ class ACO_Helper_Order {
 		}
 
 		return array(
-			'description' => 'Refunded: ' . substr( self::get_item_name( $order_item ), 0, 35 ), // String.
-			'notes'       => substr( self::get_reference( $order_item ), 0, 35 ), // String.
+			'description' => 'Refunded: ' . substr( self::get_item_name( $order_item ), 0, 34 ), // String.
+			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
 			'amount'      => $total_refunded_for_item_incl_vat, // string.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => $total_tax_refunded_for_item, // Float.
@@ -168,8 +168,8 @@ class ACO_Helper_Order {
 	 */
 	public function get_fee( $order, $fee ) {
 		return array(
-			'description' => substr( $fee->get_name(), 0, 35 ), // String.
-			'notes'       => substr( $fee->get_id(), 0, 35 ), // String.
+			'description' => substr( $fee->get_name(), 0, 34 ), // String.
+			'notes'       => substr( $fee->get_id(), 0, 34 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $fee ), // String.
 			'taxCode'     => self::get_tax_rate( $order, $fee ), // String.
 			'taxAmount'   => self::get_item_tax_amount( $fee ), // String.
@@ -185,8 +185,8 @@ class ACO_Helper_Order {
 	 */
 	public static function process_order_item_shipping( $order, $order_item ) {
 		return array(
-			'description' => substr( $order_item->get_name(), 0, 35 ), // String.
-			'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ), // String.
+			'description' => substr( $order_item->get_name(), 0, 34 ), // String.
+			'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 34 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // String.
 			'taxCode'     => self::get_tax_rate( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ),
@@ -340,7 +340,7 @@ class ACO_Helper_Order {
 					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
 					$gift_card     = array(
 						'notes'       => $giftcard_sku,
-						'description' => substr( $label, 0, 35 ),
+						'description' => substr( $label, 0, 34 ),
 						'quantity'    => 1,
 						'amount'      => $coupon_amount,
 						'taxCode'     => 0,
