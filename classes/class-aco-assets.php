@@ -238,7 +238,20 @@ class ACO_Assets {
 			return;
 		}
 
+		$order_id = ! empty( filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) ) ? filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) : get_the_ID();
+
 		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery' ), AVARDA_CHECKOUT_VERSION, true );
+
+		$params = array(
+			'aco_order_sync_toggle_nonce' => wp_create_nonce( 'aco_wc_order_sync_toggle' ),
+			'order_id'                    => $order_id,
+		);
+
+		wp_localize_script(
+			'aco_admin_js',
+			'aco_admin_params',
+			$params
+		);
 		wp_enqueue_script( 'aco_admin_js' );
 
 		wp_register_style( 'aco_admin_css', AVARDA_CHECKOUT_URL . '/assets/css/aco-admin.css', array(), AVARDA_CHECKOUT_VERSION );

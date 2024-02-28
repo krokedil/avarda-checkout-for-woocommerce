@@ -84,6 +84,8 @@ class ACO_Meta_Box {
 		$title_order_total_mismatch      = __( 'Order total mismatch', 'avarda-checkout-for-woocommerce' );
 		$title_avarda_customer_balance   = __( 'Avarda customer balance', 'avarda-checkout-for-woocommerce' );
 		$title_customer_balance_mismatch = __( 'Customer balance mismatch', 'avarda-checkout-for-woocommerce' );
+		$title_order_synchronization     = __( 'Order synchronization', 'avarda-checkout-for-woocommerce' );
+		$aco_order_sync_status           = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
 
 		if ( is_wp_error( $avarda_order ) ) {
 			$avarda_order_status     = 'unknown';
@@ -125,13 +127,20 @@ class ACO_Meta_Box {
 			),
 		);
 
+		$keys_for_meta_box[] = array(
+			'before' => '<div class="aco_order_sync--toggle">',
+			'title'  => esc_html( $title_order_synchronization ) . '<label>' . wc_help_tip( __( 'Disable this to turn off the automatic synchronization with the Avarda Merchant Portal. When disabled, any changes in either system have to be done manually.', 'avarda-checkout-for-woocommerce' ) ) . '</label>',
+			'value'  => '<span data-order-sync-status="' . $aco_order_sync_status . '" class="woocommerce-input-toggle woocommerce-input-toggle--' . $aco_order_sync_status . '"></span>',
+			'after'  => '</div>',
+		);
+
 		// Avarda order Json.
 		$keys_for_meta_box[] = array(
 			'title' => '',
 			'value' => '<span class="button open-avarda-order-data dashicons dashicons-editor-code" title="' . __( 'View Avarda order in JSON format', 'avarda-checkout-for-woocommerce' ) . '"></span>' .
 			'<div class="avarda-order-data" style="display:none;">' .
 						'<div class="avarda-order-data-modal-content">' .
-						'<h3>' . __( 'Current Avarda status', 'avarda-checkout-for-woocommerce' ) . '</h3>' .
+						'<h3>' . __( 'Payment fetched from Avarda', 'avarda-checkout-for-woocommerce' ) . '</h3>' .
 						'<span class="close-avarda-order-data dashicons dashicons-dismiss"></span>' .
 						'<pre>' . wp_json_encode( $avarda_order, JSON_PRETTY_PRINT ) . '</pre>' .
 						'</div></div>',

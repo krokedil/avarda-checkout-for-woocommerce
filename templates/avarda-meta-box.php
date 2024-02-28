@@ -6,13 +6,15 @@
  */
 
 foreach ( $keys_for_meta_box as $item ) {
+	echo wp_kses_post( $item['before'] ?? '' );
 	if ( empty( $item['title'] ) ) {
 		?>
 		<p><?php echo wp_kses_post( $item['value'] ); ?></p>
 		<?php
 	} else {
 		?>
-		<p><b><?php echo esc_html( $item['title'] ); ?></b>: <?php echo wp_kses_post( $item['value'] ); ?></p>
+		<p><b><?php echo wp_kses_post( $item['title'] ); ?></b>: <?php echo wp_kses_post( $item['value'] ); ?></p>
 		<?php
 	}
+	echo wp_kses_post( $item['after'] ?? '' );
 }
