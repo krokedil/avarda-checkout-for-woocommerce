@@ -83,7 +83,7 @@ class ACO_Meta_Box {
 		$payment_method                  = $order->get_meta( '_avarda_payment_method', true );
 		$title_payment_method            = __( 'Payment method', 'avarda-checkout-for-woocommerce' );
 		$title_avarda_purchase_id        = __( 'Purchase id', 'avarda-checkout-for-woocommerce' );
-		$title_avarda_order_status       = __( 'Avarda order status', 'avarda-checkout-for-woocommerce' );
+		$title_avarda_order_status       = __( 'Avarda order step', 'avarda-checkout-for-woocommerce' );
 		$title_avarda_order_total        = __( 'Avarda order total', 'avarda-checkout-for-woocommerce' );
 		$title_order_total_mismatch      = __( 'Order total mismatch', 'avarda-checkout-for-woocommerce' );
 		$title_avarda_customer_balance   = __( 'Avarda customer balance', 'avarda-checkout-for-woocommerce' );
