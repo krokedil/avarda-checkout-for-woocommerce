@@ -71,7 +71,10 @@ class ACO_Meta_Box {
 			return;
 		}
 
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true ) ?? $order->get_transaction_id() ?? '';
+		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
+		if ( empty( $purchase_id ) ) {
+			$purchase_id = $order->get_transaction_id();
+		}
 		// Get the Avarda order.
 		$avarda_order     = ACO_WC()->api->request_get_payment( $purchase_id );
 		$display_aco_json = filter_input( INPUT_GET, 'display-aco-json', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
