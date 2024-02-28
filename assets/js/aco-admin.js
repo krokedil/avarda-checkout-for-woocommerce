@@ -16,13 +16,13 @@ jQuery( function( $ ) {
 			// $('.aco_order_sync--toggle .woocommerce-input-toggle').prop('disabled', true);
             var orderSyncStatus = avarda_checkout_admin.toggle_button.data('order-sync-status');
             console.log('orderSyncStatus', orderSyncStatus);
-
+            $('#wpcontent').block({ message: null, overlayCSS: { background: '#fff', opacity: 0.6 } })
             if( 'enabled' === orderSyncStatus ) {
                 var newOrderSyncStatus = 'disabled';
             } else {
                 var newOrderSyncStatus = 'enabled';
             }
-            
+
             $.ajax({
 				type: 'POST',
 				data: {
@@ -37,14 +37,14 @@ jQuery( function( $ ) {
 					console.log(data);
 					if(data.success) {
 						window.location.reload();
-                        avarda_checkout_admin.toggle_button.toggleClass( "woocommerce-input-toggle--disabled woocommerce-input-toggle--enabled" )
-                        avarda_checkout_admin.toggle_button.data('order-sync-status', newOrderSyncStatus);
 					} else {
+                        $('#wpcontent').unblock();
 						avarda_checkout_admin.toggle_button.append( '<div><i>' + data.data + '</i></div>' );
 						alert( data.data );
 					}
 				},
 				error: function (data) {
+                    $('#wpcontent').unblock();
 					console.log(data);
 					console.log(data.statusText);
 				},
@@ -53,7 +53,7 @@ jQuery( function( $ ) {
 				}
 			});
             //
-            
+
         },
     }
 
