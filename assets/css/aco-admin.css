@@ -78,3 +78,9 @@ body.avarda-order-data-modal-open {
     text-align: center;
     line-height: 1.85;
 }
+
+.aco_order_sync--toggle .woocommerce-input-toggle {
+    cursor: pointer;
+    float: right;
+    margin-top: 0;
+}

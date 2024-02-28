@@ -129,7 +129,7 @@ class ACO_Meta_Box {
 
 		$keys_for_meta_box[] = array(
 			'before' => '<div class="aco_order_sync--toggle">',
-			'title'  => esc_html( $title_order_synchronization ) . '<label>' . wc_help_tip( __( 'Disable this to turn off the automatic synchronization with the Avarda Merchant Portal. When disabled, any changes in either system have to be done manually.', 'avarda-checkout-for-woocommerce' ) ) . '</label>',
+			'title'  => esc_html( $title_order_synchronization ) . wc_help_tip( __( 'Disable this to turn off the automatic synchronization with the Avarda Merchant Portal. When disabled, any changes in either system have to be done manually.', 'avarda-checkout-for-woocommerce' ) ),
 			'value'  => '<span data-order-sync-status="' . $aco_order_sync_status . '" class="woocommerce-input-toggle woocommerce-input-toggle--' . $aco_order_sync_status . '"></span>',
 			'after'  => '</div>',
 		);
@@ -149,7 +149,4 @@ class ACO_Meta_Box {
 		$keys_for_meta_box = apply_filters( 'avarda_checkout_meta_box_keys', $keys_for_meta_box );
 		include AVARDA_CHECKOUT_PATH . '/templates/avarda-meta-box.php';
 	}
-
-
-
 } new ACO_Meta_Box();
