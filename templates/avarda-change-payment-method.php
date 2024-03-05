@@ -8,7 +8,6 @@
  */
 
 do_action( 'aco_wc_before_checkout_form' );
-do_action( 'woocommerce_before_checkout_form', WC()->checkout() );
 ?>
 
 <div id="aco-iframe">
