@@ -45,7 +45,7 @@ class ACO_Callbacks {
 
 		if ( ! is_object( $order ) ) {
 			ACO_Logger::log( 'Aborting notification callback for Purchase ID ' . $purchase_id . '. No WooCommerce order found.' );
-			header( 'HTTP/1.1 200 OK' );
+			header( 'HTTP/1.1 404 Not Found' );
 			exit;
 		}
 
