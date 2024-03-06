@@ -284,6 +284,16 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		// Get the Avarda order.
 		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
+		if ( is_wp_error( $avarda_order ) ) {
+			$code    = $avarda_order->get_error_code();
+			$message = $avarda_order->get_error_message();
+			$text    = __( 'Avarda API Error on confirm Avarda order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
+			$note    = sprintf( $text, $code, $message );
+			do_action( 'aco_wc_confirm_failed', 'api_error', $note, $order );
+			$order->add_order_note( $note );
+			return;
+		}
+
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
 
