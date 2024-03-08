@@ -287,6 +287,9 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
 
+		// Save any shipping module data to the order if available.
+		ACO_Order_Management::maybe_save_shipping_meta( $order, $avarda_order );
+
 		// Let other plugins hook into this sequence.
 		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
 
@@ -421,6 +424,13 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$order->save();
 }
 
+/**
+ * Format Avarda address data.
+ *
+ * @param array $avarda_order The Avarda order.
+ *
+ * @return array
+ */
 function aco_format_address_data( $avarda_order ) {
 	$customer_address = array();
 
