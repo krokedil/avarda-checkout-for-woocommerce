@@ -47,5 +47,23 @@ class ACO_Request_Get_Payment extends ACO_Request {
 			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
-}
 
+	/**
+	 * Process the response.
+	 *
+	 * @param array  $response The response.
+	 * @param array  $request_args The request args.
+	 * @param string $request_url The request URL.
+	 *
+	 * @return array|string
+	 */
+	public function process_response( $response, $request_args = array(), $request_url = '' ) {
+		$result = parent::process_response( $response, $request_args, $request_url );
+
+		if ( ! is_wp_error( $result ) ) {
+			ACO_WC()->session()->set_avarda_order( $result );
+		}
+
+		return $result;
+	}
+}

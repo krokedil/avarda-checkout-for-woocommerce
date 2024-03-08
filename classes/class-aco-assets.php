@@ -33,7 +33,6 @@ class ACO_Assets {
 
 		add_action( 'aco_wc_before_checkout_form', array( $this, 'localize_and_enqueue_checkout_script' ) );
 		add_action( 'aco_wc_before_order_receipt', array( $this, 'localize_and_enqueue_checkout_script' ) );
-
 	}
 
 	/**
@@ -166,6 +165,8 @@ class ACO_Assets {
 			'get_avarda_payment_nonce'             => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
 			'iframe_shipping_address_change_url'   => WC_AJAX::get_endpoint( 'aco_wc_iframe_shipping_address_change' ),
 			'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
+			'iframe_shipping_option_change_url'    => WC_AJAX::get_endpoint( 'aco_iframe_shipping_option_change' ),
+			'iframe_shipping_option_change_nonce'  => wp_create_nonce( 'aco_iframe_shipping_option_change' ),
 			'log_to_file_url'                      => WC_AJAX::get_endpoint( 'aco_wc_log_js' ),
 			'log_to_file_nonce'                    => wp_create_nonce( 'aco_wc_log_js' ),
 			'submit_order'                         => WC_AJAX::get_endpoint( 'checkout' ),
@@ -217,7 +218,6 @@ class ACO_Assets {
 				aco_wc_initialize_payment();
 			}
 		}
-
 	}
 }
 new ACO_Assets();
