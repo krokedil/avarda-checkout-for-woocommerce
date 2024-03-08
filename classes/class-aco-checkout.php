@@ -208,24 +208,16 @@ class ACO_Checkout {
 		?>
 		<div class="avarda-shipping-info">
 			<small>
-			<?php if ( ! empty( $name ) ) : ?>
-				<p><?php echo esc_html( $name ); ?></p>
-			<?php endif; ?>
-			<?php if ( ! empty( $description ) ) : ?>
-				<p><?php echo esc_html( $description ); ?></p>
-			<?php endif; ?>
-			<?php if ( ! empty( $address ) ) : ?>
 				<p>
-				<?php
-				echo WC()->countries->get_formatted_address( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					array(
-						'address_1' => $address->get_street(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'city'      => $address->get_city(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					)
-				);
-				?>
-				</p>
-			<?php endif; ?>
+				<?php if ( ! empty( $name ) ) : ?>
+					<?php echo esc_html( $name ); ?>
+				<?php elseif ( ! empty( $description ) ) : ?>
+					<?php echo esc_html( $description ); ?>
+				<?php endif; ?>
+				<?php if ( ! empty( $address ) ) : ?>
+					<?php echo esc_html( ' - ' . $address->get_street() ); ?>
+				<?php endif; ?>
+			</p>
 			</small>
 		</div>
 		<?php
