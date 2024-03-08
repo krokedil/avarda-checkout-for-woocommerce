@@ -5,7 +5,6 @@
  * @package Avarda_Checkout/Classes
  */
 
-use Krokedil\Shipping\PickupPoint\OpenHours;
 use Krokedil\Shipping\PickupPoint\PickupPoint;
 
 defined( 'ABSPATH' ) || exit;
@@ -137,18 +136,41 @@ class ACO_Shipping extends WC_Shipping_Method {
 			return;
 		}
 
-		$selected_option_id = $shipping_module['id'];
-		$label              = $shipping_module['result']['shipping']['product'] ?? $shipping_module['result']['category']['name'];
-		$price_inc_vat      = $shipping_module['shipping_price'];
-		$eta                = $shipping_module['result']['delivery_time']['customer_delivery_promise'] ?? null;
+		$selected_option_id    = $shipping_module['id'];
+		$label                 = $shipping_module['result']['shipping']['product'] ?? $shipping_module['result']['category']['name'];
+		$price_inc_vat         = $shipping_module['shipping_price'];
+		$selected_pickup_point = false;
 
 		if ( isset( $shipping_module['result']['shipping']['location'] ) ) {
 			$selected_pickup_point = $this->get_ingrid_selected_pickup_point( $shipping_module['result']['shipping']['location'] );
 		}
 
-		$rate = $this->format_rate( $selected_option_id, $label, $price_inc_vat, false, $selected_pickup_point );
+		// Get the shipping price without VAT.
+		$shipping_tax = WC_Tax::calc_shipping_tax( $price_inc_vat, WC_Tax::get_shipping_tax_rates() );
+		$price        = $price_inc_vat - array_sum( $shipping_tax );
 
-		$this->add_rate( $rate );
+		$rate = array(
+			'id'          => $this->get_rate_id(),
+			'label'       => $label,
+			'description' => $label,
+			'cost'        => $price,
+			'taxes'       => $shipping_tax,
+			'calc_tax'    => 'per_order',
+			'meta_data'   => array(
+				'aco_shipping_option_id' => $selected_option_id,
+				'aco_shipping_option'    => wp_json_encode( $selected_option ),
+				'aco_carrier_id'         => $selected_option['carrier'] ?? null,
+				'aco_method_id'          => $selected_option['shipping_method'] ?? null,
+			),
+		);
+
+		$this->add_provider_to_rate( $rate, 'ingrid' );
+		if ( $selected_pickup_point ) {
+			$this->add_pickup_points_to_rate( $rate, array( $selected_pickup_point ) );
+			$this->add_selected_pickup_point_to_rate( $rate, $selected_pickup_point );
+		}
+
+		$this->add_rate( apply_filters( 'aco_shipping_add_rate', $rate, 'ingrid', $selected_option, $shipping_module ) );
 	}
 
 	/**
@@ -203,35 +225,54 @@ class ACO_Shipping extends WC_Shipping_Method {
 		}
 
 		// Set the parameters from the shipping module needed for the rate.
-		$selected_option_id = $selected_option['SelectedOptionId'];
-		$label              = $selected_option['SelectedOptionName'];
-		$price_inc_vat      = $selected_option['Price'];
-		$selected_agent_id  = $selected_option['SelectedAgentId'];
+		$selected_option_id   = $selected_option['SelectedOptionId'];
+		$label                = $selected_option['SelectedOptionName'];
+		$price_inc_vat        = $selected_option['Price'];
+		$selected_agent_id    = $selected_option['SelectedAgentId'];
+		$selected_option_data = $this->get_nshift_selected_option_data( $shipping_module, $selected_option_id );
 
 		// Set the pickup points and the selected pickup points if any exists.
-		$pickup_points         = $this->get_nshift_pickup_points( $shipping_module, $selected_option_id );
+		$pickup_points         = $this->get_nshift_pickup_points( $selected_option_data );
 		$selected_pickup_point = $this->get_nshift_selected_pickup_point( $pickup_points, $selected_agent_id );
 
 		// Get the shipping price without VAT.
 		$shipping_tax = WC_Tax::calc_shipping_tax( $price_inc_vat, WC_Tax::get_shipping_tax_rates() );
 		$price        = $price_inc_vat - array_sum( $shipping_tax );
 
-		$rate = $this->format_rate( $selected_option_id, $label, $price, $pickup_points, $selected_pickup_point );
+		$rate = array(
+			'id'          => $this->get_rate_id(),
+			'label'       => $label,
+			'description' => $label,
+			'cost'        => $price,
+			'taxes'       => $shipping_tax,
+			'calc_tax'    => 'per_order',
+			'meta_data'   => array(
+				'aco_shipping_option_id' => $selected_option_id,
+				'aco_shipping_option'    => wp_json_encode( $selected_option ),
+				'aco_carrier_id'         => $selected_option_data['carrierId'] ?? null,
+				'aco_method_id'          => $selected_option_data['serviceId'] ?? null,
+			),
+		);
 
-		$this->add_rate( $rate );
+		error_log( var_export( $pickup_points, true ) );
+
+		if ( $pickup_points ) {
+			$this->add_pickup_points_to_rate( $rate, $pickup_points );
+			$this->add_selected_pickup_point_to_rate( $rate, $selected_pickup_point );
+		}
+		$this->add_rate( apply_filters( 'aco_shipping_add_rate', $rate, 'nshift', $selected_option, $shipping_module ) );
 	}
 
 	/**
-	 * Get the pickup points from the shipping module.
+	 * Get the selected option from nShifts shipping module.
 	 *
-	 * @param array $shipping_module The shipping module.
-	 * @param int   $selected_option_id The selected option id.
+	 * @param array  $shipping_module The shipping module.
+	 * @param string $selected_option_id The selected option id.
 	 *
-	 * @return array<PickupPoint>|false
+	 * @return array|false
 	 */
-	private function get_nshift_pickup_points( $shipping_module, $selected_option_id ) {
-		$widget_data = $shipping_module['WidgetDataJson'] ?? array();
-		$options     = $widget_data['options'] ?? false;
+	private function get_nshift_selected_option_data( $shipping_module, $selected_option_id ) {
+		$options = $shipping_module['WidgetDataJson']['options'] ?? false;
 
 		// If no options are set, return.
 		if ( ! $options ) {
@@ -247,6 +288,17 @@ class ACO_Shipping extends WC_Shipping_Method {
 			}
 		}
 
+		return $selected_option;
+	}
+
+	/**
+	 * Get the pickup points from the shipping module.
+	 *
+	 * @param array $selected_option The shipping module.
+	 *
+	 * @return array<PickupPoint>|false
+	 */
+	private function get_nshift_pickup_points( $selected_option ) {
 		// If no selected option is found, return.
 		if ( ! $selected_option ) {
 			return false;
@@ -279,11 +331,11 @@ class ACO_Shipping extends WC_Shipping_Method {
 			}
 
 			$pickup_point = ( new PickupPoint() )
-			->set_id( $agent['id'] )
-			->set_name( $agent['name'] )
-			->set_address( $agent['address1'], $agent['city'], $agent['zipCode'], $agent['country'] )
-			->set_coordinates( $agent['mapLatitude'], $agent['mapLongitude'] )
-			->set_open_hours( $open_hours );
+				->set_id( $agent['id'] )
+				->set_name( $agent['name'] )
+				->set_address( $agent['address1'], $agent['city'], $agent['zipCode'], $agent['country'] )
+				->set_coordinates( $agent['mapLatitude'], $agent['mapLongitude'] )
+				->set_open_hours( $open_hours );
 
 			$pickup_points[] = $pickup_point;
 		}
@@ -316,45 +368,64 @@ class ACO_Shipping extends WC_Shipping_Method {
 	}
 
 	/**
-	 * Format a rate from the parameters given by the shipping module from Avarda.
+	 * Add the pickup points to the shipping rate.
 	 *
-	 * @param string                   $id The id of the rate.
-	 * @param string                   $label The label of the rate.
-	 * @param float                    $price_inc_vat The price of the rate including VAT.
-	 * @param array<PickupPoint>|false $pickup_points The pickup points if any.
-	 * @param PickupPoint|false        $selected_pickup_point The selected pickup point if any.
-	 * @param string                   $description The description of the rate. Default is null. If null, the label will be used.
+	 * @param array $rate The shipping rate.
+	 * @param array $pickup_points The pickup points.
 	 *
-	 * @return array
+	 * @return void
 	 */
-	private function format_rate( $id, $label, $price_inc_vat, $pickup_points = false, $selected_pickup_point = false, $description = null ) {
-		$shipping_tax = WC_Tax::calc_shipping_tax( $price_inc_vat, WC_Tax::get_shipping_tax_rates() );
-		$price        = $price_inc_vat - array_sum( $shipping_tax );
-
-		$rate = array(
-			'id'          => $this->get_rate_id(),
-			'label'       => $label,
-			'description' => $description ?? $label,
-			'cost'        => $price,
-			'taxes'       => $shipping_tax,
-			'calc_tax'    => 'per_order',
-			'meta_data'   => array(
-				'avarda_shipping_option_id' => $id,
-				'avarda_shipping_option'    => $label,
-			),
-		);
-
-		// If pickup points exists, add them to the rate.
-		if ( $pickup_points ) {
-			$rate['meta_data']['krokedil_pickup_points'] = wp_json_encode( $pickup_points );
+	private function add_pickup_points_to_rate( &$rate, $pickup_points ) {
+		if ( empty( $pickup_points ) ) {
+			return;
 		}
 
-		if ( $selected_pickup_point ) {
-			$rate['meta_data']['krokedil_selected_pickup_point']    = wp_json_encode( $selected_pickup_point );
-			$rate['meta_data']['krokedil_selected_pickup_point_id'] = $selected_pickup_point->get_id();
+		if ( ! isset( $rate['meta_data'] ) ) {
+			$rate['meta_data'] = array();
 		}
 
-		return $rate;
+		$rate['meta_data']['krokedil_pickup_points'] = wp_json_encode( $pickup_points );
+	}
+
+	/**
+	 * Add the selected pickup point to the shipping rate.
+	 *
+	 * @param array       $rate The shipping rate.
+	 * @param PickupPoint $selected_pickup_point The selected pickup point.
+	 *
+	 * @return void
+	 */
+	private function add_selected_pickup_point_to_rate( &$rate, $selected_pickup_point ) {
+		if ( empty( $selected_pickup_point ) ) {
+			return;
+		}
+
+		if ( ! isset( $rate['meta_data'] ) ) {
+			$rate['meta_data'] = array();
+		}
+
+		$rate['meta_data']['krokedil_selected_pickup_point']    = wp_json_encode( $selected_pickup_point );
+		$rate['meta_data']['krokedil_selected_pickup_point_id'] = $selected_pickup_point->get_id();
+	}
+
+	/**
+	 * Add the provider id to the rate.
+	 *
+	 * @param array  $rate The shipping rate.
+	 * @param string $id The provider id.
+	 *
+	 * @return void
+	 */
+	private function add_provider_to_rate( &$rate, $id ) {
+		if ( empty( $id ) ) {
+			return;
+		}
+
+		if ( ! isset( $rate['meta_data'] ) ) {
+			$rate['meta_data'] = array();
+		}
+
+		$rate['meta_data']['aco_provider'] = $id;
 	}
 
 	/**
