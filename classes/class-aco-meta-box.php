@@ -125,14 +125,26 @@ class ACO_Meta_Box {
 				'title' => esc_html( $title_avarda_customer_balance ),
 				'value' => wp_kses_post( $avarda_customer_balance . ' ' . $avarda_order_currency ),
 			),
-			array(
-				'title' => '',
-				'value' => '<hr>',
-			),
+		);
+
+		if ( 'disabled' === $aco_order_sync_status ) {
+			$keys_for_meta_box[] = array(
+				'before' => '',
+				'title'  => esc_html( $title_order_synchronization ),
+				'value'  => __( 'Disabled', 'avarda-checkout-for-woocommerce' ),
+				'after'  => '',
+			);
+		}
+
+		$keys_for_meta_box[] = array(
+			'before' => '',
+			'title'  => '',
+			'value'  => '<hr><div class="aco-order-advanced-toggle closed">Advanced<span class="toggle-indicator"></span></div>',
+			'after'  => '',
 		);
 
 		$keys_for_meta_box[] = array(
-			'before' => '<div class="aco_order_sync--toggle">',
+			'before' => '<div class="aco-order-advanced closed"><div class="aco_order_sync--toggle">',
 			'title'  => esc_html( $title_order_synchronization ) . wc_help_tip( __( 'Disable this to turn off the automatic synchronization with the Avarda Merchant Portal. When disabled, any changes in either system have to be done manually.', 'avarda-checkout-for-woocommerce' ) ),
 			'value'  => '<span data-order-sync-status="' . $aco_order_sync_status . '" class="woocommerce-input-toggle woocommerce-input-toggle--' . $aco_order_sync_status . '"></span>',
 			'after'  => '</div>',
@@ -141,13 +153,13 @@ class ACO_Meta_Box {
 		// Avarda order Json.
 		$keys_for_meta_box[] = array(
 			'title' => '',
-			'value' => '<span class="button open-avarda-order-data dashicons dashicons-editor-code" title="' . __( 'View Avarda order in JSON format', 'avarda-checkout-for-woocommerce' ) . '"></span>' .
+			'value' => '<span class="open-avarda-order-data">' . __( 'View Avarda order object', 'avarda-checkout-for-woocommerce' ) . wc_help_tip( __( 'View the Avarda order in JSON format.', 'avarda-checkout-for-woocommerce' ) ) . '</span>' .
 			'<div class="avarda-order-data" style="display:none;">' .
 						'<div class="avarda-order-data-modal-content">' .
 						'<h3>' . __( 'Payment fetched from Avarda', 'avarda-checkout-for-woocommerce' ) . '</h3>' .
 						'<span class="close-avarda-order-data dashicons dashicons-dismiss"></span>' .
 						'<pre>' . wp_json_encode( $avarda_order, JSON_PRETTY_PRINT ) . '</pre>' .
-						'</div></div>',
+						'</div></div></div>',
 		);
 
 		$keys_for_meta_box = apply_filters( 'avarda_checkout_meta_box_keys', $keys_for_meta_box );

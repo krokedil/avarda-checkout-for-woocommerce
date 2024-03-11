@@ -53,12 +53,7 @@
 body.avarda-order-data-modal-open {
     overflow: hidden;
 }
-/*
-.avarda-order-data {
-    background-color:#f1f1f1;
-    padding: 4px;
-}
-*/
+
 
 .open-avarda-order-data {
     position: relative;
@@ -79,8 +74,31 @@ body.avarda-order-data-modal-open {
     line-height: 1.85;
 }
 
+.aco-metabox-line-title {
+    font-weight: bold;
+}
 .aco_order_sync--toggle .woocommerce-input-toggle {
     cursor: pointer;
     float: right;
     margin-top: 0;
+}
+.aco-order-advanced.closed {
+    display: none;
+}
+
+.aco-order-advanced-toggle {
+    cursor: pointer;
+    text-decoration: underline;
+}
+.aco-order-advanced-toggle .toggle-indicator {
+    vertical-align: middle;
+}
+
+
+.meta-box-sortables .postbox .aco-order-advanced-toggle .toggle-indicator::before {
+    content: "\f142";
+}
+
+.meta-box-sortables .postbox .aco-order-advanced-toggle.closed .toggle-indicator::before {
+    content: "\f140";
 }

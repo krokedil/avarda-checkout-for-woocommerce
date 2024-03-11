@@ -1,6 +1,7 @@
 jQuery( function( $ ) {
     var avarda_checkout_admin = {
         toggle_button: $( ".aco_order_sync--toggle .woocommerce-input-toggle" ),
+        toggle_advanced_button: $( ".aco-order-advanced-toggle" ),
 
         openAvardaOrderData: function() {
             $( 'body' ).addClass( 'avarda-order-data-modal-open' );
@@ -55,6 +56,22 @@ jQuery( function( $ ) {
             //
 
         },
+        toggleAdvancedButton: function(e) {
+            e.preventDefault();
+			//$(".aco-order-advanced").toggle();
+
+            if( $( ".aco-order-advanced" ).hasClass( "closed" )) {
+                console.log('has class closed');
+                $( ".aco-order-advanced" ).removeClass( "closed" );
+                $( ".aco-order-advanced-toggle" ).removeClass( "closed" )
+            } else {
+                console.log('do not has class closed');
+                $( ".aco-order-advanced" ).addClass( "closed" );
+                $( ".aco-order-advanced-toggle" ).addClass( "closed" )
+            }
+            
+
+        },
     }
 
     $('body').on('click', '.open-avarda-order-data', function() {
@@ -67,5 +84,10 @@ jQuery( function( $ ) {
     avarda_checkout_admin.toggle_button.click( function (e) {
         avarda_checkout_admin.toggleOrderSync(e);
     });
+
+    avarda_checkout_admin.toggle_advanced_button.click( function (e) {
+        avarda_checkout_admin.toggleAdvancedButton(e);
+    });
+
 
 });
