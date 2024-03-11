@@ -30,13 +30,13 @@ class ACO_Meta_Box {
 	 */
 	public function add_meta_box( $post_type, $post_or_order_object ) {
 
-		if ( 'shop_order' !== $post_type ) {
+		if ( ! in_array( $post_type, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) ) {
 			return;
 		}
 
-		$order = ( $post_or_order_object instanceof \WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
+		$order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
 
-		if ( ! $order instanceof \WC_Order ) {
+		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
 
@@ -48,7 +48,7 @@ class ACO_Meta_Box {
 			'aco_meta_box',
 			__( 'Avarda', 'avarda-checkout-for-woocommerce' ),
 			array( $this, 'render_aco_metabox' ),
-			'shop_order',
+			$post_type,
 			'side',
 			'core'
 		);
@@ -65,9 +65,9 @@ class ACO_Meta_Box {
 	 */
 	public function render_aco_metabox( $post_or_order_object, $args ) {
 
-		$order = ( $post_or_order_object instanceof \WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
+		$order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
 
-		if ( ! $order instanceof \WC_Order ) {
+		if ( ! $order instanceof WC_Order ) {
 			return;
 		}
 
