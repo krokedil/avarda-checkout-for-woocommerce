@@ -89,6 +89,7 @@ class ACO_Meta_Box {
 		$title_avarda_customer_balance   = __( 'Avarda customer balance', 'avarda-checkout-for-woocommerce' );
 		$title_customer_balance_mismatch = __( 'Customer balance mismatch', 'avarda-checkout-for-woocommerce' );
 		$title_order_synchronization     = __( 'Order synchronization', 'avarda-checkout-for-woocommerce' );
+		$title_view_avarda_order         = __( 'View Avarda order object', 'avarda-checkout-for-woocommerce' );
 		$aco_order_sync_status           = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
 
 		if ( is_wp_error( $avarda_order ) ) {
@@ -152,8 +153,8 @@ class ACO_Meta_Box {
 
 		// Avarda order Json.
 		$keys_for_meta_box[] = array(
-			'title' => '',
-			'value' => '<span class="open-avarda-order-data">' . __( 'View Avarda order object', 'avarda-checkout-for-woocommerce' ) . wc_help_tip( __( 'View the Avarda order in JSON format.', 'avarda-checkout-for-woocommerce' ) ) . '</span>' .
+			'title' => esc_html( $title_view_avarda_order ) . wc_help_tip( __( 'View the Avarda order in JSON format.', 'avarda-checkout-for-woocommerce' ) ),
+			'value' => '<button class="open-avarda-order-data"><img src="' . AVARDA_CHECKOUT_URL . '/assets/images/view-order-object-icon.svg" width="32px"/></button>' .
 			'<div class="avarda-order-data" style="display:none;">' .
 						'<div class="avarda-order-data-modal-content">' .
 						'<h3>' . __( 'Payment fetched from Avarda', 'avarda-checkout-for-woocommerce' ) . '</h3>' .

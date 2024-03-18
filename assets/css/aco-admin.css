@@ -57,6 +57,8 @@ body.avarda-order-data-modal-open {
 
 .open-avarda-order-data {
     position: relative;
+    float: right;
+    padding: 0;
 }
 
 .open-avarda-order-data:before {
