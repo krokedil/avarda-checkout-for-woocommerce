@@ -107,7 +107,7 @@ class ACO_Helper_Order {
 		}
 
 		return array(
-			'description' => 'Refunded: ' . substr( self::get_item_name( $order_item ), 0, 34 ), // String.
+			'description' => substr( 'Refunded: ' . self::get_item_name( $order_item ), 0, 34 ), // String.
 			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
 			'amount'      => $total_refunded_for_item_incl_vat, // string.
 			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
