@@ -51,7 +51,7 @@ function aco_wc_initialize_payment() {
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
-		$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
+		$order->delete_meta_data( '_wc_avarda_purchase_id' );
 		$order->set_transaction_id( '' );
 		$order->save();
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
