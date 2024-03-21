@@ -62,7 +62,7 @@ class ACO_Helper_Cart {
 					$giftcard_sku = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
 					$gift_card    = array(
 						'notes'       => $giftcard_sku,
-						'description' => substr( $label, 0, 35 ),
+						'description' => substr( $label, 0, 34 ),
 						'quantity'    => 1,
 						'amount'      => $coupon_amount,
 						'taxCode'     => 0,
@@ -90,8 +90,8 @@ class ACO_Helper_Cart {
 			$product = wc_get_product( $cart_item['product_id'] );
 		}
 		return array(
-			'description' => substr( $this->get_product_name( $cart_item ), 0, 35 ), // String.
-			'notes'       => substr( $this->get_product_sku( $product ), 0, 35 ), // String.
+			'description' => substr( $this->get_product_name( $cart_item ), 0, 34 ), // String.
+			'notes'       => substr( $this->get_product_sku( $product ), 0, 34 ), // String.
 			'amount'      => $this->get_product_price( $cart_item ), // Float.
 			'taxCode'     => $this->get_product_tax_code( $cart_item ), // String.
 			'taxAmount'   => number_format( $cart_item['line_tax'] / $cart_item['quantity'], 2, '.', '' ), // Float.
@@ -170,8 +170,8 @@ class ACO_Helper_Cart {
 	 */
 	public function get_fee( $fee ) {
 		return array(
-			'description' => substr( $fee->name, 0, 35 ), // String.
-			'notes'       => substr( 'fee|' . $fee->id, 0, 35 ), // String.
+			'description' => substr( $fee->name, 0, 34 ), // String.
+			'notes'       => substr( 'fee|' . $fee->id, 0, 34 ), // String.
 			'amount'      => number_format( $fee->amount + $fee->tax, 2, '.', '' ), // String.
 			'taxCode'     => (string) ( $fee->tax / $fee->amount * 100 ), // String.
 			'taxAmount'   => number_format( $fee->tax, 2, '.', '' ), // String.
@@ -192,16 +192,16 @@ class ACO_Helper_Cart {
 				if ( $chosen_shipping === $method->id ) {
 					if ( $method->cost > 0 ) {
 						return array(
-							'description' => substr( $method->label, 0, 35 ), // String.
-							'notes'       => substr( 'shipping|' . $method->id, 0, 35 ), // String.
+							'description' => substr( $method->label, 0, 34 ), // String.
+							'notes'       => substr( 'shipping|' . $method->id, 0, 34 ), // String.
 							'amount'      => number_format( $method->cost + array_sum( $method->taxes ), 2, '.', '' ), // String.
 							'taxCode'     => (string) ( array_sum( $method->taxes ) / $method->cost * 100 ), // String.
 							'taxAmount'   => number_format( array_sum( $method->taxes ), 2, '.', '' ), // Float.
 						);
 					} else {
 						return array(
-							'description' => substr( $method->label, 0, 35 ), // String.
-							'notes'       => substr( 'shipping|' . $method->id, 0, 35 ), // String.
+							'description' => substr( $method->label, 0, 34 ), // String.
+							'notes'       => substr( 'shipping|' . $method->id, 0, 34 ), // String.
 							'amount'      => 0, // Float.
 							'taxCode'     => '0', // String.
 							'taxAmount'   => 0, // Float.

@@ -195,6 +195,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-status.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-meta-box.php';
 
 			// Compatibility classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-wc-carrier-agents.php';
