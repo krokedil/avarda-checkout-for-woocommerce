@@ -21,10 +21,10 @@ class ACO_Meta_Box {
 	}
 
 	/**
-	 * Add the shipping metabox to the edit order page.
+	 * Add the metabox to the edit order page.
 	 *
 	 * @param string            $post_type The post type to add the metabox to.
-	 * @param \WP_Post|WC_Order $post_or_order_object      The WordPress post or WooCommerce order, depending on HPOS is active or not.
+	 * @param \WP_Post|WC_Order $post_or_order_object The WordPress post or WooCommerce order, depending on HPOS is active or not.
 	 *
 	 * @return void
 	 */
@@ -56,10 +56,10 @@ class ACO_Meta_Box {
 
 
 	/**
-	 * Render the shipping metabox.
+	 * Render the metabox.
 	 *
-	 * @param \WP_Post|WC_Order $post_or_order_object      The WordPress post or WooCommerce order, depending on HPOS is active or not.
-	 * @param array             $args  The metabox arguments.
+	 * @param \WP_Post|WC_Order $post_or_order_object The WordPress post or WooCommerce order, depending on HPOS is active or not.
+	 * @param array             $args The metabox arguments.
 	 *
 	 * @return void
 	 */
