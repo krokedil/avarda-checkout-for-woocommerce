@@ -351,23 +351,32 @@ jQuery(function($) {
 					},
 					success: function( response ) {
 						console.log( 'getAvardaPayment', response );
+
+						if (false === response.success) {
+							if (response.data.redirect) {
+								window.location.href = response.data.redirect;
+							} else {
+								aco_wc.logToFile( 'Checkout error | ' + response.data.error );
+								aco_wc.failOrder( 'getAvardaPayment', '<div class="woocommerce-error">' + response.data.error + '</div>' );
+							}
+						} else {
+							if (response.data.hasOwnProperty('customer_data')) {
+								// Set data from wc form
+								aco_wc.fillForm(response.data.customer_data);
+								// Submit wc order.
+								aco_wc.submitForm();
+							} else {
+								$( '.woocommerce-checkout-review-order-table' ).unblock();
+								aco_wc.logToFile( 'getAvardaPayment | Customer data missing in response from Avarda.' );
+								aco_wc.failOrder( 'getAvardaPayment', '<div class="woocommerce-error">' + 'Customer data missing in response from Avarda.' + '</div>' );
+							}
+						}
 						
 					},
 					error: function( response ) {
 						console.log('getAvardaPayment error',  response );
 					},
 					complete: function( response ) {
-						
-						if (response.responseJSON.data.hasOwnProperty('customer_data')) {
-							// Set data from wc form
-							aco_wc.fillForm(response.responseJSON.data.customer_data);
-							// Submit wc order.
-							aco_wc.submitForm();
-						} else {
-							$( '.woocommerce-checkout-review-order-table' ).unblock();
-							aco_wc.logToFile( 'getAvardaPayment | Customer data missing in response from Avarda.' );
-							aco_wc.failOrder( 'getAvardaPayment', '<div class="woocommerce-error">' + 'Customer data missing in response from Avarda.' + '</div>' );
-						}
 					}
 				}
 			);

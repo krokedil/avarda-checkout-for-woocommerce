@@ -24,6 +24,9 @@ class ACO_Order_Management {
 		add_filter( 'woocommerce_order_actions', array( $this, 'add_order_actions' ), 10, 2 );
 		add_action( 'woocommerce_order_action_aco_cancel_order', array( $this, 'cancel_reservation' ) );
 		add_action( 'woocommerce_order_action_aco_activate_order', array( $this, 'activate_reservation' ) );
+
+		// Ajax for order management.
+		add_action( 'wp_ajax_aco_order_sync_toggle', array( $this, 'aco_order_sync_toggle' ) );
 	}
 
 	/**
@@ -48,6 +51,11 @@ class ACO_Order_Management {
 
 		// Check if the order has been paid.
 		if ( empty( $order->get_date_paid() ) ) {
+			return;
+		}
+
+		// Check if Avarda order sync status is disabled.
+		if ( 'disabled' === $this->get_avarda_order_sync_status( $order ) ) {
 			return;
 		}
 
@@ -117,6 +125,11 @@ class ACO_Order_Management {
 		$subscription = $this->check_if_subscription( $order );
 		// If this is a free subscription then stop here.
 		if ( $subscription && 0 >= $order->get_total() ) {
+			return;
+		}
+
+		// Check if Avarda order sync status is disabled.
+		if ( 'disabled' === $this->get_avarda_order_sync_status( $order ) ) {
 			return;
 		}
 
@@ -294,5 +307,50 @@ class ACO_Order_Management {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Ajax function to enable/disable Avarda order sync status.
+	 *
+	 * @return void
+	 */
+	public function aco_order_sync_toggle() {
+
+		$nonce = filter_input( INPUT_POST, 'nonce', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		if ( ! wp_verify_nonce( $nonce, 'aco_wc_order_sync_toggle' ) ) {
+			wp_send_json_error( 'bad_nonce' );
+			exit;
+		}
+
+		$new_order_sync_status = filter_input( INPUT_POST, 'new_order_sync_status', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$order_id              = filter_input( INPUT_POST, 'order_id', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof \WC_Order ) {
+			wp_send_json_error( 'missing_woo_order' );
+			exit;
+		}
+
+		$order->update_meta_data( '_wc_avarda_order_sync_status', $new_order_sync_status );
+		$order->save();
+
+		$return = array(
+			'new_order_sync_status' => $new_order_sync_status,
+		);
+
+		wp_send_json_success( $return );
+	}
+
+	/**
+	 * Get sync status for the order (can be turned on/off in the order in admin).
+	 *
+	 * @param object $order WC_Order object.
+	 * @return string
+	 */
+	public function get_avarda_order_sync_status( $order ) {
+		$aco_order_sync_status = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
+
+		return $aco_order_sync_status;
 	}
 }
