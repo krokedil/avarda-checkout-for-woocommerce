@@ -90,6 +90,12 @@ $settings = array(
 		'label'   => __( 'Enable Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
 		'default' => 'yes',
 	),
+	'integrated_shipping'        => array(
+		'title'   => __( 'Integrated Shipping', 'avarda-checkout-for-woocommerce' ),
+		'type'    => 'checkbox',
+		'label'   => __( 'Enable Avarda Checkout integrated shipping with for example Ingrid or nShift.', 'avarda-checkout-for-woocommerce' ),
+		'default' => 'no',
+	),
 	// SE.
 	'credentials_se'             => array(
 		'title' => 'API Credentials Sweden',
