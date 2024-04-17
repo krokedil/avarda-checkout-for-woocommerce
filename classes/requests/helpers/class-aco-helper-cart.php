@@ -49,7 +49,7 @@ class ACO_Helper_Cart {
 		// Get cart shipping.
 		if ( WC()->cart->needs_shipping() ) {
 			// If integrated shipping is not used, then add shipping as a separate line item.
-			if ( ! $this->is_integrated_shipping() ) {
+			if ( ! ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
 				$shipping = $this->get_shipping();
 				if ( null !== $shipping ) {
 					$formatted_cart_items[] = $shipping;
@@ -285,7 +285,7 @@ class ACO_Helper_Cart {
 			 * @var WC_Shipping_Rate $rate Shipping rate.
 			 */
 			foreach ( $package['rates'] as $rate ) {
-				if ( $this->is_integrated_shipping() ) {
+				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
 					return array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.

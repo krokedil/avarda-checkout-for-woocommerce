@@ -31,9 +31,6 @@ class ACO_Shipping extends WC_Shipping_Method {
 		);
 
 		add_filter( 'woocommerce_package_rates', array( $this, 'maybe_unset_other_rates' ), 10 );
-
-		// If the method is initialized, it means the rate is in use and we should be using the integrated shipping method.
-		add_filter( 'aco_integrated_shipping', '__return_true' );
 	}
 
 	/**
@@ -42,6 +39,11 @@ class ACO_Shipping extends WC_Shipping_Method {
 	 * @param array $package The package.
 	 */
 	public function is_available( $package ) {
+		// Only if the integrated shipping setting is enabled.
+		if ( ! ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+			return false;
+		}
+
 		// If Avarda is not the chosen payment method, or its not the first option in the payment method lists, return false.
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 		reset( $available_gateways );
@@ -77,6 +79,11 @@ class ACO_Shipping extends WC_Shipping_Method {
 	 * @return array
 	 */
 	public static function register( $methods ) {
+		// Only if the integrated shipping setting is enabled.
+		if ( ! ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+			return $methods;
+		}
+
 		$methods['aco_shipping'] = self::class;
 		return $methods;
 	}
