@@ -413,6 +413,52 @@ jQuery(function($) {
       });
     },
 
+    /**
+		 * Maybe freezes the iframe to prevent anyone from completing the order before filling in all required fields.
+		 *
+		 * @param {boolean} allValid
+		 */
+		maybeFreezeIframe: function( allValid ) {
+			if ( true === allValid ) {
+				aco_wc.blocked = false;
+				$('#aco-required-fields-notice').remove();
+				// Unblock iframe
+			} else 	if( ! $('#aco-required-fields-notice').length ) { // Only if we dont have an error message already.
+				aco_wc.blocked = true;
+				aco_wc.maybePrintValidationMessage();
+				// Block iframe
+			}
+		},
+
+		/**
+		 * Moves all non standard fields to the extra checkout fields.
+		 */
+		moveExtraCheckoutFields: function() {
+			// Move order comments.
+			$( '.woocommerce-additional-fields' ).appendTo( '#aco-extra-checkout-fields' );
+
+			var form = $( 'form[name="checkout"] input, form[name="checkout"] select, textarea' );
+			for ( i = 0; i < form.length; i++ ) {
+				var name = form[i].name;
+
+				// Do not try to move field names that include [ in the name.
+				if( name.includes('[')) {
+					continue;
+				}
+
+				// Check if this is a standard field.
+				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
+
+					// This is not a standard Woo field, move to our div.
+					if ( 0 < $( 'p#' + name + '_field' ).length ) {
+						$( 'p#' + name + '_field' ).appendTo( '#aco-extra-checkout-fields' );
+					} else {
+						$( 'input[name="' + name + '"]' ).closest( 'p' ).appendTo( '#aco-extra-checkout-fields' );
+					}
+				}
+			}
+		},
+
 		/**
 		 * Get address data from Avarda payment.
 		 */
@@ -466,106 +512,6 @@ jQuery(function($) {
 			);
 		},
 
-    /**
-     * Maybe freezes the iframe to prevent anyone from completing the order before filling in all required fields.
-     *
-     * @param {boolean} allValid
-     */
-    maybeFreezeIframe: function (allValid) {
-      if (true === allValid) {
-        aco_wc.blocked = false;
-        $("#aco-required-fields-notice").remove();
-        // Unblock iframe
-      } else if (!$("#aco-required-fields-notice").length) {
-        // Only if we dont have an error message already.
-        aco_wc.blocked = true;
-        aco_wc.maybePrintValidationMessage();
-        // Block iframe
-      }
-    },
-
-    /**
-     * Moves all non standard fields to the extra checkout fields.
-     */
-    moveExtraCheckoutFields: function () {
-      // Move order comments.
-      $(".woocommerce-additional-fields").appendTo(
-        "#aco-extra-checkout-fields"
-      );
-
-      var form = $(
-        'form[name="checkout"] input, form[name="checkout"] select, textarea'
-      );
-      for (i = 0; i < form.length; i++) {
-        var name = form[i].name;
-
-        // Do not try to move field names that include [ in the name.
-        if (name.includes("[")) {
-          continue;
-        }
-
-        // Check if this is a standard field.
-        if (
-          -1 === $.inArray(name, aco_wc_params.standard_woo_checkout_fields)
-        ) {
-          // This is not a standard Woo field, move to our div.
-          if (0 < $("p#" + name + "_field").length) {
-            $("p#" + name + "_field").appendTo("#aco-extra-checkout-fields");
-          } else {
-            $('input[name="' + name + '"]')
-              .closest("p")
-              .appendTo("#aco-extra-checkout-fields");
-          }
-        }
-      }
-    },
-
-    /**
-     * Get address data from Avarda payment.
-     */
-    getAvardaPayment: function () {
-      console.log("get_avarda_payment");
-      $(".woocommerce-checkout-review-order-table").block({
-        message: null,
-        overlayCSS: {
-          background: "#fff",
-          opacity: 0.6,
-        },
-      });
-      $.ajax({
-        url: aco_wc_params.get_avarda_payment_url,
-        type: "POST",
-        dataType: "json",
-        data: {
-          nonce: aco_wc_params.get_avarda_payment_nonce,
-        },
-        success: function (response) {
-          console.log("getAvardaPayment", response);
-        },
-        error: function (response) {
-          console.log("getAvardaPayment error", response);
-        },
-        complete: function (response) {
-          if (response.responseJSON.data.hasOwnProperty("customer_data")) {
-            // Set data from wc form
-            aco_wc.fillForm(response.responseJSON.data.customer_data);
-            // Submit wc order.
-            aco_wc.submitForm();
-          } else {
-            $(".woocommerce-checkout-review-order-table").unblock();
-            aco_wc.logToFile(
-              "getAvardaPayment | Customer data missing in response from Avarda."
-            );
-            aco_wc.failOrder(
-              "getAvardaPayment",
-              '<div class="woocommerce-error">' +
-                "Customer data missing in response from Avarda." +
-                "</div>"
-            );
-          }
-        },
-      });
-    },
 
     /**
      * Submit the order using the WooCommerce AJAX function.
