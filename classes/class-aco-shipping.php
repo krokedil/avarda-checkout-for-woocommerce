@@ -254,8 +254,6 @@ class ACO_Shipping extends WC_Shipping_Method {
 			),
 		);
 
-		error_log( var_export( $pickup_points, true ) );
-
 		if ( $pickup_points ) {
 			$this->add_pickup_points_to_rate( $rate, $pickup_points );
 			$this->add_selected_pickup_point_to_rate( $rate, $selected_pickup_point );
