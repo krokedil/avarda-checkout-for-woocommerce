@@ -68,7 +68,7 @@ $settings = array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging', 'avarda-checkout-for-woocommerce' ),
 		'default'     => 'no',
-		'description' => sprintf( __( 'Log ' . $this->method_title . ' events in <code>%s</code>', 'avarda-checkout-for-woocommerce' ), wc_get_log_file_path( 'avarda_checkout' ) ), // phpcs:ignore
+		'description' => __( 'Log ' . $this->method_title . ' events in the WooCommerce status logs', 'avarda-checkout-for-woocommerce' ), // phpcs:ignore
 	),
 	'payment_gateway_icon'       => array(
 		'title'       => __( 'Payment gateway icon', 'avarda-checkout-for-woocommerce' ),
