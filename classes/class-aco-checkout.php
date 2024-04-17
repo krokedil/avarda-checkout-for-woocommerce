@@ -223,4 +223,3 @@ class ACO_Checkout {
 		<?php
 	}
 }
-new ACO_Checkout();

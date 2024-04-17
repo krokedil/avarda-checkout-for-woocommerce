@@ -91,6 +91,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public $pickup_points;
 
 		/**
+		 * Checkout class instance.
+		 *
+		 * @var ACO_Checkout $checkout
+		 */
+		public $checkout;
+
+		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
 		 * @var $instance
@@ -166,6 +173,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
 
 			// Set class variables.
+			$this->checkout         = new ACO_Checkout();
 			$this->pickup_points    = new PickupPoints();
 			$this->api              = new ACO_API();
 			$this->logger           = new ACO_Logger();
@@ -345,7 +353,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		}
 	}
 
-	// Declare HPOS compatibility
+	// Declare HPOS compatibility.
 	add_action(
 		'before_woocommerce_init',
 		function () {
@@ -364,7 +372,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 	 *
 	 * @return Avarda_Checkout_For_WooCommerce
 	 */
-	function ACO_WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
+	function ACO_WC() { // phpcs:ignore
 		return Avarda_Checkout_For_WooCommerce::get_instance();
 	}
 }
