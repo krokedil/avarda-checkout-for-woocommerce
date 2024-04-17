@@ -75,7 +75,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public $order_items;
 
-
 		/**
 		 * Helper class for order reservation.
 		 *
@@ -96,6 +95,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @var ACO_Checkout $checkout
 		 */
 		public $checkout;
+
+		/**
+		 * Cart page class instance.
+		 *
+		 * @var ACO_Cart_Page $cart_page
+		 */
+		public $cart_page;
 
 		/**
 		 * The reference the *Singleton* instance of this class.
@@ -182,6 +188,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
+			$this->cart_page        = new ACO_Cart_Page();
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
@@ -267,6 +274,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-modules-helper.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-cart-page.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-checkout.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-confirmation.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
