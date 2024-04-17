@@ -19,11 +19,20 @@ class ACO_Checkout {
 	private $checkout_flow;
 
 	/**
+	 * If integrated shipping is enabled.
+	 *
+	 * @var bool
+	 */
+	private $integrated_shipping;
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct() {
-		$settings            = get_option( 'woocommerce_aco_settings' );
-		$this->checkout_flow = $settings['checkout_flow'] ?? 'embedded';
+		$settings                  = get_option( 'woocommerce_aco_settings' );
+		$this->checkout_flow       = $settings['checkout_flow'] ?? 'embedded';
+		$this->integrated_shipping = isset( $settings['integrated_shipping'] ) && 'yes' === $settings['integrated_shipping'] ? true : false;
+
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 999999 );
 
 		if ( 'embedded' === $this->checkout_flow ) {
@@ -31,6 +40,15 @@ class ACO_Checkout {
 		}
 
 		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
+	}
+
+	/**
+	 * Check if integrated shipping is enabled.
+	 *
+	 * @return bool
+	 */
+	public function is_integrated_shipping_enabled() {
+		return $this->integrated_shipping;
 	}
 
 	/**
