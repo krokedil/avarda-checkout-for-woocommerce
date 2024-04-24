@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.4.3
-Requires PHP: 7.2
+Tested up to: 6.5.2
+Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 8.7.0
+WC tested up to: 8.8.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.13.0
+Stable tag: 1.13.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2024.04.24        - version 1.13.1 =
+* Tweak             - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).
+
 = 2024.03.21        - version 1.13.0 =
 * Feature           - Adds metabox that fetches Avarda payment and displays current status when viewing a single order in Woo admin.
 * Feature           - Add support for disabling order management connection between Woo and Avarda on a single order.
