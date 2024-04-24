@@ -154,7 +154,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 
 			aco_wc_unset_sessions();
-			$order->delete_meta_data( '_wc_avarda_purchase_id' );
+			aco_delete_avarda_meta_data_from_order( $order );
+	
 			$order->set_transaction_id( '' );
 			$order->save();
 			return array(
