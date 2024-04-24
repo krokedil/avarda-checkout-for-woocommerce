@@ -51,11 +51,11 @@ function aco_wc_initialize_payment() {
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
 	if ( $order ) {
-		$order->delete_meta_data( '_wc_avarda_purchase_id' );
+		aco_delete_avarda_meta_data_from_order( $order );
 		$order->set_transaction_id( '' );
 		$order->save();
 		$avarda_purchase_id = ( is_array( $avarda_payment ) && isset( $avarda_payment['purchaseId'] ) ) ? $avarda_payment['purchaseId'] : '';
-		ACO_Logger::log( 'Delete _wc_avarda_purchase_id & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
+		ACO_Logger::log( 'Delete _wc_avarda_purchase_id, _wc_avarda_jwt, _wc_avarda_expiredUtc & _transaction_id during aco_wc_initialize_payment. Order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
 	}
 
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
@@ -137,7 +137,7 @@ function aco_wc_initialize_or_update_order() {
 
 					// Make sure that payment session step is ok for an update.
 					if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
-						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order_from_wc_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
+						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
 						return;
 					}
 
@@ -165,7 +165,7 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-		$order = wc_get_order( $order_id );
+	$order = wc_get_order( $order_id );
 	if ( $order->get_meta( '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
 		$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
 		$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
@@ -174,6 +174,9 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
 
 		if ( is_wp_error( $avarda_payment ) ) {
+			aco_wc_unset_sessions();
+			aco_delete_avarda_meta_data_from_order( $order );
+			ACO_Logger::log( 'Avarda GET request failed in aco_wc_initialize_or_update_order_from_wc_order. Clearing Avarda session & order meta data.' );
 			return;
 		}
 
@@ -589,6 +592,19 @@ function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_language' );
 	WC()->session->__unset( 'aco_currency' );
 	WC()->session->__unset( 'aco_wc_cart_contains_subscription' );
+}
+
+/**
+ * Delete Avarda meta data from order.
+ * @param WC_Order $order WooCommerce order.
+ *
+ * @return void
+ */
+function aco_delete_avarda_meta_data_from_order( $order ) {
+	$order->delete_meta_data( '_wc_avarda_purchase_id' );
+	$order->delete_meta_data( '_wc_avarda_jwt' );
+	$order->delete_meta_data( '_wc_avarda_expiredUtc' );
+	$order->save();
 }
 
 /**
