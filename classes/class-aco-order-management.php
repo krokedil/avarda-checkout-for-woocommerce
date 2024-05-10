@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-use Krokedil\Shipping\Admin\EditOrderPage;
+use KrokedilAvardaDeps\Krokedil\Shipping\Admin\EditOrderPage;
 
 /**
  * Order management class.

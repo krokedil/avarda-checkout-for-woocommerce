@@ -5,7 +5,7 @@
  * @package Avarda_Checkout/Classes
  */
 
-use Krokedil\Shipping\PickupPoint\PickupPoint;
+use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoint\PickupPoint;
 
 defined( 'ABSPATH' ) || exit;
 

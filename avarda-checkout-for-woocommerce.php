@@ -21,7 +21,7 @@
  * @package Avarda_Checkout
  */
 
-use Krokedil\Shipping\PickupPoints;
+use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -202,7 +202,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return bool|mixed
 		 */
 		public function init_composer() {
-			$autoloader = AVARDA_CHECKOUT_PATH . '/vendor/autoload.php';
+			$autoloader = AVARDA_CHECKOUT_PATH . '/dependencies/autoload.php';
 
 			if ( ! is_readable( $autoloader ) ) {
 				self::missing_autoloader();
