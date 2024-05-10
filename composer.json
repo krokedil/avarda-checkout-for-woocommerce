@@ -4,11 +4,11 @@
     "type": "wordpress-plugin",
     "require-dev": {
         "php-stubs/woocommerce-stubs": "^8.5",
-        "wp-coding-standards/wpcs": "^2.3"
+        "wp-coding-standards/wpcs": "^2.3",
+        "wpify/scoper": "3.1.3"
     },
     "require": {
-        "php": ">=7.4",
-        "krokedil/shipping": "dev-develop-fraktjakt"
+        "php": ">=7.4"
     },
     "repositories": [
         {
@@ -23,13 +23,25 @@
             "email": "info@krokedil.com"
         }
     ],
+    "extra": {
+        "wpify-scoper": {
+            "prefix": "KrokedilAvardaDeps",
+            "folder": "dependencies",
+            "autorun": true
+        }
+    },
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "wpify/scoper": true
         },
         "platform": {
             "php": "7.4"
         }
+    },
+    "scripts": {
+        "wpify-scoper": "wpify-scoper"
     }
 }
