@@ -27,7 +27,11 @@
         "wpify-scoper": {
             "prefix": "KrokedilAvardaDeps",
             "folder": "dependencies",
-            "autorun": true
+            "autorun": true,
+            "globals": [
+                "wordpress",
+                "woocommerce"
+            ]
         }
     },
     "minimum-stability": "dev",
