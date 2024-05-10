@@ -82,5 +82,24 @@ class ACO_Request_Update_Payment extends ACO_Request {
 			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
-}
 
+	/**
+	 * Process the response.
+	 *
+	 * @param array  $response The response.
+	 * @param array  $request_args The request args.
+	 * @param string $request_url The request URL.
+	 *
+	 * @return array|string
+	 */
+	public function process_response( $response, $request_args = array(), $request_url = '' ) {
+		$result = parent::process_response( $response, $request_args, $request_url );
+
+		if ( ! is_wp_error( $result ) ) {
+			$request_body = json_decode( $request_args['body'], true );
+			ACO_WC()->session()->update_avarda_order_items( $request_body['items'] );
+		}
+
+		return $result;
+	}
+}

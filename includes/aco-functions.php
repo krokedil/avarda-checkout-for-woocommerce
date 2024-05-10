@@ -300,6 +300,9 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
 
+		// Save any shipping module data to the order if available.
+		ACO_Order_Management::maybe_save_shipping_meta( $order, $avarda_order );
+
 		// Let other plugins hook into this sequence.
 		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
 
@@ -434,6 +437,13 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$order->save();
 }
 
+/**
+ * Format Avarda address data.
+ *
+ * @param array $avarda_order The Avarda order.
+ *
+ * @return array
+ */
 function aco_format_address_data( $avarda_order ) {
 	$customer_address = array();
 
@@ -800,4 +810,25 @@ function aco_check_order_totals( $order, $avarda_order ) {
 	}
 
 	return true;
+}
+
+/**
+ * Clear any stored shipping package hashes in the WC Session to ensure that shipping rates are recalculated.
+ *
+ * @param array $packages Array of shipping packages.
+ *
+ * @return array
+ */
+function aco_clear_shipping_package_hashes( $packages ) {
+	// Get all package keys.
+	$package_keys = array_keys( $packages );
+
+	// Loop them to ensure we clear the shipping rates for all of them.
+	foreach ( $package_keys as $package_key ) {
+		$wc_session_key = 'shipping_for_package_' . $package_key;
+		WC()->session->__unset( $wc_session_key );
+	}
+
+	// Return the packages unchanged.
+	return $packages;
 }

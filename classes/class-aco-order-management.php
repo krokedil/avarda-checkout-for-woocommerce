@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use KrokedilAvardaDeps\Krokedil\Shipping\Admin\EditOrderPage;
+
 /**
  * Order management class.
  */
@@ -27,6 +29,16 @@ class ACO_Order_Management {
 
 		// Ajax for order management.
 		add_action( 'wp_ajax_aco_order_sync_toggle', array( $this, 'aco_order_sync_toggle' ) );
+		// Update an order.
+		// add_action( 'woocommerce_saved_order_items', array( $this, 'update_order' ), 10, 2 ); // for aco refund .
+
+		// Add the shipping metabox to the edit order page.
+		$shipping_edit_order_page = new EditOrderPage( ACO_WC()->pickup_points );
+		$shipping_edit_order_page
+			->set_metabox_title( __( 'Avarda Shipping Information', 'avarda-checkout-for-woocommerce' ) )
+			->set_can_change_pickup_point( false );
+
+		add_filter( 'woocommerce_hidden_order_itemmeta', array( $this, 'add_hidden_order_itemmeta' ) );
 	}
 
 	/**
@@ -167,7 +179,6 @@ class ACO_Order_Management {
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully activated.', 'avarda-checkout-for-woocommerce' ) );
 		}
-
 	}
 
 	/**
@@ -260,7 +271,6 @@ class ACO_Order_Management {
 		}
 		$order->add_order_note( __( 'Avarda Checkout order could not be refunded.', 'avarda-checkout-for-woocommerce' ) );
 		return false;
-
 	}
 
 	/**
@@ -352,5 +362,206 @@ class ACO_Order_Management {
 		$aco_order_sync_status = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
 
 		return $aco_order_sync_status;
+	}
+
+	/**
+	 * Add hidden order itemmeta.
+	 *
+	 * @param array $hidden_order_itemmeta Array of hidden order itemmeta.
+	 * @return array
+	 */
+	public function add_hidden_order_itemmeta( $hidden_order_itemmeta ) {
+		// If the query param debug is set, just return the array.
+		if ( isset( $_GET['debug'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return $hidden_order_itemmeta;
+		}
+
+		$hidden_order_itemmeta[] = 'aco_shipping_option_id';
+		$hidden_order_itemmeta[] = 'aco_shipping_option';
+		$hidden_order_itemmeta[] = 'aco_provider';
+		$hidden_order_itemmeta[] = 'aco_carrier_id';
+		$hidden_order_itemmeta[] = 'aco_method_id';
+		return $hidden_order_itemmeta;
+	}
+
+	/**
+	 * Save order meta from shipping modules to the WooCommerce order.
+	 *
+	 * @param WC_Order|int $order The WooCommerce order or order id.
+	 * @param array        $avarda_order The Avarda order.
+	 *
+	 * @return void
+	 */
+	public static function maybe_save_shipping_meta( $order, $avarda_order ) {
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			$order = wc_get_order( $order );
+		}
+
+		// If the order is not a WC_Order at this point, return early.
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return;
+		}
+
+		$avarda_shipping = self::get_avarda_shipping_line( $order );
+
+		// If the Avarda shipping line is not found, return early.
+		if ( ! $avarda_shipping ) {
+			return;
+		}
+
+		self::save_shipping_meta( $order, $avarda_shipping, $avarda_order );
+	}
+
+	/**
+	 * Get the Avarda shipping line from the WooCommerce order if it exists.
+	 *
+	 * @param WC_Order $order The WooCommerce order or order id.
+	 *
+	 * @return WC_Order_Item_Shipping|false
+	 */
+	private static function get_avarda_shipping_line( $order ) {
+		// Get the shipping line from the WooCommerce order, and ensure that the order used the aco_shipping method.
+		$shipping_lines = $order->get_items( 'shipping' );
+
+		// Return early if no shipping lines are found.
+		if ( empty( $shipping_lines ) ) {
+			return false;
+		}
+
+		$avarda_shipping = false;
+
+		// Loop through the shipping lines to find the correct shipping line.
+		foreach ( $shipping_lines as $shipping_line ) {
+			// Get the shipping method from the shipping line.
+			$shipping_method = $shipping_line->get_method_id();
+
+			// Test for avarda shipping method.
+			if ( 'aco_shipping' === $shipping_method ) {
+				// Set the avarda shipping line to the current shipping line. And break the loop.
+				$avarda_shipping = $shipping_line;
+				break;
+			}
+		}
+
+		// Return the avarda shipping line.
+		return $avarda_shipping;
+	}
+
+	/**
+	 * Save order meta from shipping modules to the WooCommerce order.
+	 *
+	 * @param WC_Order               $order The WooCommerce order.
+	 * @param WC_Order_Item_Shipping $avarda_shipping The Avarda shipping line.
+	 * @param array                  $avarda_order The Avarda order.
+	 *
+	 * @return void
+	 */
+	private static function save_shipping_meta( $order, $avarda_shipping, $avarda_order ) {
+		// Get the provider from the shipping line meta data.
+		$provider = $avarda_shipping->get_meta( 'aco_provider' );
+
+		// Switch on the provider to save the shipping meta.
+		switch ( $provider ) {
+			case 'ingrid':
+				self::set_ingrid_shipping_meta( $order, $avarda_shipping, $avarda_order );
+				break;
+			case 'nshift':
+				self::set_nshift_shipping_meta( $order, $avarda_shipping, $avarda_order );
+				break;
+			default:
+				break;
+		}
+
+		// Trigger an action to allow other shipping providers to save their meta.
+		do_action( 'aco_set_shipping_meta', $order, $avarda_order, $provider );
+
+		// Save the order.
+		$order->save();
+	}
+
+	/**
+	 * Set Ingrid shipping meta.
+	 *
+	 * @param WC_Order               $order The WooCommerce order.
+	 * @param WC_Order_Item_Shipping $avarda_shipping The Avarda shipping line.
+	 * @param array                  $avarda_order The Avarda order.
+	 *
+	 * @return void
+	 */
+	private static function set_ingrid_shipping_meta( $order, $avarda_shipping, $avarda_order ) {
+		// Get the shipping module data from the Avarda order.
+		$module = ACO_Modules_Helper::get_module( $avarda_order, 'tos_id', 'external_id' );
+
+		if ( ! $module ) {
+			return;
+		}
+
+		$shipping_method = $module['selected_shipping_option'] ?? array();
+		$location        = $shipping_method['location'] ?? array();
+
+		$meta_data = array(
+			'_aco_shipping_data_json'        => wp_json_encode( $module ),
+			'_aco_shipping_data'             => $module,
+			'_aco_shipping_method_id'        => $shipping_method['shipping_method'] ?? '',
+			'_aco_external_method_id'        => $module['external_id'] ?? $avarda_order['purchaseId'] ?? '',
+			'_aco_shipping_method_name'      => $shipping_method['product'] ?? '',
+			'_aco_pickup_location_id'        => $location['external_id'] ?? '',
+			'_aco_pickup_location_name'      => $location['name'] ?? '',
+			'_aco_pickup_location_address_1' => $location['address']['address_lines'][0] ?? '',
+			'_aco_pickup_location_city'      => $location['address']['city'] ?? '',
+			'_aco_pickup_location_country'   => $location['address']['country'] ?? '',
+			'_aco_carrier'                   => $shipping_method['carrier'] ?? '',
+			'_aco_tos_id'                    => $module['tos_id'] ?? '',
+		);
+
+		foreach ( $meta_data as $key => $value ) {
+
+			// Skip any empty values.
+			if ( empty( $value ) ) {
+				continue;
+			}
+
+			$order->update_meta_data( $key, $value );
+		}
+	}
+
+	/**
+	 * Set NShift shipping meta.
+	 *
+	 * @param WC_Order               $order The WooCommerce order.
+	 * @param WC_Order_Item_Shipping $avarda_shipping The Avarda shipping line.
+	 * @param array                  $avarda_order The Avarda order.
+	 *
+	 * @return void
+	 */
+	private static function set_nshift_shipping_meta( $order, $avarda_shipping, $avarda_order ) {
+		$module = ACO_Modules_Helper::get_module( $avarda_order, 'prepareId' );
+
+		if ( ! $module ) {
+			return;
+		}
+
+		$service    = $module['service'] ?? array();
+		$agent      = $module['agent'] ?? array();
+		$carrier_id = $avarda_shipping->get_meta( 'aco_carrier_id' );
+
+		$meta_data = array(
+			'_aco_shipping_data_json'        => wp_json_encode( $module ),
+			'_aco_shipping_data'             => $module,
+			'_aco_shipping_method_id'        => $service['id'] ?? '',
+			'_aco_external_method_id'        => $service['externalIdentifier'] ?? $avarda_order['purchaseId'] ?? '',
+			'_aco_shipping_method_name'      => $service['name'] ?? '',
+			'_aco_pickup_location_id'        => $agent['quickId'] ?? '',
+			'_aco_pickup_location_name'      => $agent['name'] ?? '',
+			'_aco_pickup_location_address_1' => $agent['address1'] ?? '',
+			'_aco_pickup_location_city'      => $agent['city'] ?? '',
+			'_aco_pickup_location_country'   => $agent['country'] ?? '',
+			'_aco_carrier'                   => $carrier_id ?? '',
+			'_aco_prepare_id'                => $module['prepareId'] ?? '',
+		);
+
+		foreach ( $meta_data as $key => $value ) {
+			$order->update_meta_data( $key, $value );
+		}
 	}
 }
