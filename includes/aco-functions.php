@@ -9,24 +9,77 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 /**
- * Maybe creates, stores a token as a transient and returns.AMFReader
+ * Maybe creates, stores a token as a transient and returns the token.
+ * If a token failed to be created, false is returned.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return string|boolean
+ */
+function aco_maybe_create_token( $currency = null ) {
+	$token = aco_get_auth_token( $currency );
+
+	if ( false === $token ) { // update token if currency is changed.
+		$response = ACO_WC()->api->request_token();
+		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
+			return false;
+		}
+
+		$token = $response['token'];
+		aco_set_auth_token( $token, $currency );
+	}
+
+	return $token;
+}
+
+/**
+ * Get the auth token transient name based on the currency.
+ *
+ * @param string|null $currency The currency code.
  *
  * @return string
  */
-function aco_maybe_create_token() {
-	$token    = get_transient( 'aco_auth_token' );
-	$currency = get_transient( 'aco_currency' );
-	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
-		$response = ACO_WC()->api->request_token();
-		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
-			return;
-		}
-		// Set transient with 55minute life time.
-		set_transient( 'aco_auth_token', $response['token'], 55 * MINUTE_IN_SECONDS );
-		set_transient( 'aco_currency', get_woocommerce_currency(), 55 * MINUTE_IN_SECONDS );
-		$token = $response['token'];
-	}
-	return $token;
+function aco_get_transient_name( $currency = null ) {
+	$currency = $currency ? $currency : get_woocommerce_currency(); // Get the currency if it was not passed.
+	$currency = strtolower( $currency ); // Make sure the currency is lowercase.
+	return "aco_{$currency}_auth_token";
+}
+
+/**
+ * Get the auth token transient for the currency.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return string|boolean
+ */
+function aco_get_auth_token( $currency = null ) {
+	$transient_name = aco_get_transient_name( $currency );
+	return get_transient( $transient_name );
+}
+
+/**
+ * Delete the auth token for the currency.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return void
+ */
+function aco_delete_auth_token( $currency = null ) {
+	$transient_name = aco_get_transient_name( $currency );
+	delete_transient( $transient_name );
+}
+
+/**
+ * Set the auth token transient for the currency.
+ *
+ * @param string      $token The auth token.
+ * @param string|null $currency The currency code.
+ *
+ * @return void
+ */
+function aco_set_auth_token( $token, $currency ) {
+	$transient_name = aco_get_transient_name( $currency );
+	set_transient( $transient_name, $token, 55 * MINUTE_IN_SECONDS );
 }
 
 
@@ -44,7 +97,7 @@ function aco_wc_initialize_payment() {
 	// Initialize payment.
 	$avarda_payment = ACO_WC()->api->request_initialize_payment();
 	if ( is_wp_error( $avarda_payment ) ) {
-		return;
+		return array();
 	}
 
 	// Remove old payment data if a WooCommerce order already exist.
@@ -606,6 +659,7 @@ function aco_wc_unset_sessions() {
 
 /**
  * Delete Avarda meta data from order.
+ *
  * @param WC_Order $order WooCommerce order.
  *
  * @return void
