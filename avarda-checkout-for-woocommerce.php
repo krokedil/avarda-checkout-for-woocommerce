@@ -187,7 +187,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->include_files();
 
 			// Delete transient when aco settings is saved.
-			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'aco_delete_transients' ) );
+			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'delete_all_transients' ) );
 
 			// Register the shipping method with WooCommerce.
 			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
@@ -258,14 +258,17 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 
 		/**
-		 * Delete transients when ACO settings is saved.
+		 * Delete all possible transients when saving the settings.
 		 *
 		 * @return void
 		 */
-		public function aco_delete_transients() {
-			// Need to clear transients if credentials is changed.
-			delete_transient( 'aco_auth_token' );
-			delete_transient( 'aco_currency' );
+		public function delete_all_transients() {
+			$currencies = array( 'SEK', 'NOK', 'DKK', 'EUR' );
+
+			foreach ( $currencies as $currency ) {
+				$name = aco_get_transient_name( $currency );
+				delete_transient( $name );
+			}
 		}
 
 		/**
