@@ -104,6 +104,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public $cart_page;
 
 		/**
+		 * Customer helper class instance.
+		 *
+		 * @var ACO_Helper_Customer $customer
+		 */
+		public $customer;
+
+		/**
+		 * The checkout flow.
+		 *
+		 * @var string $checkout_flow
+		 */
+		public $checkout_flow;
+
+		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
 		 * @var $instance
@@ -140,7 +154,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		private function __clone() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Nope', 'avarda-checkout-for-woocommerce' ), '1.0' );
 		}
 		/**
 		 * Public unserialize method to prevent unserializing of the *Singleton*
@@ -149,7 +163,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function __wakeup() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Nope', 'avarda-checkout-for-woocommerce' ), '1.0' );
 		}
 
 		/**
