@@ -134,12 +134,16 @@ class ACO_Helper_Cart {
 		$height = empty( $height ) ? 0 : $height;
 
 		$shipping_params = array(
-			'weight'     => wc_get_weight( $weight, 'g' ),
-			'length'     => wc_get_dimension( $length, 'mm' ),
-			'width'      => wc_get_dimension( $width, 'mm' ),
-			'height'     => wc_get_dimension( $height, 'mm' ),
-			'attributes' => array( $shipping_class ),
+			'weight' => wc_get_weight( $weight, 'g' ),
+			'length' => wc_get_dimension( $length, 'mm' ),
+			'width'  => wc_get_dimension( $width, 'mm' ),
+			'height' => wc_get_dimension( $height, 'mm' ),
 		);
+
+		// Only set the attributes if the shipping class is not empty.
+		if ( ! empty( $shipping_class ) ) {
+			$shipping_params['attributes'] = array( $shipping_class );
+		}
 
 		$shipping_params = apply_filters( 'aco_item_shipping_params', $shipping_params, $product );
 
