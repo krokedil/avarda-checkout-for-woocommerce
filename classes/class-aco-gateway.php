@@ -78,6 +78,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou', array( $this, 'avarda_thank_you' ) );
 		add_action( 'woocommerce_receipt_aco', array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_after_checkout_validation', array( $this, 'validate_totals' ), 10, 2 );
 	}
 
 	/**
@@ -378,7 +379,41 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 			ACO_Logger::log( "Loading order receipt template for Avarda checkout: {$avarda_order_receipt_template}", WC_Log_Levels::DEBUG );
 			require $avarda_order_receipt_template;
+		}
+	}
 
+	/**
+	 * Validate the totals for the cart and the Avarda order before processing the payment.
+	 *
+	 * @param array    $data An array of posted data.
+	 * @param WP_Error $errors Validation errors.
+	 *
+	 * @return void
+	 */
+	public function validate_totals( &$data, &$errors ) {
+		// Only if the chosen payment method is Avarda Checkout.
+		if ( $this->id !== $data['payment_method'] ) {
+			return;
+		}
+
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
+
+		if ( is_wp_error( $avarda_order ) || empty( $avarda_order ) ) {
+			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
+			return;
+		}
+
+		// Get the cart totals for the entire WooCommerce cart.
+		$cart_totals     = WC()->cart->get_totals();
+		$wc_total        = intval( round( $cart_totals['total'] * 100, 2 ) );
+		$aco_order_total = intval( round( $avarda_order['totalPrice'] * 100, 2 ) );
+
+		// Get the difference between the WooCommerce cart total and the Avarda order total.
+		$diff = abs( $wc_total - $aco_order_total );
+
+		// If the diff is greater than 3, add an error.
+		if ( $diff > 3 ) {
+			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
 		}
 	}
 }
