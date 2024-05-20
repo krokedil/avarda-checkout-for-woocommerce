@@ -25,7 +25,6 @@ class ACO_Request_Update_Payment extends ACO_Request {
 	public function request( $aco_purchase_id, $order_id = null, $force = false ) {
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/items';
 		$request_args = apply_filters( 'aco_update_payment_args', $this->get_request_args( $order_id ) );
-
 		// Check if we need to update.
 		// @Todo - return false if no update is needed. Before we can do this change we need to change the return data in check_for_api_error() function.
 		if ( WC()->session->get( 'aco_update_md5' ) && WC()->session->get( 'aco_update_md5' ) === md5( wp_json_encode( $request_args ) ) && ! $force ) {
@@ -34,7 +33,6 @@ class ACO_Request_Update_Payment extends ACO_Request {
 
 			return 'No update needed';
 		}
-
 		WC()->session->set( 'aco_update_md5', md5( wp_json_encode( $request_args ) ) );
 
 		$response = wp_remote_request( $request_url, $request_args );
