@@ -231,6 +231,11 @@ class ACO_Request {
 			if ( null !== json_decode( $response['body'], true ) ) {
 				$errors = json_decode( $response['body'], true );
 				foreach ( $errors as $error => $aco_error_messages ) {
+					// Ensure the error message is an array so we can loop through it.
+					if ( ! is_array( $aco_error_messages ) ) {
+						$aco_error_messages = array( $aco_error_messages );
+					}
+
 					foreach ( $aco_error_messages as $aco_error_message ) {
 						if ( is_array( $aco_error_message ) ) {
 							foreach ( $aco_error_message as $aco_err_msg ) {
