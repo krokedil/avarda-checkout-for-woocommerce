@@ -76,7 +76,7 @@ class ACO_Confirmation {
 
 		if ( ! $order ) {
 			// If no order is found, bail. @TODO Add a fallback order creation here?
-			wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
+			wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'avarda-checkout-for-woocommerce' ), 'error' );
 			ACO_Logger::log( ': No WC order found in confirmation page. Avarda Purchase ID: ' . $avarda_purchase_id );
 			return;
 		}
