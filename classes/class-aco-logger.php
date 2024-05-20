@@ -24,15 +24,24 @@ class ACO_Logger {
 	 * Logs an event.
 	 *
 	 * @param string $data The data string.
+	 * @param string $level The log level. Default 'info' from WC_Log_Levels::INFO.
+	 *
+	 * @return void
 	 */
-	public static function log( $data ) {
+	public static function log( $data, $level = null ) {
 		$avarda_settings = get_option( 'woocommerce_aco_settings' );
+
+		$status_code = isset( $data['response']['code'] ) ? $data['response']['code'] : '';
+		$level       = self::get_log_level( $status_code, $level );
+
 		if ( 'yes' === $avarda_settings['debug'] ) {
 			$message = self::format_data( $data );
+
 			if ( empty( self::$log ) ) {
 				self::$log = new WC_Logger();
 			}
-			self::$log->add( 'Avarda_Checkout', wp_json_encode( $message ) );
+
+			self::$log->add( 'Avarda_Checkout', wp_json_encode( $message ), $level );
 		}
 
 		if ( isset( $data['response']['code'] ) && ( $data['response']['code'] < 200 || $data['response']['code'] > 299 ) ) {
@@ -132,4 +141,36 @@ class ACO_Logger {
 		update_option( 'krokedil_debuglog_aco', $logs );
 	}
 
+	/**
+	 * Get the log level.
+	 *
+	 * @param string      $status_code The status code.
+	 * @param string|null $level The log level.
+	 *
+	 * @return string
+	 */
+	public static function get_log_level( $status_code, $level ) {
+		if ( ! empty( $level ) ) {
+			return $level;
+		}
+
+		// Get the first number from the status code.
+		$first_digit = substr( $status_code, 0, 1 );
+
+		switch ( $first_digit ) {
+			case '2':
+			case '3':
+				$level = WC_Log_Levels::INFO;
+				break;
+			case '4':
+			case '5':
+				$level = WC_Log_Levels::ERROR;
+				break;
+			default:
+				$level = WC_Log_Levels::INFO;
+				break;
+		}
+
+		return $level;
+	}
 }
