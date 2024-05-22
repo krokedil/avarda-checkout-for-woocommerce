@@ -34,6 +34,19 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public $payment_gateway_icon_max_width;
 
+	 * Checkout flow.
+	 *
+	 * @var string
+	 */
+	public $checkout_flow;
+
+	/**
+	 * Debug mode. 'yes' or 'no'.
+	 *
+	 * @var string
+	 */
+	public $debug;
+
 	/**
 	 * Class constructor.
 	 */
