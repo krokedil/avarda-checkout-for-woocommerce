@@ -34,6 +34,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public $payment_gateway_icon_max_width;
 
+	/**
 	 * Checkout flow.
 	 *
 	 * @var string
@@ -128,8 +129,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// If we are on an admin page, just return true.
-		if ( is_admin() ) {
+		// If we are on a WordPress admin page, or doing a REST API request, return true.
+		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			return true;
 		}
 
