@@ -13,6 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ACO_Assets class.
  */
 class ACO_Assets {
+	/**
+	 * The checkout flow.
+	 *
+	 * @var string
+	 */
+	public $checkout_flow;
 
 	/**
 	 * The plugin settings.

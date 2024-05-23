@@ -16,6 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ACO_Subscription {
 	/**
+	 * Test mode.
+	 *
+	 * @var bool
+	 */
+	private $testmode;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -70,7 +77,6 @@ class ACO_Subscription {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -252,4 +258,3 @@ class ACO_Subscription {
 }
 
 new ACO_Subscription();
-
