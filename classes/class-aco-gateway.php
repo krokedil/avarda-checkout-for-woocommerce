@@ -150,12 +150,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect_url' => $confirmation_url,
 			);
 		} else {
-			// Something went wrong. Unset sessions and remove previos purchase id from order.
+			// Something went wrong. Unset sessions and remove previous purchase id from order.
 			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 
 			aco_wc_unset_sessions();
 			aco_delete_avarda_meta_data_from_order( $order );
-	
+
 			$order->set_transaction_id( '' );
 			$order->save();
 			return array(
@@ -183,7 +183,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $pay_url,
 		);
-
 	}
 
 	/**
@@ -327,7 +326,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		}
 	}
-
 }
 
 /**

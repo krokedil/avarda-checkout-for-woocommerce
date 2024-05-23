@@ -164,5 +164,22 @@ $settings = array(
 		'default'  => '',
 		'desc_tip' => true,
 	),
+	// International.
+	'credentials_international'  => array(
+		'title' => 'API Credentials International',
+		'type'  => 'title',
+	),
+	'merchant_id_int'            => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_int'                => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
 );
 return apply_filters( 'aco_settings', $settings );

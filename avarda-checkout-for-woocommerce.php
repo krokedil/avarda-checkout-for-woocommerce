@@ -104,6 +104,20 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public $cart_page;
 
 		/**
+		 * Customer helper class instance.
+		 *
+		 * @var ACO_Helper_Customer $customer
+		 */
+		public $customer;
+
+		/**
+		 * The checkout flow.
+		 *
+		 * @var string $checkout_flow
+		 */
+		public $checkout_flow;
+
+		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
 		 * @var $instance
@@ -140,7 +154,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		private function __clone() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Nope', 'avarda-checkout-for-woocommerce' ), '1.0' );
 		}
 		/**
 		 * Public unserialize method to prevent unserializing of the *Singleton*
@@ -149,7 +163,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return void
 		 */
 		public function __wakeup() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Nope' ), '1.0' );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Nope', 'avarda-checkout-for-woocommerce' ), '1.0' );
 		}
 
 		/**
@@ -173,7 +187,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->include_files();
 
 			// Delete transient when aco settings is saved.
-			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'aco_delete_transients' ) );
+			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'delete_all_transients' ) );
 
 			// Register the shipping method with WooCommerce.
 			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
@@ -244,14 +258,17 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 
 		/**
-		 * Delete transients when ACO settings is saved.
+		 * Delete all possible transients when saving the settings.
 		 *
 		 * @return void
 		 */
-		public function aco_delete_transients() {
-			// Need to clear transients if credentials is changed.
-			delete_transient( 'aco_auth_token' );
-			delete_transient( 'aco_currency' );
+		public function delete_all_transients() {
+			$currencies = array( 'SEK', 'NOK', 'DKK', 'EUR' );
+
+			foreach ( $currencies as $currency ) {
+				$name = aco_get_transient_name( $currency );
+				delete_transient( $name );
+			}
 		}
 
 		/**
