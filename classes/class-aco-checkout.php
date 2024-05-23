@@ -130,7 +130,7 @@ class ACO_Checkout {
 		}
 
 		// Get the Avarda order from Avarda.
-		$avarda_order = ACO_WC()->session()->get_avarda_order();
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
 
 		// Check if we got a wp_error.
 		if ( is_wp_error( $avarda_order ) ) {

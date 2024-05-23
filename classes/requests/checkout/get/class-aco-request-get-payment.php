@@ -61,7 +61,7 @@ class ACO_Request_Get_Payment extends ACO_Request {
 		$result = parent::process_response( $response, $request_args, $request_url );
 
 		if ( ! is_wp_error( $result ) ) {
-			ACO_WC()->session()->set_avarda_order( $result );
+			ACO_WC()->session()->set_avarda_payment( $result );
 		}
 
 		return $result;

@@ -96,7 +96,7 @@ class ACO_Shipping extends WC_Shipping_Method {
 	 * @return void
 	 */
 	public function calculate_shipping( $package = array() ) {
-		$avarda_order = ACO_WC()->session()->get_avarda_order();
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
 
 		// If no Avarda order is set, return.
 		if ( is_wp_error( $avarda_order ) ) {
