@@ -57,32 +57,21 @@ class ACO_Helper_Cart {
 			}
 		}
 
-		// Smart coupons.
-		if ( ! empty( WC()->cart->get_coupons() ) ) {
-			$apply_before_tax = 'yes' === get_option( 'woocommerce_smart_coupon_apply_before_tax', 'no' );
-			foreach ( WC()->cart->get_coupons() as $coupon_key => $coupon ) {
-				if ( 'smart_coupon' === $coupon->get_discount_type() ) {
-					if ( wc_tax_enabled() && $apply_before_tax ) {
-						// The discount is applied directly to the cart item. Send gift card amount as zero for bookkeeping.
-						$coupon_amount = 0;
-					} else {
-						$coupon_amount = $coupon->get_amount() * -1;
-					}
-					$coupon_amount = number_format( $coupon_amount, 2, '.', '' );
-					// translators: %s is the gift card reference.
-					$label        = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( sprintf( __( 'Gift card: %s', 'avarda-checkout-for-woocommerce' ), $coupon->get_code() ) ), $coupon );
-					$giftcard_sku = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
-					$gift_card    = array(
-						'notes'       => $giftcard_sku,
-						'description' => substr( $label, 0, 34 ),
-						'quantity'    => 1,
-						'amount'      => $coupon_amount,
-						'taxCode'     => 0,
-						'taxAmount'   => 0,
-					);
+		foreach ( ACO_WC()->krokedil->compatibility()->giftcards() as $giftcards ) {
+			if ( false !== ( strpos( get_class( $giftcards ), 'WCGiftCards', true ) ) && ! function_exists( 'WC_GC' ) ) {
+				continue;
+			}
 
-					$formatted_cart_items[] = $gift_card;
-				}
+			$retrieved_giftcards = $giftcards->get_cart_giftcards();
+			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
+				$formatted_cart_items[] = array(
+					'note'        => $retrieved_giftcard->get_sku(),
+					'description' => $retrieved_giftcard->get_name(),
+					'quantity'    => $retrieved_giftcard->get_quantity(),
+					'amount'      => $retrieved_giftcard->get_total_amount(),
+					'taxCode'     => $retrieved_giftcard->get_tax_rate(),
+					'taxAmount'   => $retrieved_giftcard->get_total_tax_amount(),
+				);
 			}
 		}
 

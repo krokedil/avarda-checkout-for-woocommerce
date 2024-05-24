@@ -22,6 +22,7 @@
  */
 
 use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
+use Krokedil\WooCommerce\KrokedilWooCommerce;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -125,6 +126,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		protected static $instance;
 
 		/**
+		 * The WooCommerce package from Krokedil.
+		 *
+		 * @var KrokedilWooCommerce
+		 */
+		public $krokedil = null;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -203,6 +211,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 			$this->cart_page        = new ACO_Cart_Page();
+			$this->krokedil         = new KrokedilWooCommerce(
+				array(
+					'slug'         => 'aco',
+					'price_format' => 'major',
+				)
+			);
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
