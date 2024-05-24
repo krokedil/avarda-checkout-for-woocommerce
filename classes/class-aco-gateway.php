@@ -13,6 +13,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Gateway class.
  */
 class ACO_Gateway extends WC_Payment_Gateway {
+	/**
+	 * Testmode.
+	 *
+	 * @var boolean
+	 */
+	public $testmode;
+
+	/**
+	 * Payment gateway icon.
+	 *
+	 * @var string
+	 */
+	public $payment_gateway_icon;
+
+	/**
+	 * Payment gateway icon max width.
+	 *
+	 * @var string
+	 */
+	public $payment_gateway_icon_max_width;
 
 	/**
 	 * Class constructor.
@@ -58,6 +78,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_thankyou', array( $this, 'avarda_thank_you' ) );
 		add_action( 'woocommerce_receipt_aco', array( $this, 'receipt_page' ) );
+		add_action( 'woocommerce_after_checkout_validation', array( $this, 'validate_totals' ), 10, 2 );
 	}
 
 	/**
@@ -88,18 +109,38 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return boolean
 	 */
 	public function is_available() {
-		if ( 'yes' === $this->enabled ) {
-			// Do checks here.
+		// Ensure that the Avarda Checkout gateway is enabled.
+		if ( 'yes' !== $this->enabled ) {
+			ACO_Logger::log( 'Avarda Checkout payment gateway is not enabled.', WC_Log_Levels::DEBUG );
+			return false;
+		}
 
-			// Avarda doesn't support 0 value subscriptions.
-			if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
-				if ( 0 == round( WC()->cart->total, 2 ) ) { // phpcs:ignore
-					return false;
-				}
-			}
+		// If we are on an admin page, just return true.
+		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
 			return true;
 		}
-		return false;
+
+		// If we have an avarda session, ensure the currency matches the current currency for the store.
+		$avarda_payment = ACO_WC()->session()->get_avarda_payment();
+		if ( ! is_wp_error( $avarda_payment ) && ! empty( $avarda_payment ) ) {
+			// Ensure the currency matches the current currency for the store.
+			$payment_currency = $avarda_payment['checkoutSite']['currencyCode'] ?? '';
+			$wc_currency      = get_woocommerce_currency();
+			if ( strtoupper( $wc_currency ) !== strtoupper( $payment_currency ) ) {
+				ACO_Logger::log( 'Currency mismatch. The Avarda Checkout payment gateway is not available.', WC_Log_Levels::DEBUG );
+				return false;
+			}
+		}
+
+		// Avarda doesn't support 0 value subscriptions.
+		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
+			if ( 0 == round( WC()->cart->total, 2 ) ) { // phpcs:ignore
+				ACO_Logger::log( 'Subscription total is 0. The Avarda Checkout payment gateway is not available.', WC_Log_Levels::DEBUG );
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -150,11 +191,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect_url' => $confirmation_url,
 			);
 		} else {
-			// Something went wrong. Unset sessions and remove previos purchase id from order.
+			// Something went wrong. Unset sessions and remove previous purchase id from order.
 			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
 
 			aco_wc_unset_sessions();
-			$order->delete_meta_data( $order_id, '_wc_avarda_purchase_id' );
+			aco_delete_avarda_meta_data_from_order( $order );
+
 			$order->set_transaction_id( '' );
 			$order->save();
 			return array(
@@ -182,7 +224,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $pay_url,
 		);
-
 	}
 
 	/**
@@ -209,29 +250,15 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// Get the Avarda order ID.
 		$order              = wc_get_order( $order_id );
 		$avarda_purchase_id = $this->get_avarda_purchase_id( $order );
-		$avarda_order       = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-		if ( is_wp_error( $avarda_order ) ) {
-			// Unset sessions.
-			ACO_Logger::log( 'Avarda GET request failed in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
+		$avarda_order       = ACO_WC()->session()->get_avarda_payment();
+
+		if ( is_wp_error( $avarda_order ) || empty( $avarda_order ) ) {
+			$this->log_process_payment_get_error( $avarda_order, $order_id, $avarda_purchase_id );
 			return false;
 		}
 
 		if ( $order_id && $avarda_order ) {
-
-			// Get current status of Avarda session.
-			if ( 'B2C' === $avarda_order['mode'] ) {
-				$aco_step = $avarda_order['b2C']['step']['current'];
-			} elseif ( 'B2B' === $avarda_order['mode'] ) {
-				$aco_step = $avarda_order['b2B']['step']['current'];
-			}
-
-			// check if session TimedOut.
-			if ( 'TimedOut' === $aco_step ) {
-				ACO_Logger::log( 'Avarda session TimedOut in process payment handler. Clearing Avarda session and reloading the cehckout page. Woo order ID: ' . $order_id . '. Avarda purchase ID: ' . $avarda_purchase_id );
-				return false;
-			}
-
-			$purchase_id = sanitize_text_field( $avarda_order['purchaseId'] );
+			$purchase_id = sanitize_text_field( ACO_WC()->session()->get_purchase_id() );
 			$order->update_meta_data( '_wc_avarda_purchase_id', $purchase_id );
 			$order->set_transaction_id( $purchase_id );
 			$order->update_meta_data( '_wc_avarda_environment', $this->testmode ? 'test' : 'live' );
@@ -243,13 +270,39 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			do_action( 'aco_wc_process_payment', $order_id, $avarda_order );
 
 			// Check that the transaction id got set correctly.
-			if ( strtolower( $order->get_transaction_id() === strtolower( $avarda_purchase_id ) ) ) {
+			if ( strtolower( $order->get_transaction_id() ) === strtolower( $avarda_purchase_id ) ) {
 				return true;
 			}
 		}
 		// Return false if we get here. Something went wrong.
 		ACO_Logger::log( 'Avarda general error in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID ' . $order_id . '. Avarda purchase ID ' . $avarda_purchase_id );
 		return false;
+	}
+
+	/**
+	 * Handle process payment error.
+	 *
+	 * @param WP_Error|bool $error The error object.
+	 * @param int           $order_id The WooCommerce order ID.
+	 * @param string        $purchase_id The Avarda purchase ID.
+	 *
+	 * @return void
+	 */
+	public function log_process_payment_get_error( $error, $order_id, $purchase_id ) {
+		$message = "Avarda GET request failed in process payment handler. Clearing Avarda session and reloading the checkout page. Woo order ID: $order_id. Avarda purchase ID: $purchase_id";
+		if ( ! is_wp_error( $error ) ) {
+			ACO_Logger::log( $message );
+			return;
+		}
+
+		$code = $error->get_error_code();
+		if ( 'avarda_checkout_payment_invalid' === $code || 'avarda_checkout_session_invalid' === $code ) {
+			$error_message = $error->get_error_message();
+			$message       = "Avarda session failed to validate $error_message. Clearing Avarda session and reloading the checkout page. Woo order ID: $order_id. Avarda purchase ID: $purchase_id";
+		}
+
+		// Unset sessions.
+		ACO_Logger::log( $message );
 	}
 
 
@@ -314,6 +367,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			} else {
 				$avarda_change_payment_method_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-change-payment-method.php', $template_name );
 			}
+
+			ACO_Logger::log( "Loading change payment template for Avarda checkout: {$avarda_change_payment_method_template}", WC_Log_Levels::DEBUG );
 			require $avarda_change_payment_method_template;
 		} else {
 
@@ -322,11 +377,45 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			} else {
 				$avarda_order_receipt_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-order-receipt.php', $template_name );
 			}
+			ACO_Logger::log( "Loading order receipt template for Avarda checkout: {$avarda_order_receipt_template}", WC_Log_Levels::DEBUG );
 			require $avarda_order_receipt_template;
-
 		}
 	}
 
+	/**
+	 * Validate the totals for the cart and the Avarda order before processing the payment.
+	 *
+	 * @param array    $data An array of posted data.
+	 * @param WP_Error $errors Validation errors.
+	 *
+	 * @return void
+	 */
+	public function validate_totals( &$data, &$errors ) {
+		// Only if the chosen payment method is Avarda Checkout.
+		if ( $this->id !== $data['payment_method'] ) {
+			return;
+		}
+
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
+
+		if ( is_wp_error( $avarda_order ) || empty( $avarda_order ) ) {
+			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
+			return;
+		}
+
+		// Get the cart totals for the entire WooCommerce cart.
+		$cart_totals     = WC()->cart->get_totals();
+		$wc_total        = intval( round( $cart_totals['total'] * 100, 2 ) );
+		$aco_order_total = intval( round( $avarda_order['totalPrice'] * 100, 2 ) );
+
+		// Get the difference between the WooCommerce cart total and the Avarda order total.
+		$diff = abs( $wc_total - $aco_order_total );
+
+		// If the diff is greater than 3, add an error.
+		if ( $diff > 3 ) {
+			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
+		}
+	}
 }
 
 /**

@@ -1,0 +1,19 @@
+{
+    "require": {
+        "php": ">=7.4",
+        "krokedil/shipping": "dev-develop-fraktjakt"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:krokedil/shipping.git"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

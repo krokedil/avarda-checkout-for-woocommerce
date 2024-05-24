@@ -77,6 +77,7 @@ class ACO_Templates {
 					if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
 						if ( ! isset( $_GET['confirm'] ) ) {
 							$template = $avarda_checkout_template;
+							ACO_Logger::log( "Loading checkout template for Avarda checkout because ACO is the chosen method: $template", WC_Log_Levels::DEBUG );
 						}
 					}
 
@@ -87,6 +88,7 @@ class ACO_Templates {
 						if ( 'aco' === key( $available_gateways ) ) {
 							if ( ! isset( $_GET['confirm'] ) ) {
 								$template = $avarda_checkout_template;
+								ACO_Logger::log( "Loading checkout template for Avarda checkout because no method is chosen and ACO is the first option: $template", WC_Log_Levels::DEBUG );
 							}
 						}
 					}
@@ -99,6 +101,7 @@ class ACO_Templates {
 							if ( 'aco' === key( $available_gateways ) ) {
 								if ( ! isset( $_GET['confirm'] ) ) {
 									$template = $avarda_checkout_template;
+									ACO_Logger::log( "Loading checkout template for Avarda checkout the chosen method is no longer available, and ACO is the first option: $template", WC_Log_Levels::DEBUG );
 								}
 							}
 						}

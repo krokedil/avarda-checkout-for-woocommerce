@@ -29,7 +29,9 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_iframe_shipping_address_change' => true,
 			'aco_wc_change_payment_method'          => true,
 			'aco_wc_log_js'                         => true,
+			'aco_iframe_shipping_option_change'     => true,
 		);
+
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
 			add_action( 'wp_ajax_woocommerce_' . $ajax_event, array( __CLASS__, $ajax_event ) );
 			if ( $nopriv ) {
@@ -140,17 +142,42 @@ class ACO_AJAX extends WC_AJAX {
 	public static function aco_wc_get_avarda_payment() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'aco_wc_get_avarda_payment' ) ) { // Input var okay.
-			wp_send_json_error( 'bad_nonce' );
+			wp_send_json_error(
+				array(
+					'error' => 'bad_nonce',
+				)
+			);
 			exit;
 		}
 
-		$avarda_payment = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
-		if ( is_wp_error( $avarda_payment ) ) {
-			wp_send_json_error( $avarda_payment );
+		$avarda_order = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
+
+		// Get current status of Avarda session.
+		$aco_step = aco_get_payment_step( $avarda_order );
+
+		// Check if session TimedOut.
+		if ( 'TimedOut' === $aco_step ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Avarda session TimedOut (in aco_wc_get_avarda_payment function). Clearing Avarda session and reloading the checkout page.' );
+			wp_send_json_error(
+				array(
+					'error'    => 'timeout',
+					'redirect' => wc_get_checkout_url(),
+				)
+			);
 		}
+
+		if ( is_wp_error( $avarda_order ) ) {
+			wp_send_json_error(
+				array(
+					'error' => 'avarda_request_error',
+				)
+			);
+		}
+
 		wp_send_json_success(
 			array(
-				'customer_data' => aco_format_address_data( $avarda_payment ),
+				'customer_data' => aco_format_address_data( $avarda_order ),
 			)
 		);
 	}
@@ -171,6 +198,43 @@ class ACO_AJAX extends WC_AJAX {
 		$message            = "Frontend JS $avarda_purchase_id: $posted_message";
 		ACO_Logger::log( $message );
 		wp_send_json_success();
+	}
+
+	/**
+	 * Shipping option changed in Avarda Checkout.
+	 *
+	 * @return void
+	 */
+	public static function aco_iframe_shipping_option_change() {
+		check_ajax_referer( 'aco_iframe_shipping_option_change', 'nonce' );
+
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		// Force shipping to be re-calculated.
+		WC()->cart->calculate_shipping();
+		remove_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		WC()->cart->calculate_totals();
+
+		// Get the order review HTML.
+		ob_start();
+		woocommerce_order_review();
+		$order_review = ob_get_clean();
+
+		// Send it as a fragment in the json response.
+		wp_send_json_success(
+			array(
+				'fragments' => array(
+					'.woocommerce-checkout-review-order-table' => $order_review,
+				),
+			)
+		);
 	}
 }
 ACO_AJAX::init();

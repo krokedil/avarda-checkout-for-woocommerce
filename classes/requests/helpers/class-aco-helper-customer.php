@@ -14,12 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ACO_Helper_Customer {
 	/**
-	 * Gets formated order items.
+	 * Get the B2B customer details.
 	 *
-	 * @param int $order_id The WooCommerce order object.
-	 * @return array Formated order items.
+	 * @param int $order_id The WooCommerce order id. Null if we are using the cart.
+	 *
+	 * @return array
 	 */
-	public function get_b2b_customer( $order_id ) {
+	public function get_b2b_customer( $order_id = null ) {
 		$customer = array();
 		$order    = wc_get_order( $order_id );
 
@@ -77,7 +78,14 @@ class ACO_Helper_Customer {
 		return $customer;
 	}
 
-	public function get_b2c_customer( $order_id ) {
+	/**
+	 * Get the B2C customer details.
+	 *
+	 * @param int $order_id The WooCommerce order id. Null if we are using the cart.
+	 *
+	 * @return array
+	 */
+	public function get_b2c_customer( $order_id = null ) {
 		$customer = array();
 		$order    = wc_get_order( $order_id );
 
@@ -138,5 +146,97 @@ class ACO_Helper_Customer {
 		return $customer;
 	}
 
+	/**
+	 * Get address details from WooCommerce from an order or the customer session.
+	 *
+	 * @param WC_Order|bool $order The WooCommerce order id. False if we are using the cart.
+	 * @param bool          $b2b If the customer is a B2B customer.
+	 *
+	 * @return array
+	 */
+	public function get_customer( $order = false, $b2b = false ) {
+		$item = $order ? $order : WC()->customer;
 
+		$customer = array_filter(
+			array(
+				'invoicingAddress' => self::get_invoicing_address( $item, $b2b ),
+				'deliveryAddress'  => self::get_delivery_address( $item ),
+				'userInputs'       => self::get_user_inputs( $item ),
+			)
+		);
+
+		return $customer;
+	}
+
+	/**
+	 * Get the invoicing address.
+	 *
+	 * @param WC_Order|WC_Customer $item Either a WC_Order or WC_Customer object.
+	 * @param bool                 $b2b If the customer is a B2B customer.
+	 *
+	 * @return array
+	 */
+	public static function get_invoicing_address( $item, $b2b = false ) {
+		$invoicing_address = array_filter(
+			array(
+				'name'      => $b2b ? $item->get_billing_company() : '',
+				'firstName' => $item->get_billing_first_name(),
+				'lastName'  => $item->get_billing_last_name(),
+				'address1'  => $item->get_billing_address_1(),
+				'address2'  => $item->get_billing_address_2(),
+				'zip'       => $item->get_billing_postcode(),
+				'city'      => $item->get_billing_city(),
+				'country'   => $item->get_billing_country(),
+			)
+		);
+
+		return $invoicing_address;
+	}
+
+	/**
+	 * Get the delivery address.
+	 *
+	 * @param WC_Order|WC_Customer $item Either a WC_Order or WC_Customer object.
+	 *
+	 * @return array
+	 */
+	public static function get_delivery_address( $item ) {
+		$delivery_countries = WC()->countries->get_shipping_countries();
+
+		$country = $item->get_shipping_country();
+
+		( isset( $delivery_countries[ $country ] ) ? $country : $delivery_countries['default'] );
+
+		$delivery_address = array_filter(
+			array(
+				'firstName' => $item->get_shipping_first_name(),
+				'lastName'  => $item->get_shipping_last_name(),
+				'address1'  => $item->get_shipping_address_1(),
+				'address2'  => $item->get_shipping_address_2(),
+				'zip'       => $item->get_shipping_postcode(),
+				'city'      => $item->get_shipping_city(),
+				'country'   => $item->get_shipping_country(),
+			)
+		);
+
+		return $delivery_address;
+	}
+
+	/**
+	 * Get the user inputs.
+	 *
+	 * @param WC_Order|WC_Customer $item Either a WC_Order or WC_Customer object.
+	 *
+	 * @return array
+	 */
+	public static function get_user_inputs( $item ) {
+		$user_input = array_filter(
+			array(
+				'phone' => $item->get_billing_phone(),
+				'email' => $item->get_billing_email(),
+			)
+		);
+
+		return $user_input;
+	}
 }

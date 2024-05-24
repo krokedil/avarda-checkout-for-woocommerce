@@ -117,8 +117,8 @@ class ACO_Helper_Create_Refund_Data {
 		$total_tax          = $item->get_total_tax();
 
 		return array(
-			'description' => substr( $title, 0, 35 ),
-			'notes'       => substr( $sku, 0, 35 ),
+			'description' => substr( $title, 0, 34 ),
+			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $formatted_tax_rate ) ),
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
@@ -151,8 +151,8 @@ class ACO_Helper_Create_Refund_Data {
 		$total_tax    = ( $free_shipping ) ? 0 : $shipping->get_total_tax();
 		$title        = $shipping->get_name();
 		return array(
-			'description' => substr( $title, 0, 35 ),
-			'notes'       => substr( $shipping_reference, 0, 35 ),
+			'description' => substr( $title, 0, 34 ),
+			'notes'       => substr( $shipping_reference, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $tax_rate ) ),
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
@@ -180,8 +180,8 @@ class ACO_Helper_Create_Refund_Data {
 		$total_tax          = $fee->get_total_tax();
 
 		return array(
-			'description' => substr( $title, 0, 35 ),
-			'notes'       => substr( $sku, 0, 35 ),
+			'description' => substr( $title, 0, 34 ),
+			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
 			'taxCode'     => strval( round( $formatted_tax_rate ) ),
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),

@@ -16,10 +16,12 @@ class ACO_Helper_Checkout_Setup {
 	/**
 	 * Gets checkout setup.
 	 *
-	 * @param int $order_id The WooCommerce order id.
+	 * @param int  $order_id The WooCommerce order id.
+	 * @param bool $is_international Whether the order is international or not.
+	 *
 	 * @return array Formatted checkout setup.
 	 */
-	public function get_checkout_setup( $order_id = null ) {
+	public function get_checkout_setup( $order_id = null, $is_international = false ) {
 
 		$avarda_settings = get_option( 'woocommerce_aco_settings' );
 		$age_validation  = $avarda_settings['age_validation'] ?? '';
@@ -52,6 +54,11 @@ class ACO_Helper_Checkout_Setup {
 		// Age validation.
 		if ( ! empty( $age_validation ) ) {
 			$checkout_setup['ageValidation'] = $age_validation;
+		}
+
+		// Set the international properties to the checkout setup if the order is international.
+		if ( $is_international ) {
+			$checkout_setup = $this->set_international_properties( $checkout_setup );
 		}
 
 		return $checkout_setup;
@@ -99,4 +106,18 @@ class ACO_Helper_Checkout_Setup {
 		return apply_filters( 'aco_wc_terms_url', $terms_url );
 	}
 
+	/**
+	 * Set international properties.
+	 *
+	 * @param array $checkout_setup The checkout setup.
+	 *
+	 * @return array
+	 */
+	private function set_international_properties( $checkout_setup ) {
+		$checkout_setup['enableCountrySelector'] = true;
+		$checkout_setup['invoicingCountries']    = array_keys( WC()->countries->get_allowed_countries() );
+		$checkout_setup['deliveryCountries']     = array_keys( WC()->countries->get_shipping_countries() );
+
+		return $checkout_setup;
+	}
 }

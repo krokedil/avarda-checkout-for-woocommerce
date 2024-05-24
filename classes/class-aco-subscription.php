@@ -16,6 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class ACO_Subscription {
 	/**
+	 * Test mode.
+	 *
+	 * @var bool
+	 */
+	private $testmode;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -70,7 +77,6 @@ class ACO_Subscription {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -197,8 +203,8 @@ class ACO_Subscription {
 						$order_lines = array();
 						foreach ( $wc_order->get_items() as $item ) {
 							$order_lines[] = array(
-								'description' => substr( $wc_order->get_shipping_method(), 0, 35 ),
-								'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 35 ),
+								'description' => substr( $wc_order->get_shipping_method(), 0, 34 ),
+								'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 34 ),
 								'amount'      => 0,
 								'taxCode'     => 0,
 								'taxAmount'   => 0,
@@ -252,4 +258,3 @@ class ACO_Subscription {
 }
 
 new ACO_Subscription();
-

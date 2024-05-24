@@ -223,6 +223,16 @@
           "description" : "<ul><li>Feature - Adds logic to trigger activate and cancel order request to Avarda without changing order status. This is done via WooCommerce Order action logic.</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.4.2"
+     },
+     "1.13.0" : {
+          "description" : "<ul><li>Feature - Adds metabox that fetches Avarda payment and displays current status when viewing a single order in Woo admin.</li><li>Feature - Add support for disabling order management connection between Woo and Avarda on a single order.</li><li>Enhancement - Adds aco_wc_confirm_failed hook so other plugins can listen to and take action if confirm order step fails.</li><li>Tweak - Respond with 404 if no Woo order is found during callbacks from Avarda.</li><li>Fix - Make sure plugin only sends 35 characters in product names, also for refunds.</li><li>Fix - Check for Avarda TimedOut step/status even when making GET avarda order when fetching customer data and submitting WC checkout form.</li><li>Fix - Fix issue with the _wc_avarda_purchase_id meta data field not being deleted correctly in pending Woo order (if one exist) if a new Avarda payment session being created.</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.4.3"
+     },
+     "1.13.1" : {
+          "description" : "<ul><li>Tweak - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).</li></ul>",
+          "requires" : "5.0.0",
+          "tested" : "6.5.2"
      }
 
 }

@@ -13,6 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * ACO_Assets class.
  */
 class ACO_Assets {
+	/**
+	 * The checkout flow.
+	 *
+	 * @var string
+	 */
+	public $checkout_flow;
 
 	/**
 	 * The plugin settings.
@@ -34,6 +40,8 @@ class ACO_Assets {
 		add_action( 'aco_wc_before_checkout_form', array( $this, 'localize_and_enqueue_checkout_script' ) );
 		add_action( 'aco_wc_before_order_receipt', array( $this, 'localize_and_enqueue_checkout_script' ) );
 
+		// Admin scripts.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 	}
 
 	/**
@@ -166,6 +174,8 @@ class ACO_Assets {
 			'get_avarda_payment_nonce'             => wp_create_nonce( 'aco_wc_get_avarda_payment' ),
 			'iframe_shipping_address_change_url'   => WC_AJAX::get_endpoint( 'aco_wc_iframe_shipping_address_change' ),
 			'iframe_shipping_address_change_nonce' => wp_create_nonce( 'aco_wc_iframe_shipping_address_change' ),
+			'iframe_shipping_option_change_url'    => WC_AJAX::get_endpoint( 'aco_iframe_shipping_option_change' ),
+			'iframe_shipping_option_change_nonce'  => wp_create_nonce( 'aco_iframe_shipping_option_change' ),
 			'log_to_file_url'                      => WC_AJAX::get_endpoint( 'aco_wc_log_js' ),
 			'log_to_file_nonce'                    => wp_create_nonce( 'aco_wc_log_js' ),
 			'submit_order'                         => WC_AJAX::get_endpoint( 'checkout' ),
@@ -197,27 +207,89 @@ class ACO_Assets {
 	 * @return void
 	 */
 	public function aco_maybe_initialize_payment( $order_id = null ) {
-		if ( ! empty( $order_id ) ) {
-			$order = wc_get_order( $order_id );
-			// Creates a session and store it to order if we don't have a previous one or if it has expired.
-			$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
-			if ( empty( $avarda_jwt_expired_time ) || strtotime( $avarda_jwt_expired_time ) < time() ) {
-				$order->delete_meta_data( '_wc_avarda_purchase_id' );
-				$order->delete_meta_data( '_wc_avarda_jwt' );
-				$order->delete_meta_data( '_wc_avarda_expiredUtc' );
-				$order->save();
-				aco_wc_initialize_or_update_order_from_wc_order( $order_id );
-			}
-		} else {
-			// Creates jwt token if we do not have session var set with jwt token or if it have expired.
-			$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
-			$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
-			$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
-			if ( 'new_token_required' === $token || null === $avarda_payment_data['jwt'] || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
-				aco_wc_initialize_payment();
-			}
+		// Get the order if we have an order id.
+		$order = $order_id ? wc_get_order( $order_id ) : null;
+
+		// Get the Avarda payment.
+		$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
+
+		// If we don't have any errors, and the payment is returned as an array, just continue.
+		if ( ! is_wp_error( $avarda_payment ) && false !== $avarda_payment ) {
+			return;
 		}
 
+		// If we did not get an order, we need to initialize a new payment.
+		if ( null !== $order ) {
+			// Delete old meta data.
+			aco_delete_avarda_meta_data_from_order( $order );
+
+			// Initialize the payment.
+			$avarda_payment = ACO_WC()->api->request_initialize_payment( $order_id );
+			aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_payment );
+		} else {
+			$avarda_payment = aco_wc_initialize_payment();
+		}
+
+		if ( is_wp_error( $avarda_payment ) ) {
+			// If we got an error, log it and return.
+			ACO_Logger::log( 'Error when initializing Avarda payment: ' . $avarda_payment->get_error_message(), WC_Log_Levels::ERROR );
+			return;
+		}
+	}
+
+	/**
+	 * Force a new session with Avarda Checkout.
+	 *
+	 * @param WC_Order|null|false $order The WooCommerce Order.
+	 *
+	 * @return void
+	 */
+	public function force_new_session( $order = null ) {
+		$is_order = is_a( $order, 'WC_Order' );
+
+		if ( $is_order ) {
+			aco_delete_avarda_meta_data_from_order( $order );
+			$avarda_order = aco_wc_initialize_or_update_order_from_wc_order( $order->get_id() );
+		} else {
+			$avarda_order = aco_wc_initialize_payment();
+		}
+
+		ACO_WC()->session()->set_avarda_payment( $avarda_order );
+	}
+
+	/**
+	 * Enqueue admin assets.
+	 *
+	 * @param string $hook The current admin page.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_assets( $hook ) {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+
+		if ( ! in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) && ! in_array( $screen_id, array( 'shop_order' ), true ) ) {
+			return;
+		}
+
+		$order_id = ! empty( filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) ) ? filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) : get_the_ID();
+
+		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery', 'jquery-blockui' ), AVARDA_CHECKOUT_VERSION, true );
+
+		$params = array(
+			'aco_order_sync_toggle_nonce' => wp_create_nonce( 'aco_wc_order_sync_toggle' ),
+			'order_id'                    => $order_id,
+		);
+
+		wp_localize_script(
+			'aco_admin_js',
+			'aco_admin_params',
+			$params
+		);
+		wp_enqueue_script( 'aco_admin_js' );
+
+		wp_register_style( 'aco_admin_css', AVARDA_CHECKOUT_URL . '/assets/css/aco-admin.css', array(), AVARDA_CHECKOUT_VERSION );
+		wp_enqueue_style( 'aco_admin_css' );
 	}
 }
 new ACO_Assets();
