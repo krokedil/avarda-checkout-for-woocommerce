@@ -9,19 +9,9 @@
         "squizlabs/php_codesniffer": "*"
     },
     "require": {
-        "krokedil/woocommerce": "dev-develop",
         "php": ">=7.4"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:krokedil/shipping.git"
-        },
-        {
-            "type": "vcs",
-            "url": "git@github.com:krokedil/woocommerce.git"
-        }
-    ],
+    "repositories": [],
     "license": "GPLv3",
     "authors": [
         {

@@ -22,7 +22,7 @@
  */
 
 use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
-use Krokedil\WooCommerce\KrokedilWooCommerce;
+use KrokedilAvardaDeps\Krokedil\WooCommerce\KrokedilWooCommerce;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
