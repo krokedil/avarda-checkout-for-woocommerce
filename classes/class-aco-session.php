@@ -85,7 +85,7 @@ class ACO_Session {
 		// See if we need to get the avarda payment or not.
 		if ( empty( $this->avarda_payment ) ) {
 			// Get the purchase id from the order or the session.
-			$purchase_id = $order ? $order->get_meta( 'aco_purchase_id' ) : aco_get_purchase_id_from_session();
+			$purchase_id = $order ? $order->get_meta( '_wc_avarda_purchase_id' ) : aco_get_purchase_id_from_session();
 
 			// If we did not have any purchase id, it means that we don't have a Avarda payment. So return false to indicate that none exists.
 			if ( empty( $purchase_id ) ) {
