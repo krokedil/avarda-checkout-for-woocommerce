@@ -35,6 +35,20 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public $payment_gateway_icon_max_width;
 
 	/**
+	 * Checkout flow.
+	 *
+	 * @var string
+	 */
+	public $checkout_flow;
+
+	/**
+	 * Debug mode.
+	 *
+	 * @var boolean
+	 */
+	public $debug;
+
+	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
@@ -393,6 +407,11 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public function validate_totals( &$data, &$errors ) {
 		// Only if the chosen payment method is Avarda Checkout.
 		if ( $this->id !== $data['payment_method'] ) {
+			return;
+		}
+
+		// If we are using the checkout flow "redirect", we don't need to validate the totals.
+		if ( 'redirect' === $this->checkout_flow ) {
 			return;
 		}
 
