@@ -404,7 +404,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function validate_totals( &$data, &$errors ) {
+	public function validate_totals( $data, $errors ) {
 		// Only if the chosen payment method is Avarda Checkout.
 		if ( $this->id !== $data['payment_method'] ) {
 			return;
