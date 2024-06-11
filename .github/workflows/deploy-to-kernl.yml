@@ -1,0 +1,32 @@
+name: Deploy release to Kernl.
+on:
+    release:
+        types: [published]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Composer Install
+      run: composer install
+
+    - name: Kernl Deployment
+      id: kernl-deploy
+      uses: krokedil/kernl-release@1.0.0
+      with:
+          plugin-id: ${{ secrets.PLUGIN_ID }}
+          plugin-slug: avarda-checkout-for-woocommerce
+          kernl-username: ${{ secrets.KERNL_USERNAME }}
+          kernl-password: ${{ secrets.KERNL_PASSWORD }}
+
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ steps.kernl-deploy.outputs.zip-path }}
+        asset_name: ${{ github.event.repository.name }}.zip
+        asset_content_type: application/zip
