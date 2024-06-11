@@ -12,16 +12,43 @@ defined( 'ABSPATH' ) || exit;
  */
 class ACO_Checkout {
 	/**
+	 * Checkout flow.
+	 *
+	 * @var string
+	 */
+	private $checkout_flow;
+
+	/**
+	 * If integrated shipping is enabled.
+	 *
+	 * @var bool
+	 */
+	private $integrated_shipping;
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct() {
-		$settings            = get_option( 'woocommerce_aco_settings' );
-		$this->checkout_flow = $settings['checkout_flow'] ?? 'embedded';
+		$settings                  = get_option( 'woocommerce_aco_settings' );
+		$this->checkout_flow       = $settings['checkout_flow'] ?? 'embedded';
+		$this->integrated_shipping = isset( $settings['integrated_shipping'] ) && 'yes' === $settings['integrated_shipping'] ? true : false;
+
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 999999 );
 
 		if ( 'embedded' === $this->checkout_flow ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
 		}
+
+		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
+	}
+
+	/**
+	 * Check if integrated shipping is enabled.
+	 *
+	 * @return bool
+	 */
+	public function is_integrated_shipping_enabled() {
+		return $this->integrated_shipping;
 	}
 
 	/**
@@ -103,7 +130,7 @@ class ACO_Checkout {
 		}
 
 		// Get the Avarda order from Avarda.
-		$avarda_order = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
 
 		// Check if we got a wp_error.
 		if ( is_wp_error( $avarda_order ) ) {
@@ -128,7 +155,7 @@ class ACO_Checkout {
 		// check if session TimedOut.
 		if ( 'TimedOut' === $aco_step ) {
 			aco_wc_unset_sessions();
-			ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the cehckout page.' );
+			ACO_Logger::log( 'Avarda session TimedOut. Clearing Avarda session and reloading the checkout page.' );
 			WC()->session->reload_checkout = true;
 			return;
 		}
@@ -151,7 +178,7 @@ class ACO_Checkout {
 			WC()->session->reload_checkout = true;
 		}
 
-		$saved_hash = WC()->session->set( 'aco_last_update_hash', $cart_hash );
+		WC()->session->set( 'aco_last_update_hash', $cart_hash );
 	}
 
 	/**
@@ -174,4 +201,43 @@ class ACO_Checkout {
 
 		return $fields;
 	}
-} new ACO_Checkout();
+
+	/**
+	 * Print the extra shipping info.
+	 *
+	 * @param WC_Shipping_Rate $rate The shipping rate.
+	 *
+	 * @return void
+	 */
+	public function print_extra_shipping_info( $rate ) {
+		if ( false === strpos( $rate->get_id(), 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
+			return;
+		}
+
+		$selected_pickup_point = ACO_WC()->pickup_points->get_selected_pickup_point_from_rate( $rate );
+		if ( empty( $selected_pickup_point ) ) {
+			return;
+		}
+
+		$name        = $selected_pickup_point->get_name();
+		$description = $selected_pickup_point->get_description();
+		$address     = $selected_pickup_point->get_address();
+
+		?>
+		<div class="avarda-shipping-info">
+			<small>
+				<p>
+				<?php if ( ! empty( $name ) ) : ?>
+					<?php echo esc_html( $name ); ?>
+				<?php elseif ( ! empty( $description ) ) : ?>
+					<?php echo esc_html( $description ); ?>
+				<?php endif; ?>
+				<?php if ( ! empty( $address ) ) : ?>
+					<?php echo esc_html( ' - ' . $address->get_street() ); ?>
+				<?php endif; ?>
+			</p>
+			</small>
+		</div>
+		<?php
+	}
+}

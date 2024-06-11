@@ -9,24 +9,77 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 /**
- * Maybe creates, stores a token as a transient and returns.AMFReader
+ * Maybe creates, stores a token as a transient and returns the token.
+ * If a token failed to be created, false is returned.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return string|boolean
+ */
+function aco_maybe_create_token( $currency = null ) {
+	$token = aco_get_auth_token( $currency );
+
+	if ( false === $token ) { // update token if currency is changed.
+		$response = ACO_WC()->api->request_token();
+		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
+			return false;
+		}
+
+		$token = $response['token'];
+		aco_set_auth_token( $token, $currency );
+	}
+
+	return $token;
+}
+
+/**
+ * Get the auth token transient name based on the currency.
+ *
+ * @param string|null $currency The currency code.
  *
  * @return string
  */
-function aco_maybe_create_token() {
-	$token    = get_transient( 'aco_auth_token' );
-	$currency = get_transient( 'aco_currency' );
-	if ( false === $token || get_woocommerce_currency() !== $currency ) { // update token if currency is changed.
-		$response = ACO_WC()->api->request_token();
-		if ( is_wp_error( $response ) || empty( $response['token'] ) ) {
-			return;
-		}
-		// Set transient with 55minute life time.
-		set_transient( 'aco_auth_token', $response['token'], 55 * MINUTE_IN_SECONDS );
-		set_transient( 'aco_currency', get_woocommerce_currency(), 55 * MINUTE_IN_SECONDS );
-		$token = $response['token'];
-	}
-	return $token;
+function aco_get_transient_name( $currency = null ) {
+	$currency = $currency ? $currency : get_woocommerce_currency(); // Get the currency if it was not passed.
+	$currency = strtolower( $currency ); // Make sure the currency is lowercase.
+	return "aco_{$currency}_auth_token";
+}
+
+/**
+ * Get the auth token transient for the currency.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return string|boolean
+ */
+function aco_get_auth_token( $currency = null ) {
+	$transient_name = aco_get_transient_name( $currency );
+	return get_transient( $transient_name );
+}
+
+/**
+ * Delete the auth token for the currency.
+ *
+ * @param string|null $currency The currency code.
+ *
+ * @return void
+ */
+function aco_delete_auth_token( $currency = null ) {
+	$transient_name = aco_get_transient_name( $currency );
+	delete_transient( $transient_name );
+}
+
+/**
+ * Set the auth token transient for the currency.
+ *
+ * @param string      $token The auth token.
+ * @param string|null $currency The currency code.
+ *
+ * @return void
+ */
+function aco_set_auth_token( $token, $currency ) {
+	$transient_name = aco_get_transient_name( $currency );
+	set_transient( $transient_name, $token, 55 * MINUTE_IN_SECONDS );
 }
 
 
@@ -44,7 +97,7 @@ function aco_wc_initialize_payment() {
 	// Initialize payment.
 	$avarda_payment = ACO_WC()->api->request_initialize_payment();
 	if ( is_wp_error( $avarda_payment ) ) {
-		return;
+		return array();
 	}
 
 	// Remove old payment data if a WooCommerce order already exist.
@@ -89,70 +142,31 @@ function aco_wc_show_checkout_form( $order_id = null ) {
  * @return void
  */
 function aco_wc_initialize_or_update_order() {
-
-	$avarda_payment_data     = WC()->session->get( 'aco_wc_payment_data' );
-	$avarda_purchase_id      = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['purchaseId'] ) ) ? $avarda_payment_data['purchaseId'] : '';
-	$avarda_jwt_expired_time = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['expiredUtc'] ) ) ? $avarda_payment_data['expiredUtc'] : '';
-	$avarda_jwt              = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
-	$token                   = ( time() < strtotime( $avarda_jwt_expired_time ) ) ? 'session' : 'new_token_required';
-
-	if ( ! empty( $avarda_purchase_id ) ) {
-		// We ha ve a purchase ID, get payment from Avarda.
-		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-
+	$avarda_payment = ACO_WC()->session()->get_avarda_payment();
+	if ( $avarda_payment ) {
 		if ( is_wp_error( $avarda_payment ) ) {
-			aco_wc_unset_sessions();
 			ACO_Logger::log( 'Avarda GET request failed in aco_wc_initialize_or_update_order. Clearing Avarda session.' );
+			aco_wc_unset_sessions();
 			return;
 		}
 
-		// Get payment status.
-		$aco_step = aco_get_payment_step( $avarda_payment );
+		$purchase_id = ACO_WC()->session()->get_purchase_id();
+		$step        = ACO_WC()->session()->get_payment_step();
 
-		switch ( $aco_step ) {
-			case 'Completed':
-				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				$order = aco_get_order_by_purchase_id( $avarda_purchase_id );
-
-				if ( is_object( $order ) ) {
-					$confirmation_url = add_query_arg(
-						array(
-							'aco_confirm'     => 'yes',
-							'aco_purchase_id' => $avarda_purchase_id,
-							'wc_order_id'     => $order->get_id(),
-						),
-						$order->get_checkout_order_received_url()
-					);
-					wp_safe_redirect( $confirmation_url );
-					exit;
-				}
-				break;
-			case 'TimedOut':
-				aco_wc_initialize_payment();
-				break;
-			default:
-				if ( 'new_token_required' === $token || empty( $avarda_jwt ) || get_woocommerce_currency() !== WC()->session->get( 'aco_currency' ) || ACO_WC()->checkout_setup->get_language() !== WC()->session->get( 'aco_language' ) ) {
-					aco_wc_initialize_payment();
-				} else {
-
-					// Make sure that payment session step is ok for an update.
-					if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
-						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
-						return;
-					}
-
-					$avarda_payment = ACO_WC()->api->request_update_payment( $avarda_purchase_id, null, true );
-					// If the update failed - unset sessions and return error.
-					if ( is_wp_error( $avarda_payment ) ) {
-						// Unset sessions.
-						aco_wc_unset_sessions();
-						ACO_Logger::log( 'Avarda update request failed in aco_wc_initialize_or_update_order function. Clearing Avarda session.' );
-					}
-				}
-				break;
+		// Make sure that payment session step is ok for an update.
+		if ( ! in_array( $step, aco_payment_steps_approved_for_update_request(), true ) ) {
+			ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order function since Avarda payment session %s in step %s.', $purchase_id, $step ) );
+			return;
 		}
-	} else {
-		// We have no purchase id, let's create a new session.
+
+		$avarda_payment = ACO_WC()->api->request_update_payment( $purchase_id, null, true );
+		// If the update failed - unset sessions and return error.
+		if ( is_wp_error( $avarda_payment ) ) {
+			// Unset sessions.
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Avarda update request failed in aco_wc_initialize_or_update_order function. Clearing Avarda session.' );
+		}
+	} else { // If no Avarda payment session exists, create a new one.
 		aco_wc_initialize_payment();
 	}
 }
@@ -165,14 +179,10 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-	$order = wc_get_order( $order_id );
-	if ( $order->get_meta( '_wc_avarda_purchase_id' ) ) { // Check if we have an order id.
-		$avarda_purchase_id      = $order->get_meta( '_wc_avarda_purchase_id', true );
-		$avarda_jwt_expired_time = $order->get_meta( '_wc_avarda_expiredUtc', true );
-
-		// We ha ve a purchase ID, get payment from Avarda.
-		$avarda_payment = ACO_WC()->api->request_get_payment( $avarda_purchase_id );
-
+	$order          = wc_get_order( $order_id );
+	$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
+	if ( $avarda_payment ) { // If we got a response
+		// Check for a WP_Error.
 		if ( is_wp_error( $avarda_payment ) ) {
 			aco_wc_unset_sessions();
 			aco_delete_avarda_meta_data_from_order( $order );
@@ -180,68 +190,43 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 			return;
 		}
 
-		// Get payment status.
-		$aco_step = aco_get_payment_step( $avarda_payment );
+		$purchase_id = ACO_WC()->session()->get_purchase_id();
+		$step        = ACO_WC()->session()->get_payment_step();
 
-		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id, $aco_step ) );
+		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $purchase_id, $step ) );
 
-		switch ( $aco_step ) {
-			case 'Completed':
-				// Payment already completed in Avarda. Let's redirect the customer to the thankyou/confirmation page.
-				if ( is_object( $order ) ) {
-					$confirmation_url = add_query_arg(
-						array(
-							'aco_confirm'     => 'yes',
-							'aco_purchase_id' => $avarda_purchase_id,
-							'wc_order_id'     => $order_id,
-						),
-						$order->get_checkout_order_received_url()
-					);
-					wp_safe_redirect( $confirmation_url );
-					exit;
-				}
-				break;
-			case 'TimedOut':
-				$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
-				break;
-			default:
-				if ( strtotime( $avarda_jwt_expired_time ) < time() ) {
-					$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
-					aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
-				} else {
-
-					// Make sure that payment session step is ok for an update.
-					if ( ! in_array( $aco_step, aco_payment_steps_approved_for_update_request(), true ) ) {
-						ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order_from_wc_order function since Avarda payment session %s in step %s.', $avarda_purchase_id, $aco_step ) );
-						return;
-					}
-
-					// Try to update the order.
-					$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id, $order_id, true );
-				}
-				break;
+		// Make sure that payment session step is ok for an update.
+		if ( ! in_array( $step, aco_payment_steps_approved_for_update_request(), true ) ) {
+			ACO_Logger::log( sprintf( 'Aborting update in aco_wc_initialize_or_update_order_from_wc_order function since Avarda payment session %s in step %s.', $purchase_id, $step ) );
+			return;
 		}
+
+		// Try to update the order.
+		$avarda_order = ACO_WC()->api->request_update_payment( $purchase_id, $order_id, true );
+
 		if ( is_wp_error( $avarda_order ) ) {
-			ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			ACO_Logger::log( sprintf( 'Update session for %s|%s (Avarda ID: %s). Avarda order failed to update, initializing new checkout session.', $order_id, $order->get_order_key(), $purchase_id ) );
 
 			// If update order failed try to create new order.
 			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 			if ( is_wp_error( $avarda_order ) ) {
-				// If failed then bail.
-				ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $avarda_purchase_id ) );
+				ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $purchase_id ) );
 				return;
 			}
+
 			aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
 			return $avarda_order;
 		}
+
 		return $avarda_order;
+
 	} else {
 		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
 
-		// Create new order, since we dont have one.
+		// Create new order, since we don't have one.
 		$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
-		if ( false === $avarda_order ) {
-			ACO_Logger::log( sprintf( 'Checkout session initilization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
+		if ( is_wp_error( $avarda_order ) || ! $avarda_order ) {
+			ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
 			return;
 		}
 		aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );
@@ -299,6 +284,9 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
+
+		// Save any shipping module data to the order if available.
+		ACO_Order_Management::maybe_save_shipping_meta( $order, $avarda_order );
 
 		// Let other plugins hook into this sequence.
 		do_action( 'aco_wc_confirm_avarda_order', $order_id, $avarda_order );
@@ -434,6 +422,13 @@ function aco_populate_wc_order( $order, $avarda_order ) {
 	$order->save();
 }
 
+/**
+ * Format Avarda address data.
+ *
+ * @param array $avarda_order The Avarda order.
+ *
+ * @return array
+ */
 function aco_format_address_data( $avarda_order ) {
 	$customer_address = array();
 
@@ -596,6 +591,7 @@ function aco_wc_unset_sessions() {
 
 /**
  * Delete Avarda meta data from order.
+ *
  * @param WC_Order $order WooCommerce order.
  *
  * @return void
@@ -800,4 +796,25 @@ function aco_check_order_totals( $order, $avarda_order ) {
 	}
 
 	return true;
+}
+
+/**
+ * Clear any stored shipping package hashes in the WC Session to ensure that shipping rates are recalculated.
+ *
+ * @param array $packages Array of shipping packages.
+ *
+ * @return array
+ */
+function aco_clear_shipping_package_hashes( $packages ) {
+	// Get all package keys.
+	$package_keys = array_keys( $packages );
+
+	// Loop them to ensure we clear the shipping rates for all of them.
+	foreach ( $package_keys as $package_key ) {
+		$wc_session_key = 'shipping_for_package_' . $package_key;
+		WC()->session->__unset( $wc_session_key );
+	}
+
+	// Return the packages unchanged.
+	return $packages;
 }

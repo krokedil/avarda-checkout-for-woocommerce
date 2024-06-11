@@ -68,7 +68,7 @@ $settings = array(
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable logging', 'avarda-checkout-for-woocommerce' ),
 		'default'     => 'no',
-		'description' => sprintf( __( 'Log ' . $this->method_title . ' events in <code>%s</code>', 'avarda-checkout-for-woocommerce' ), wc_get_log_file_path( 'avarda_checkout' ) ), // phpcs:ignore
+		'description' => __( 'Log ' . $this->method_title . ' events in the WooCommerce status logs', 'avarda-checkout-for-woocommerce' ), // phpcs:ignore
 	),
 	'payment_gateway_icon'       => array(
 		'title'       => __( 'Payment gateway icon', 'avarda-checkout-for-woocommerce' ),
@@ -89,6 +89,12 @@ $settings = array(
 		'type'    => 'checkbox',
 		'label'   => __( 'Enable Two column checkout layout', 'avarda-checkout-for-woocommerce' ),
 		'default' => 'yes',
+	),
+	'integrated_shipping'        => array(
+		'title'   => __( 'Integrated Shipping', 'avarda-checkout-for-woocommerce' ),
+		'type'    => 'checkbox',
+		'label'   => __( 'Enable Avarda Checkout integrated shipping with for example Ingrid or nShift.', 'avarda-checkout-for-woocommerce' ),
+		'default' => 'no',
 	),
 	// SE.
 	'credentials_se'             => array(
@@ -153,6 +159,23 @@ $settings = array(
 		'desc_tip' => true,
 	),
 	'api_key_fi'                 => array(
+		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	// International.
+	'credentials_international'  => array(
+		'title' => 'API Credentials International',
+		'type'  => 'title',
+	),
+	'merchant_id_int'            => array(
+		'title'    => __( 'Client ID', 'avarda-checkout-for-woocommerce' ),
+		'type'     => 'text',
+		'default'  => '',
+		'desc_tip' => true,
+	),
+	'api_key_int'                => array(
 		'title'    => __( 'Client Secret', 'avarda-checkout-for-woocommerce' ),
 		'type'     => 'text',
 		'default'  => '',
