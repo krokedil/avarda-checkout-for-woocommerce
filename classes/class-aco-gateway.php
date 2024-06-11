@@ -129,8 +129,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// If we are on an admin page, just return true.
-		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		// If we are on an admin page, rest request, or doing cron, just return true.
+		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || defined( 'DOING_CRON' ) && DOING_CRON ) {
 			return true;
 		}
 
