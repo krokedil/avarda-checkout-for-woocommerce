@@ -7,7 +7,6 @@
  * @package Avarda_Checkout/Templates
  */
 
-
 do_action( 'aco_wc_before_checkout_form' );
 // If checkout registration is disabled and not logged in, the user cannot checkout.
 if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {

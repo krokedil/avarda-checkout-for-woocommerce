@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf04c34b54badfab80b82e7ab9705726",
+    "content-hash": "f716a200da2805033709b6305cd2600f",
     "packages": [
         {
             "name": "krokedil/shipping",
@@ -66,6 +66,53 @@
             "time": "2024-03-25T15:01:14+00:00"
         },
         {
+            "name": "krokedil/woocommerce",
+            "version": "dev-develop",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/krokedil/woocommerce.git",
+                "reference": "13d1bd757fc903a6c029a1a939d80927f6e44dcb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/13d1bd757fc903a6c029a1a939d80927f6e44dcb",
+                "reference": "13d1bd757fc903a6c029a1a939d80927f6e44dcb",
+                "shasum": ""
+            },
+            "require-dev": {
+                "10up/wp_mock": "^1.0",
+                "php": "~7.1 || ~8.0",
+                "php-stubs/woocommerce-stubs": "^7.2",
+                "php-stubs/wordpress-stubs": "^6.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Krokedil\\WooCommerce\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Krokedil\\WooCommerce\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "GPL-V2"
+            ],
+            "authors": [
+                {
+                    "name": "Krokedil AB",
+                    "email": "info@krokedil.se"
+                }
+            ],
+            "description": "A library package for Krokedils plugins that contains helper methods when working with WooCommerce.",
+            "support": {
+                "source": "https://github.com/krokedil/woocommerce/tree/develop",
+                "issues": "https://github.com/krokedil/woocommerce/issues"
+            },
+            "time": "2024-05-13T13:09:27+00:00"
+        },
+        {
             "name": "psr/container",
             "version": "dev-master",
             "source": {
@@ -124,7 +171,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "krokedil/shipping": 20
+        "krokedil/shipping": 20,
+        "krokedil/woocommerce": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

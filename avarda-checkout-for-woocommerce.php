@@ -22,7 +22,7 @@
  */
 
 use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
-use Automattic\WooCommerce\Internal\Admin\Events;
+use KrokedilAvardaDeps\Krokedil\WooCommerce\KrokedilWooCommerce;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -126,6 +126,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		protected static $instance;
 
 		/**
+		 * The WooCommerce package from Krokedil.
+		 *
+		 * @var KrokedilWooCommerce
+		 */
+		public $krokedil = null;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -204,6 +211,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 			$this->cart_page        = new ACO_Cart_Page();
+			$this->krokedil         = new KrokedilWooCommerce(
+				array(
+					'slug'         => 'aco',
+					'price_format' => 'major',
+				)
+			);
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
@@ -350,7 +363,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return string Setting link
 		 */
 		public function get_setting_link() {
-			Events::instance()->do_wc_admin_daily();
 			$section_slug = 'aco';
 			return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
 		}

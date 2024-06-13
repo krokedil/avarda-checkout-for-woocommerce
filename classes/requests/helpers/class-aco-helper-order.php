@@ -324,31 +324,21 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public static function process_gift_cards( $order_id, $order, $items ) {
+		foreach ( ACO_WC()->krokedil->compatibility()->giftcards() as $giftcards ) {
+			if ( false !== ( strpos( get_class( $giftcards ), 'WCGiftCards', true ) ) && ! function_exists( 'WC_GC' ) ) {
+				continue;
+			}
 
-		// Smart coupons.
-		if ( ! empty( $order->get_items( 'coupon' ) ) ) {
-			foreach ( $order->get_items( 'coupon' ) as $item_id => $item ) {
-
-				$code          = ( is_object( $item ) && is_callable( array( $item, 'get_name' ) ) ) ? $item->get_name() : trim( $item['name'] );
-				$coupon        = new WC_Coupon( $code );
-				$discount_type = $coupon->get_discount_type();
-				$discount      = ( is_object( $item ) && is_callable( array( $item, 'get_discount' ) ) ) ? $item->get_discount() : $item['discount_amount'];
-
-				if ( 'smart_coupon' === $discount_type && ! empty( $discount ) ) {
-					$coupon_amount = number_format( $discount * -1, 2, '.', '' );
-					$label         = apply_filters( 'aco_smart_coupon_gift_card_label', esc_html( __( 'Gift card:', 'avarda-checkout-for-woocommerce' ) . ' ' . $coupon->get_code() ), $coupon );
-					$giftcard_sku  = apply_filters( 'aco_smart_coupon_gift_card_sku', esc_html( $coupon->get_id() ), $coupon );
-					$gift_card     = array(
-						'notes'       => $giftcard_sku,
-						'description' => substr( $label, 0, 34 ),
-						'quantity'    => 1,
-						'amount'      => $coupon_amount,
-						'taxCode'     => 0,
-						'taxAmount'   => 0,
-					);
-
-					$items[] = $gift_card;
-				}
+			$retrieved_giftcards = $giftcards->get_order_giftcards( $order );
+			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
+				$items[] = array(
+					'note'        => $retrieved_giftcard->get_sku(),
+					'description' => $retrieved_giftcard->get_name(),
+					'quantity'    => $retrieved_giftcard->get_quantity(),
+					'amount'      => $retrieved_giftcard->get_total_amount(),
+					'taxCode'     => $retrieved_giftcard->get_tax_rate(),
+					'taxAmount'   => $retrieved_giftcard->get_total_tax_amount(),
+				);
 			}
 		}
 

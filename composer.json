@@ -10,12 +10,7 @@
     "require": {
         "php": ">=7.4"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@github.com:krokedil/shipping.git"
-        }
-    ],
+    "repositories": [],
     "license": "GPLv3",
     "authors": [
         {
