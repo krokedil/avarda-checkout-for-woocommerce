@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/woocommerce.git",
-                "reference": "13d1bd757fc903a6c029a1a939d80927f6e44dcb"
+                "reference": "7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/13d1bd757fc903a6c029a1a939d80927f6e44dcb",
-                "reference": "13d1bd757fc903a6c029a1a939d80927f6e44dcb",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c",
+                "reference": "7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c",
                 "shasum": ""
             },
             "require-dev": {
@@ -110,7 +110,7 @@
                 "source": "https://github.com/krokedil/woocommerce/tree/develop",
                 "issues": "https://github.com/krokedil/woocommerce/issues"
             },
-            "time": "2024-05-13T13:09:27+00:00"
+            "time": "2024-06-07T06:54:32+00:00"
         },
         {
             "name": "psr/container",
