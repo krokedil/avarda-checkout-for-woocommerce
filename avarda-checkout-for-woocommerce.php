@@ -23,7 +23,6 @@
 
 use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
 use KrokedilAvardaDeps\Krokedil\WooCommerce\KrokedilWooCommerce;
-use Automattic\WooCommerce\Internal\Admin\Events;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -364,7 +363,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 * @return string Setting link
 		 */
 		public function get_setting_link() {
-			Events::instance()->do_wc_admin_daily();
 			$section_slug = 'aco';
 			return admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $section_slug );
 		}
