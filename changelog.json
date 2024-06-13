@@ -237,6 +237,11 @@
      "1.14.0": {
           "description": "<ul><li>Feature - Adds support for international checkout using the international credentials setting fields. If a currency the customer is using does not have their own credentials in Avarda the international credentials will be used instead.</li><li>Feature - Adds filters for the credentials used in the requests. These are aco_credentials, aco_client_id and aco_client_secret.</li><li>Feature - Add support for integrated shipping methods in Avarda Checkout for nShift and Ingrid with Pickup point support.</li><li>Enhancement - Improved session handling with Avarda to reduce the amount of requests needed for each order.</li><li>Enhancement - Added log levels to different log messages to allow limiting of the messages logged.</li><li>Enhancement - Auth tokens created for the requests are now stored individually based on currency as transients to prevent new tokens being generated each time a new currency is used. Should reduce the amount of requests made on stores using multiple </li>currencies with Avarda.<li>Enhancement - Adds a validation for the cart total against the Avarda session before WooCommerce creates an order. This should prevent on-hold orders from being created when a mismatch is detected.</li><li>Fix - Fixes an issue with token validation when loading the Javascript that caused us to not properly handle orders that had been completed, and had their session expired in Avarda.</li><li>Fix - Fixed PHP 8.2 deprecation warnings.</li></ul>",
           "requires": "5.0.0",
-          "tested": "6.5.3"
+          "tested": "6.5.4"
+     },
+     "1.14.1": {
+          "description": "<ul><li>Fix - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.5.4"
      }
 }

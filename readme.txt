@@ -8,7 +8,7 @@ WC requires at least: 5.6.0
 WC tested up to: 9.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.14.0
+Stable tag: 1.14.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,7 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
-= 2024.06.03        - version 1.14.0 =
+= 2024.06.13        - version 1.14.1 =
+* Fix               - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.
+
+= 2024.06.11        - version 1.14.0 =
 * Feature           - Adds support for international checkout using the international credentials setting fields. If a currency the customer is using does not have their own credentials in Avarda the international credentials will be used instead.
 * Feature           - Adds filters for the credentials used in the requests. These are aco_credentials, aco_client_id and aco_client_secret.
 * Feature           - Add support for integrated shipping methods in Avarda Checkout for nShift and Ingrid with Pickup point support.
