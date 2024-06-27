@@ -45,9 +45,9 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	public $checkout_flow;
 
 	/**
-	 * Debug mode. 'yes' or 'no'.
+	 * Debug mode.
 	 *
-	 * @var string
+	 * @var boolean
 	 */
 	public $debug;
 
@@ -132,8 +132,8 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// If we are on a WordPress admin page, or doing a REST API request, return true.
-		if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		// If we are on an admin page, just return true.
+		if ( is_admin() ) {
 			return true;
 		}
 
@@ -407,9 +407,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function validate_totals( &$data, &$errors ) {
+	public function validate_totals( $data, $errors ) {
 		// Only if the chosen payment method is Avarda Checkout.
 		if ( $this->id !== $data['payment_method'] ) {
+			return;
+		}
+
+		// If we are using the checkout flow "redirect", we don't need to validate the totals.
+		if ( 'redirect' === $this->checkout_flow ) {
 			return;
 		}
 

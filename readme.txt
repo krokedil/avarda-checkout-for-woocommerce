@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.5.3
+Tested up to: 6.5.4
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 8.9.0
+WC tested up to: 9.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.13.1
+Stable tag: 1.14.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,20 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2024.06.13        - version 1.14.1 =
+* Fix               - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.
+
+= 2024.06.11        - version 1.14.0 =
+* Feature           - Adds support for international checkout using the international credentials setting fields. If a currency the customer is using does not have their own credentials in Avarda the international credentials will be used instead.
+* Feature           - Adds filters for the credentials used in the requests. These are aco_credentials, aco_client_id and aco_client_secret.
+* Feature           - Add support for integrated shipping methods in Avarda Checkout for nShift and Ingrid with Pickup point support.
+* Enhancement       - Improved session handling with Avarda to reduce the amount of requests needed for each order.
+* Enhancement       - Added log levels to different log messages to allow limiting of the messages logged.
+* Enhancement       - Auth tokens created for the requests are now stored individually based on currency as transients to prevent new tokens being generated each time a new currency is used. Should reduce the amount of requests made on stores using multiple currencies with Avarda.
+* Enhancement       - Adds a validation for the cart total against the Avarda session before WooCommerce creates an order. This should prevent on-hold orders from being created when a mismatch is detected.
+* Fix               - Fixes an issue with token validation when loading the Javascript that caused us to not properly handle orders that had been completed, and had their session expired in Avarda.
+* Fix               - Fixed PHP 8.2 deprecation warnings.
+
 = 2024.04.24        - version 1.13.1 =
 * Tweak             - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).
 
@@ -216,7 +230,7 @@ More information on how to get started can be found in the [plugin documentation
 = 2020.06.03        - version 0.1.5 =
 * Enhancement       - Support for Swedish, Finnish and English language in the checkout.
 
-= 2020.06.01        - version 0.1.4 = 
+= 2020.06.01        - version 0.1.4 =
 * Enhancement       - Prevent doing update request when payment has state Completed or TimedOut.
 
 = 2020.05.28        - version 0.1.3 =

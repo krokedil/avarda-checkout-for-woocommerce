@@ -22,12 +22,12 @@
      "0.1.4" : {
           "description" : "<ul><li>Enhancement - Prevent doing update request when payment has state Completed or TimedOut.</li></ul>",
           "requires" : "4.7.0",
-          "tested" : "5.4.1" 
+          "tested": "5.4.1"
      },
      "0.1.5" : {
           "description" : "<ul><li>Enhancement - Support for Swedish, Finnish and English language in the checkout.</li></ul>",
           "requires" : "4.7.0",
-          "tested" : "5.4.1" 
+          "tested": "5.4.1"
      },
      "0.1.6" : {
           "description" : "<ul><li>Tweak - Initialize payment request is using the Avarda legacy endpoint.</li><li>Enhancement - Trigger event when Avarda Checkout form is loaded on checkout page.</li></ul>",
@@ -233,6 +233,15 @@
           "description" : "<ul><li>Tweak - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).</li></ul>",
           "requires" : "5.0.0",
           "tested" : "6.5.2"
+     },
+     "1.14.0": {
+          "description": "<ul><li>Feature - Adds support for international checkout using the international credentials setting fields. If a currency the customer is using does not have their own credentials in Avarda the international credentials will be used instead.</li><li>Feature - Adds filters for the credentials used in the requests. These are aco_credentials, aco_client_id and aco_client_secret.</li><li>Feature - Add support for integrated shipping methods in Avarda Checkout for nShift and Ingrid with Pickup point support.</li><li>Enhancement - Improved session handling with Avarda to reduce the amount of requests needed for each order.</li><li>Enhancement - Added log levels to different log messages to allow limiting of the messages logged.</li><li>Enhancement - Auth tokens created for the requests are now stored individually based on currency as transients to prevent new tokens being generated each time a new currency is used. Should reduce the amount of requests made on stores using multiple </li>currencies with Avarda.<li>Enhancement - Adds a validation for the cart total against the Avarda session before WooCommerce creates an order. This should prevent on-hold orders from being created when a mismatch is detected.</li><li>Fix - Fixes an issue with token validation when loading the Javascript that caused us to not properly handle orders that had been completed, and had their session expired in Avarda.</li><li>Fix - Fixed PHP 8.2 deprecation warnings.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.5.4"
+     },
+     "1.14.1": {
+          "description": "<ul><li>Fix - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.5.4"
      }
-
 }

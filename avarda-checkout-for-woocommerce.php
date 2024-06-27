@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         1.13.1
+ * Version:         1.14.1
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 8.9.0
+ * WC tested up to: 9.0.0
  *
  * Copyright:       © 2020-2024 Krokedil.
  * License:         GNU General Public License v3.0
@@ -22,13 +22,14 @@
  */
 
 use KrokedilAvardaDeps\Krokedil\Shipping\PickupPoints;
+use KrokedilAvardaDeps\Krokedil\WooCommerce\KrokedilWooCommerce;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '1.13.1' );
+define( 'AVARDA_CHECKOUT_VERSION', '1.14.1' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://checkout-api.avarda.com' );
@@ -125,6 +126,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		protected static $instance;
 
 		/**
+		 * The WooCommerce package from Krokedil.
+		 *
+		 * @var KrokedilWooCommerce
+		 */
+		public $krokedil = null;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -203,6 +211,12 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 			$this->cart_page        = new ACO_Cart_Page();
+			$this->krokedil         = new KrokedilWooCommerce(
+				array(
+					'slug'         => 'aco',
+					'price_format' => 'major',
+				)
+			);
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
