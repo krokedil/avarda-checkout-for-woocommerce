@@ -1,4 +1,4 @@
-<?php // phpcs:ignore
+<?php
 /**
  * Gateway class file.
  *
@@ -8,6 +8,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+use KrokedilAvardaDeps\Krokedil\SettingsPage\SettingsPage;
+use KrokedilAvardaDeps\Krokedil\SettingsPage\Gateway;
 
 /**
  * Gateway class.
@@ -430,6 +433,23 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
 		}
 	}
+
+	/**
+	 * Add settings page extension for Avarda Checkout.
+	 *
+	 * @return void
+	 */
+	public function admin_options() {
+		$args         = include AVARDA_CHECKOUT_PATH . '/includes/aco-temp-settings-data.php';
+		$args['icon'] = AVARDA_CHECKOUT_URL . '/assets/images/avarda-icon.png';
+
+		$gateway_page = new Gateway( $this, $args );
+
+		$args['general_content'] = array( $gateway_page, 'output' );
+		$settings_page           = SettingsPage::get_instance();
+		$settings_page->register_page( $this->id, $args, $this );
+		$settings_page->output( $this->id );
+	}
 }
 
 /**
@@ -439,7 +459,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
  * @param  array $methods All registered payment methods.
  * @return array $methods All registered payment methods.
  */
-function add_aco_method( $methods ) {
+function add_aco_method( $methods ) { // phpcs:ignore
 	$methods[] = 'ACO_Gateway';
 	return $methods;
 }
