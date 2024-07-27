@@ -25,61 +25,63 @@ class ACO_Helper_Create_Refund_Data {
 			$reason = " ({$reason})";
 		}
 
-		if ( null !== $refund_order_id ) {
-			// Get refund order data.
-			$refund_order      = wc_get_order( $refund_order_id );
-			$refunded_items    = $refund_order->get_items();
-			$refunded_shipping = $refund_order->get_items( 'shipping' );
-			$refunded_fees     = $refund_order->get_items( 'fee' );
+		if ( empty( $refund_order_id ) ) {
+			return array();
+		}
 
-			// Set needed variables for refunds.
-			$item_refund = array();
+		// Get refund order data.
+		$refund_order      = wc_get_order( $refund_order_id );
+		$refunded_items    = $refund_order->get_items();
+		$refunded_shipping = $refund_order->get_items( 'shipping' );
+		$refunded_fees     = $refund_order->get_items( 'fee' );
 
-			// Item refund.
-			if ( $refunded_items ) {
-				foreach ( $refunded_items as $item ) {
-					$original_order = wc_get_order( $order_id );
-					foreach ( $original_order->get_items() as $original_order_item ) {
-						if ( $item->get_product_id() == $original_order_item->get_product_id() ) {
-							// Found product match, continue.
-							break;
-						}
+		// Set needed variables for refunds.
+		$item_refund = array();
+
+		// Item refund.
+		if ( $refunded_items ) {
+			foreach ( $refunded_items as $item ) {
+				$original_order = wc_get_order( $order_id );
+				foreach ( $original_order->get_items() as $original_order_item ) {
+					if ( $item->get_product_id() == $original_order_item->get_product_id() ) {
+						// Found product match, continue.
+						break;
 					}
-					array_push( $item_refund, self::get_refund_item_data( $item ) );
 				}
-			}
-
-			// Shipping item refund.
-			if ( $refunded_shipping ) {
-				foreach ( $refunded_shipping as $shipping ) {
-					$original_order = wc_get_order( $order_id );
-					foreach ( $original_order->get_items( 'shipping' ) as $original_order_shipping ) {
-						if ( $shipping->get_name() == $original_order_shipping->get_name() ) {
-							// Found product match, continue.
-							break;
-						}
-					}
-					array_push( $item_refund, self::get_refund_shipping_data( $shipping, $original_order_shipping ) );
-				}
-			}
-
-			// Fee item refund.
-			if ( $refunded_fees ) {
-				foreach ( $refunded_fees as $fee ) {
-					$original_order = wc_get_order( $order_id );
-					foreach ( $original_order->get_items( 'fee' ) as $original_order_fee ) {
-						if ( $fee->get_name() == $original_order_fee->get_name() ) {
-							// Found product match, continue.
-							break;
-						}
-					}
-					array_push( $item_refund, self::get_refund_fee_data( $fee ) );
-				}
+				array_push( $item_refund, self::get_refund_item_data( $item ) );
 			}
 		}
 
-			// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
-			return $item_refund;
+			// Shipping item refund.
+		if ( $refunded_shipping ) {
+			foreach ( $refunded_shipping as $shipping ) {
+				$original_order = wc_get_order( $order_id );
+				foreach ( $original_order->get_items( 'shipping' ) as $original_order_shipping ) {
+					if ( $shipping->get_name() == $original_order_shipping->get_name() ) {
+						// Found product match, continue.
+						break;
+					}
+				}
+				array_push( $item_refund, self::get_refund_shipping_data( $shipping, $original_order_shipping ) );
+			}
+		}
+
+			// Fee item refund.
+		if ( $refunded_fees ) {
+			foreach ( $refunded_fees as $fee ) {
+				$original_order = wc_get_order( $order_id );
+				foreach ( $original_order->get_items( 'fee' ) as $original_order_fee ) {
+					if ( $fee->get_name() == $original_order_fee->get_name() ) {
+						// Found product match, continue.
+						break;
+					}
+				}
+				array_push( $item_refund, self::get_refund_fee_data( $fee ) );
+			}
+		}
+
+		// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
+		return $item_refund;
 	}
 
 	/**
