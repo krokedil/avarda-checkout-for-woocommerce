@@ -21,7 +21,6 @@ class ACO_Helper_Create_Refund_Data {
 	 * @return array
 	 */
 	public static function create_refund_data( $order_id, $refund_order_id, $amount, $reason ) {
-		$data = array();
 		if ( '' === $reason ) {
 			$reason = '';
 		} else {
@@ -35,8 +34,7 @@ class ACO_Helper_Create_Refund_Data {
 			$refunded_fees     = $refund_order->get_items( 'fee' );
 
 			// Set needed variables for refunds.
-			$modified_item_prices = 0;
-			$item_refund          = array();
+			$item_refund = array();
 
 			// Item refund.
 			if ( $refunded_items ) {
@@ -83,7 +81,6 @@ class ACO_Helper_Create_Refund_Data {
 
 			// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
 			return $item_refund;
-
 	}
 
 	/**
