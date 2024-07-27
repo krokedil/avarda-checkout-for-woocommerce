@@ -80,7 +80,6 @@ class ACO_Helper_Create_Refund_Data {
 			}
 		}
 
-		// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
 		return $item_refund;
 	}
 
