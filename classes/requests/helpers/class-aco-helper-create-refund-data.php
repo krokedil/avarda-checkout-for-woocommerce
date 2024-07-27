@@ -21,11 +21,10 @@ class ACO_Helper_Create_Refund_Data {
 	 * @return array
 	 */
 	public static function create_refund_data( $order_id, $refund_order_id, $amount, $reason ) {
-		if ( '' === $reason ) {
-			$reason = '';
-		} else {
-			$reason = ' (' . $reason . ')';
+		if ( ! empty( $reason ) ) {
+			$reason = " ({$reason})";
 		}
+
 		if ( null !== $refund_order_id ) {
 			// Get refund order data.
 			$refund_order      = wc_get_order( $refund_order_id );
