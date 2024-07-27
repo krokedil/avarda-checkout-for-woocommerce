@@ -10,6 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @category Class
  * @author   Krokedil <info@krokedil.se>
  */
+
+
+use KrokedilAvardaDeps\Krokedil\WooCommerce\Order\Order;
 class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Creates refund data
@@ -30,10 +33,10 @@ class ACO_Helper_Create_Refund_Data {
 		}
 
 		// Get refund order data.
-		$refund_order      = wc_get_order( $refund_order_id );
-		$refunded_items    = $refund_order->get_items();
-		$refunded_shipping = $refund_order->get_items( 'shipping' );
-		$refunded_fees     = $refund_order->get_items( 'fee' );
+		$order             = wc_get_order( $refund_order_id );
+		$refunded_items    = $order->get_items();
+		$refunded_shipping = $order->get_items( 'shipping' );
+		$refunded_fees     = $order->get_items( 'fee' );
 
 		// Set needed variables for refunds.
 		$item_refund = array();
@@ -52,7 +55,7 @@ class ACO_Helper_Create_Refund_Data {
 			}
 		}
 
-			// Shipping item refund.
+		// Shipping item refund.
 		if ( $refunded_shipping ) {
 			foreach ( $refunded_shipping as $shipping ) {
 				$original_order = wc_get_order( $order_id );
@@ -66,7 +69,7 @@ class ACO_Helper_Create_Refund_Data {
 			}
 		}
 
-			// Fee item refund.
+		// Fee item refund.
 		if ( $refunded_fees ) {
 			foreach ( $refunded_fees as $fee ) {
 				$original_order = wc_get_order( $order_id );
@@ -78,6 +81,30 @@ class ACO_Helper_Create_Refund_Data {
 				}
 				array_push( $item_refund, self::get_refund_fee_data( $fee ) );
 			}
+		}
+
+		// Coupons are not available in the refunded order. They must be retrieved from the parent order.
+		$order_data = new Order(
+			wc_get_order( $order_id ),
+			array(
+				'slug'         => 'aco',
+				'price_format' => 'major',
+			)
+		);
+
+		foreach ( $order_data->get_line_coupons() as $item ) {
+			// Skip any that are not type discount or gift_card.
+			if ( ! in_array( $item->get_type(), array( 'discount', 'gift_card' ), true ) ) {
+				continue;
+			}
+
+			$item_refund[] = array(
+				'description' => $item->get_name(),
+				'notes'       => $item->get_sku(),
+				'amount'      => $item->get_total_amount(),
+				'taxCode'     => $item->get_tax_rate(),
+				'taxAmount'   => $item->get_total_tax_amount(),
+			);
 		}
 
 		return $item_refund;
