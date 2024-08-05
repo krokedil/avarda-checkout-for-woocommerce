@@ -208,17 +208,11 @@ class ACO_AJAX extends WC_AJAX {
 	public static function aco_iframe_shipping_option_change() {
 		check_ajax_referer( 'aco_iframe_shipping_option_change', 'nonce' );
 
-		add_filter(
-			'woocommerce_cart_shipping_packages',
-			'aco_clear_shipping_package_hashes'
-		);
+		if ( ! ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+			wp_send_json_success( array( 'fragments' => array() ) );
+		}
 
-		// Force shipping to be re-calculated.
-		WC()->cart->calculate_shipping();
-		remove_filter(
-			'woocommerce_cart_shipping_packages',
-			'aco_clear_shipping_package_hashes'
-		);
+		self::process_integrated_partner_shipping();
 
 		WC()->cart->calculate_totals();
 
@@ -234,6 +228,26 @@ class ACO_AJAX extends WC_AJAX {
 					'.woocommerce-checkout-review-order-table' => $order_review,
 				),
 			)
+		);
+	}
+
+	/**
+	 * Process integrated partner shipping.
+	 *
+	 * @return void
+	 */
+	private static function process_integrated_partner_shipping() {
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		// Force shipping to be re-calculated.
+		WC()->cart->calculate_shipping();
+
+		remove_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
 		);
 	}
 }
