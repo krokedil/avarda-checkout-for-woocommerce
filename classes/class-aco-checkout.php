@@ -26,12 +26,20 @@ class ACO_Checkout {
 	private $integrated_shipping;
 
 	/**
+	 * If integrated shipping with WooCommerce is enabled.
+	 *
+	 * @var bool
+	 */
+	private $integrated_shipping_wc;
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct() {
-		$settings                  = get_option( 'woocommerce_aco_settings' );
-		$this->checkout_flow       = $settings['checkout_flow'] ?? 'embedded';
-		$this->integrated_shipping = isset( $settings['integrated_shipping'] ) && 'yes' === $settings['integrated_shipping'] ? true : false;
+		$settings                     = get_option( 'woocommerce_aco_settings' );
+		$this->checkout_flow          = $settings['checkout_flow'] ?? 'embedded';
+		$this->integrated_shipping    = isset( $settings['integrated_shipping'] ) && 'yes' === $settings['integrated_shipping'] ? true : false;
+		$this->integrated_shipping_wc = isset( $settings['integrated_shipping_woocommerce'] ) && 'yes' === $settings['integrated_shipping_woocommerce'] ? true : false;
 
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 999999 );
 
@@ -49,6 +57,15 @@ class ACO_Checkout {
 	 */
 	public function is_integrated_shipping_enabled() {
 		return $this->integrated_shipping;
+	}
+
+	/**
+	 * Check if integrated shipping with WooCommerce is enabled.
+	 *
+	 * @return bool
+	 */
+	public function is_integrated_wc_shipping_enabled() {
+		return $this->integrated_shipping_wc;
 	}
 
 	/**
@@ -192,7 +209,7 @@ class ACO_Checkout {
 	 */
 	public function add_hidden_jwt_token_field( $fields ) {
 		$avarda_jwt_token = aco_get_jwt_token_from_session();
-
+		error_log( 'avarda_jwt_token: ' . $avarda_jwt_token );
 		$fields['billing']['aco_jwt_token'] = array(
 			'type'    => 'hidden',
 			'class'   => array( 'aco_jwt_token' ),
