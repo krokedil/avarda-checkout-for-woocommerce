@@ -83,6 +83,11 @@ class ACO_API {
 	public function request_update_payment( $aco_purchase_id, $order_id = null, $force = false ) {
 		$request  = new ACO_Request_Update_Payment();
 		$response = $request->request( $aco_purchase_id, $order_id, $force );
+
+		if ( empty( $order_id ) && ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+			$this->request_update_extra_identifiers( $aco_purchase_id );
+		}
+
 		return $this->check_for_api_error( $response );
 	}
 
@@ -160,7 +165,20 @@ class ACO_API {
 	 */
 	public function create_recurring_order( $order_id, $recurring_token = null, $purchase_id = null ) {
 		return ( new ACO_Request_Auth_Recurring_Payment( $order_id, $recurring_token, $purchase_id, false ) )->request();
+	}
 
+	/**
+	 * Update extra identifiers to an Avarda Checkout payment.
+	 *
+	 * @param string $aco_purchase_id Avarda purchase id.
+	 *
+	 * @return mixed
+	 */
+	public function request_update_extra_identifiers( $aco_purchase_id ) {
+		$request  = new ACO_Request_Update_Extra_Identifiers();
+		$response = $request->request( $aco_purchase_id );
+
+		return $this->check_for_api_error( $response );
 	}
 
 	/**
