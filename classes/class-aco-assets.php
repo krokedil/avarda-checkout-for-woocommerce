@@ -88,6 +88,14 @@ class ACO_Assets {
 				true
 			);
 
+			wp_register_script(
+				'aco_shipping_widget',
+				AVARDA_CHECKOUT_URL . '/assets/js/aco_shipping_widget.js',
+				array( 'jquery' ),
+				AVARDA_CHECKOUT_VERSION,
+				true
+			);
+
 			// Checkout style.
 			wp_register_style(
 				'aco',
@@ -197,6 +205,7 @@ class ACO_Assets {
 			$params
 		);
 		wp_enqueue_script( 'aco_wc' );
+		wp_enqueue_script( 'aco_shipping_widget' );
 	}
 
 	/**
