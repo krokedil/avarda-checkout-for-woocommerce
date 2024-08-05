@@ -133,6 +133,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public $krokedil = null;
 
 		/**
+		 * Rest api registry instance.
+		 *
+		 * @var ACO_API_Registry
+		 */
+		protected $rest_api;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -217,6 +224,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 					'price_format' => 'major',
 				)
 			);
+			$this->rest_api         = new ACO_API_Registry();
+			$this->rest_api->init();
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
@@ -323,12 +332,16 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-initialize-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/get/class-aco-request-get-payment.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-extra-identifiers.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-order-reference.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-cancel-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-return-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php'; // For aco refund.
+
+			// REST API.
+			include_once AVARDA_CHECKOUT_PATH . '/classes/api/class-aco-api-registry.php';
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
