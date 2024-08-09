@@ -75,14 +75,6 @@ jQuery(function($) {
     documentReady: function () {
       aco_wc.moveExtraCheckoutFields();
       aco_wc.ACOCheckoutForm();
-
-      // Add two column class to checkout if Avarda setting in Woo is set.
-      if (true === aco_wc_params.aco_checkout_layout.two_column) {
-        $("form.checkout.woocommerce-checkout").addClass(
-          "aco-two-column-checkout-left"
-        );
-        $("#aco-iframe").addClass("aco-two-column-checkout-right");
-      }
     },
 
     ACOCheckoutForm: function () {

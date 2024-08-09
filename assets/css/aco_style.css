@@ -1,5 +1,5 @@
 @media only screen and (min-width : 769px) {
-    .aco-two-column-checkout-left {
+    .aco-two-column-checkout-left form.checkout.woocommerce-checkout {
         float: left;
         width: 40%;
         padding-right: 20px;
@@ -7,7 +7,7 @@
         box-sizing: border-box;
     }
 
-    .aco-two-column-checkout-right {
+    .aco-two-column-checkout-left #aco-iframe {
         float: right;
         width: 60%;
         padding-left: 20px;
