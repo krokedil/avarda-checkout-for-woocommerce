@@ -209,7 +209,7 @@ class ACO_Checkout {
 	 */
 	public function add_hidden_jwt_token_field( $fields ) {
 		$avarda_jwt_token = aco_get_jwt_token_from_session();
-		error_log( 'avarda_jwt_token: ' . $avarda_jwt_token );
+
 		$fields['billing']['aco_jwt_token'] = array(
 			'type'    => 'hidden',
 			'class'   => array( 'aco_jwt_token' ),
