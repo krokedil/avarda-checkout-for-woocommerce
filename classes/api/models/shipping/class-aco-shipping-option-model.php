@@ -72,6 +72,50 @@ class ACO_Shipping_Option_Model {
 		$option->price           = floatval( $shipping_rate->get_cost() ) + array_sum( $shipping_rate->get_taxes() );
 		$option->currency        = get_woocommerce_currency();
 
+		// Pickup points.
+		self::set_pickup_points( $option, $shipping_rate );
+
 		return $option;
+	}
+
+	/**
+	 * Set pickup points for the shipping method.
+	 *
+	 * @param object           $option ACO_Shipping_Option_Model.
+	 * @param WC_Shipping_Rate $shipping_rate The shipping method rate from WooCommerce.
+	 */
+	private static function set_pickup_points( &$option, $shipping_rate ) {
+		// Get any pickup points for the shipping method.
+		$pickup_points         = ACO_WC()->pickup_points->get_pickup_points_from_rate( $shipping_rate ) ?? array();
+		$selected_pickup_point = ACO_WC()->pickup_points->get_selected_pickup_point_from_rate( $shipping_rate );
+		// Loop through the pickup points and set the pickup point data for the Qliro api.
+		$secondary_options = array();
+		foreach ( $pickup_points as $pickup_point ) {
+			// If the id is empty, skip.
+			if ( empty( $pickup_point->get_id() ) ) {
+				continue;
+			}
+
+			$secondary_options[] = array(
+				'MerchantReference'   => $pickup_point->get_id(),
+				'SelectedPickupPoint' => $selected_pickup_point->id === $pickup_point->get_id() ? true : false,
+				'DisplayName'         => $pickup_point->get_name(),
+				'Descriptions'        => array( // Can max have 3 lines.
+					trim( mb_substr( $pickup_point->get_address()->get_street(), 0, 100 ) ),
+					trim( mb_substr( $pickup_point->get_address()->get_postcode() . ' ' . $pickup_point->get_address()->get_city(), 0, 100 ) ),
+					trim( mb_substr( $pickup_point->get_description(), 0, 100 ) ),
+				),
+				'Coordinates'         => array(
+					'Lat' => $pickup_point->get_coordinates()->get_latitude(),
+					'Lng' => $pickup_point->get_coordinates()->get_longitude(),
+				),
+				'DeliveryDateInfo'    => array(
+					'DateStart' => $pickup_point->get_eta()->get_utc(),
+				),
+			);
+		}
+		if ( ! empty( $secondary_options ) ) {
+			$option->pickupPoints = $secondary_options;
+		}
 	}
 }
