@@ -67,7 +67,8 @@ class ACO_Shipping_Option_Model {
 
 		$option->shippingMethod  = $shipping_rate->get_id();
 		$option->deliveryType    = 'mailbox';
-		$option->carrier         = 'PostNord';
+		$option->carrier         = self::get_shipping_method_carrier( $shipping_rate );
+		$option->iconUrl         = self::get_shipping_method_icon( $option->carrier );
 		$option->shippingProduct = $shipping_rate->get_label();
 		$option->price           = floatval( $shipping_rate->get_cost() ) + array_sum( $shipping_rate->get_taxes() );
 		$option->currency        = get_woocommerce_currency();
@@ -117,5 +118,66 @@ class ACO_Shipping_Option_Model {
 		if ( ! empty( $secondary_options ) ) {
 			$option->pickupPoints = $secondary_options;
 		}
+	}
+
+	/**
+	 * Get the icon for the shipping method.
+	 *
+	 * @param string $carrier The carrier for the shipping method.
+	 *
+	 * @return string
+	 */
+	private static function get_shipping_method_icon( $carrier ) {
+		switch ( strtolower( $carrier ) ) {
+			case 'postnord':
+			case 'plab':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-postnord.svg';
+			case 'dhl':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-dhl.svg';
+			case 'budbee':
+				return '';
+			case 'instabox':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-instabox.svg';
+			case 'schenker':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-db-schenker.svg';
+			case 'bring':
+				return '';
+			case 'dhl Freight':
+				return '';
+			case 'ups':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-ups.svg';
+			case 'fedex':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-fedex.svg';
+			case 'local_pickup':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-fedex.svg';
+			case 'deliverycheckout':
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/package.webp';
+			default:
+				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/package.webp';
+		}
+	}
+
+	/**
+	 * Get the carrier for the shipping method.
+	 *
+	 * @param @param WC_Shipping_Rate $shipping_rate The shipping rate.
+	 *
+	 * @return string
+	 */
+	private static function get_shipping_method_carrier( $shipping_rate ) {
+		$carrier = apply_filters( 'aco_shipping_method_carrier', '', $shipping_rate );
+
+		if ( ! empty( $carrier ) ) {
+			return $carrier;
+		}
+
+		if ( $shipping_rate->get_method_id() === 'local_pickup' ) {
+			return 'local_pickup';
+		}
+
+		$meta_data = $shipping_rate->get_meta_data();
+		$carrier   = $meta_data['carrier'] ?? $meta_data['udc_carrier_id'] ?? '';
+
+		return $carrier;
 	}
 }
