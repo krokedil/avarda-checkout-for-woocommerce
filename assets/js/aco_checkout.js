@@ -228,12 +228,16 @@ jQuery(function($) {
 
     setCustomerDeliveryData: function (data) {
       console.log(data);
-      $("#billing_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#billing_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#billing_country").val(
         data.customer_country ? data.customer_country : ""
       );
 
-      $("#shipping_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#shipping_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#shipping_country").val(
         data.customer_country ? data.customer_country : ""
       );
@@ -292,7 +296,7 @@ jQuery(function($) {
         ? customerAddress.billing.city
         : ".";
       var billing_postcode = customerAddress.billing.zip
-        ? customerAddress.billing.zip
+        ? customerAddress.billing.zip.replace(/\s/g, "")
         : "";
       var billing_phone = customerAddress.billing.phone
         ? customerAddress.billing.phone
@@ -350,7 +354,7 @@ jQuery(function($) {
       );
       $("#shipping_postcode").val(
         customerAddress.shipping.zip
-          ? customerAddress.shipping.zip
+          ? customerAddress.shipping.zip.replace(/\s/g, "")
           : billing_postcode
       );
     },
