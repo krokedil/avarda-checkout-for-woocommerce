@@ -161,12 +161,13 @@ class ACO_Assets {
 			$redirect_url = $order->get_checkout_payment_url( true );
 		}
 
-		$standard_woo_checkout_fields = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address', 'calc_shipping_country', 'calc_shipping_state', 'calc_shipping_postcode' ) );
-		$avarda_settings              = get_option( 'woocommerce_aco_settings' );
-		$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
-		$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
-		$styles                       = new stdClass(); // empty object as default value.
-		$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
+		$standard_woo_checkout_fields    = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address', 'calc_shipping_country', 'calc_shipping_state', 'calc_shipping_postcode' ) );
+		$avarda_settings                 = get_option( 'woocommerce_aco_settings' );
+		$aco_test_mode                   = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
+		$aco_two_column_checkout         = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+		$styles                          = new stdClass(); // empty object as default value.
+		$aco_custom_css_styles           = apply_filters( 'aco_custom_css_styles', $styles );
+		$integrated_shipping_woocommerce = isset( $avarda_settings['integrated_shipping_woocommerce'] ) && 'yes' === $avarda_settings['integrated_shipping_woocommerce'] ? 'yes' : 'no';
 
 		$params = array(
 			'ajax_url'                             => admin_url( 'admin-ajax.php' ),
@@ -205,6 +206,15 @@ class ACO_Assets {
 			$params
 		);
 		wp_enqueue_script( 'aco_wc' );
+
+		$shipping_widget = array(
+			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce,
+		);
+		wp_localize_script(
+			'aco_shipping_widget',
+			'aco_wc_shipping_params',
+			$shipping_widget
+		);
 		wp_enqueue_script( 'aco_shipping_widget' );
 	}
 

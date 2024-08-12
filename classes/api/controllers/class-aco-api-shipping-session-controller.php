@@ -76,14 +76,19 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @return array
 	 */
 	private function get_customer_session( $customer_id ) {
-		$session = WC()->session->get_session( $customer_id );
+		if ( null !== WC()->session && method_exists( WC()->session, 'get_session' ) ) {
+			$session = WC()->session->get_session( $customer_id );
+		} else {
+			WC()->session = new WC_Session_Handler();
+			$session      = WC()->session->get_session( $customer_id );
+		}
 
 		$shipping                = unserialize( $session['shipping_for_package_0'] ?? '' ) ?? array();
 		$chosen_shipping_methods = unserialize( $session['chosen_shipping_methods'] ?? '' ) ?? array();
 
 		return array(
 			'shipping'               => $shipping,
-			'chosen_shipping_method' => reset( $chosen_shipping_methods ),
+			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
 		);
 	}
 
