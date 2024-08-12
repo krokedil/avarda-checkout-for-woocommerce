@@ -25,6 +25,11 @@ jQuery(function($) {
         $element.on( 'change', 'select[name="aco_pickup_point"]', function( event) {
             //aco_shipping_widget.onChangedPickupPoint(event);
             aco_shipping_widget.syncWithKrokedilShippingSelect(event);
+
+            // If we have a listener for the shipping_option_changed event, trigger it.
+            if (aco_shipping_widget.listeners["shipping_option_changed"] !== undefined) {
+               aco_shipping_widget.listeners["shipping_option_changed"].listener()
+            }
         });
 
         // If we have a listener for the shipping_option_changed event, trigger it.
@@ -142,7 +147,7 @@ jQuery(function($) {
             .radio-control:not(:last-child) .radio-box {
                 border-bottom: 1px solid #ccc;
             }
-            
+
             .left-column {
                 display: flex;
                 align-items: center;
@@ -212,8 +217,8 @@ jQuery(function($) {
                             </div>
                             <div class="main-column">${name}</div>
                             <div class="right-column"><span class="price">${price} ${currency}</span>${iconHtml}</div>
-                            
-                            
+
+
                         </div>
                         <div class="details">
                             ${aco_shipping_widget.getPickupPointsHtml(pickupPoints, method)}
@@ -228,7 +233,7 @@ jQuery(function($) {
       getPickupPointsHtml: (pickupPoints, method) => {
         let html = "";
         if(pickupPoints.length > 0) {
-            
+
             html += `<select name="aco_pickup_point" data-rate-id=${method} id="aco_pickup_point">`;
             pickupPoints.forEach((pickupPoint) => {
                 let SelectedStatus = pickupPoint.SelectedPickupPoint === true ? "selected" : "";
@@ -283,8 +288,8 @@ jQuery(function($) {
             },
         });
 
-        
-    },  
+
+    },
     syncWithKrokedilShippingSelect: (event) => {
         const select = $(event.target);
         const value = select.val();
@@ -349,7 +354,7 @@ jQuery(function($) {
                 },
             });
         },
-    
+
         /**
          * Unblocks the element with the given selector.
          *
@@ -358,7 +363,7 @@ jQuery(function($) {
         unblockElement: (selector) => {
             $(selector).unblock();
         },
-    
+
     };
 
     // Make the aco_shipping_widget object available globally under avardaShipping.
