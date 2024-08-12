@@ -56,6 +56,20 @@ class ACO_Shipping_Option_Model {
 	public $currency;
 
 	/**
+	 * The icon url for the shipping option.
+	 *
+	 * @var string
+	 */
+	public $iconUrl;
+
+	/**
+	 * The pickup points for the shipping option.
+	 *
+	 * @var array
+	 */
+	public $pickupPoints;
+
+	/**
 	 * Instantiate a shipping option model from a shipping rate.
 	 *
 	 * @param WC_Shipping_Rate $shipping_rate The shipping rate.
@@ -160,7 +174,7 @@ class ACO_Shipping_Option_Model {
 	/**
 	 * Get the carrier for the shipping method.
 	 *
-	 * @param @param WC_Shipping_Rate $shipping_rate The shipping rate.
+	 * @param WC_Shipping_Rate $shipping_rate The shipping rate.
 	 *
 	 * @return string
 	 */
