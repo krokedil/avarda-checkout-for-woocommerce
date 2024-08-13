@@ -86,7 +86,7 @@ jQuery(function($) {
         },
 
         getOptionsHtml: () => {
-            const {options, selectedOption} = aco_shipping_widget.modules;
+            const {options, selected_option} = aco_shipping_widget.modules;
             let html = `<style>
                 .radio-group {
                     display: flex;
@@ -239,19 +239,19 @@ jQuery(function($) {
             <div class="radio-group">
             `;
             options.forEach((option) => {
-            html += aco_shipping_widget.getOptionHtml(option, selectedOption);
+            html += aco_shipping_widget.getOptionHtml(option, selected_option);
             });
             html += "</div>";
 
             return html;
         },
 
-        getOptionHtml: (option, selectedOption) => {
+        getOptionHtml: (option, selected_option) => {
             const price = parseFloat(option.price).toFixed(2);
             const method = option.shippingMethod;
             const formattedMethod = option.shippingMethod.replace(/:/g, "");
             const name = option.shippingProduct;
-            const selected = selectedOption === method ? "checked" : "";
+            const selected = selected_option === method ? "checked" : "";
             const pickupPoints = option.pickupPoints ? option.pickupPoints : [];
             const iconUrl = option.iconUrl ? option.iconUrl : '';
             var iconHtml = '';
