@@ -40,8 +40,13 @@ jQuery(function($) {
             $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
             $('body').on( 'updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice );
 
-            // Trigger the loaded event.
-            aco_shipping_widget.dispatchEvent("loaded");
+            // Dispatch the loaded event once as soon as it is registered by avarda.
+            const loadedTimeout = setTimeout(() => {
+                if (aco_shipping_widget.listeners["loaded"]) {
+                    aco_shipping_widget.dispatchEvent("loaded");
+                    clearTimeout(loadedTimeout);
+                }
+            }, 0);
         },
 
         suspend: () => {
