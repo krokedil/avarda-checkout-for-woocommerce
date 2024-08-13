@@ -71,11 +71,22 @@ class ACO_API_Registry {
 
 	/**
 	 * Get the auth token for the API.
-	 * Uses the WordPress wp_hash function to generate a hash.
 	 *
 	 * @return string
 	 */
 	public static function get_auth_token() {
-		return apply_filters( 'aco_rest_api_token', wp_hash( 'avarda-checkout-for-woocommerce' ) );
+		$settings = get_option( 'woocommerce_avarda_checkout_settings', array( 'shipping_broker_api_key' => null ) );
+
+		return apply_filters( 'aco_rest_api_token', $settings['shipping_broker_api_key'] );
+	}
+
+	/**
+	 * Get a suggested auth token for the API.
+	 * Uses the WordPress wp_hash function to generate a hash with a specific seed.
+	 *
+	 * @return string
+	 */
+	public static function get_token_suggestion() {
+		return apply_filters( 'aco_rest_api_suggested_token', wp_hash( 'avarda-checkout-for-woocommerce-suggested' ) );
 	}
 }

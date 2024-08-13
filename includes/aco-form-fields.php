@@ -5,7 +5,8 @@
  * @package Avarda_Checkout/Includes
  */
 
-$shipping_auth_token = ACO_API_Registry::get_auth_token();
+$token_suggestion = ACO_API_Registry::get_token_suggestion();
+$token_suggestion = "<code>{$token_suggestion}</code>";
 
 $settings = array(
 	'enabled'                         => array(
@@ -107,9 +108,19 @@ $settings = array(
 		'title'       => __( 'Integrated WooCommerce Shipping', 'avarda-checkout-for-woocommerce' ),
 		'type'        => 'checkbox',
 		'label'       => __( 'Enable if you want to use the WooCommerce shipping methods inside the Avarda checkout.', 'avarda-checkout-for-woocommerce' ),
-		// translators: %s: auth token.
-		'description' => sprintf( __( 'You need to configure this with Avarda. The secret for your store is: "%s"', 'avarda-checkout-for-woocommerce' ), $shipping_auth_token ),
+		'description' => __( 'You need to configure this with Avarda.', 'avarda-checkout-for-woocommerce' ),
 		'default'     => 'no',
+	),
+	'shipping_broker_api_key'         => array(
+		'title'             => __( 'Shipping Broker API Key', 'avarda-checkout-for-woocommerce' ),
+		'type'              => 'password',
+		// translators: %s: token suggestion.
+		'description'       => sprintf( __( 'Enter the API Key you wish to use for the WooCommerce shipping integration. This will be used by Avarda to communicate with your store to handle the shipping session. You can use this key that has been generated from your store: %s', 'avarda-checkout-for-woocommerce' ), $token_suggestion ),
+		'default'           => '',
+		'desc_tip'          => false,
+		'custom_attributes' => array(
+			'autocomplete' => 'off',
+		),
 	),
 	// SE.
 	'credentials_se'                  => array(
