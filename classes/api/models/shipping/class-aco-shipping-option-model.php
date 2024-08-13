@@ -151,7 +151,7 @@ class ACO_Shipping_Option_Model {
 			case 'dhl Freight': // Maybe use a separate icon for DHL Freight in the future.
 				return "$base_url/icon-dhl.svg";
 			case 'budbee':
-				return '';
+				return "$base_url/icon-budbee.svg";
 			case 'instabox':
 				return "$base_url/icon-instabox.svg";
 			case 'schenker':
@@ -163,11 +163,11 @@ class ACO_Shipping_Option_Model {
 			case 'fedex':
 				return "$base_url/icon-fedex.svg";
 			case 'local_pickup':
-				return "$base_url/icon-fedex.svg";
+				return "$base_url/icon-store.svg";
 			case 'deliverycheckout':
-				return "$base_url/package.webp";
+				return "$base_url/icon-neutral.svg";
 			default:
-				return "$base_url/package.webp";
+				return "$base_url/icon-neutral.svg";
 		}
 	}
 
