@@ -142,32 +142,32 @@ class ACO_Shipping_Option_Model {
 	 * @return string
 	 */
 	private static function get_shipping_method_icon( $carrier ) {
+		$base_url = AVARDA_CHECKOUT_URL . '/assets/images/shipping';
 		switch ( strtolower( $carrier ) ) {
 			case 'postnord':
 			case 'plab':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-postnord.svg';
+				return "$base_url/icon-postnord.svg";
 			case 'dhl':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-dhl.svg';
+			case 'dhl Freight': // Maybe use a separate icon for DHL Freight in the future.
+				return "$base_url/icon-dhl.svg";
 			case 'budbee':
 				return '';
 			case 'instabox':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-instabox.svg';
+				return "$base_url/icon-instabox.svg";
 			case 'schenker':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-db-schenker.svg';
+				return "$base_url/icon-db-schenker.svg";
 			case 'bring':
-				return '';
-			case 'dhl Freight':
-				return '';
+				return "$base_url/icon-bring.svg";
 			case 'ups':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-ups.svg';
+				return "$base_url/icon-ups.svg";
 			case 'fedex':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-fedex.svg';
+				return "$base_url/icon-fedex.svg";
 			case 'local_pickup':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-fedex.svg';
+				return "$base_url/icon-fedex.svg";
 			case 'deliverycheckout':
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/package.webp';
+				return "$base_url/package.webp";
 			default:
-				return AVARDA_CHECKOUT_URL . '/assets/images/shipping/package.webp';
+				return "$base_url/package.webp";
 		}
 	}
 
