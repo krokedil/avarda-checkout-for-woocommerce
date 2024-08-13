@@ -72,10 +72,31 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * Get the customer session from the customer unique id.
 	 *
 	 * @param string $customer_id The customer unique id.
+	 * @param array  $body The body from the Avarda request.
 	 *
 	 * @return array
 	 */
-	private function get_customer_session( $customer_id ) {
+	private function get_customer_session( $customer_id, $body ) {
+		$this->setup_customer_session( $customer_id, $body );
+
+		$shipping                = WC()->session->get( 'shipping_for_package_0' ) ?? array();
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
+
+		return array(
+			'shipping'               => $shipping,
+			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
+		);
+	}
+
+	/**
+	 * Setup the session data for the customer.
+	 *
+	 * @param string $customer_id The customer unique id.
+	 * @param array  $body The body from the Avarda request.
+	 *
+	 * @return void
+	 */
+	private function setup_customer_session( $customer_id, $body ) {
 		if ( null !== WC()->session && method_exists( WC()->session, 'get_session' ) ) {
 			$session = WC()->session->get_session( $customer_id );
 		} else {
@@ -83,13 +104,33 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$session      = WC()->session->get_session( $customer_id );
 		}
 
-		$shipping                = unserialize( $session['shipping_for_package_0'] ?? '' ) ?? array();
-		$chosen_shipping_methods = unserialize( $session['chosen_shipping_methods'] ?? '' ) ?? array();
+		// Loop the session and set it as the current user session data.
+		foreach ( $session as $key => $value ) {
+			$value = maybe_unserialize( $value );
 
-		return array(
-			'shipping'               => $shipping,
-			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
-		);
+			// If its the customer session, set the address data from the body.
+			if ( 'customer' === $key ) {
+				if ( isset( $body['deliveryAddress']['zip'] ) ) {
+					$value['postcode']          = $body['deliveryAddress']['zip'];
+					$value['shipping_postcode'] = $body['deliveryAddress']['zip'];
+				}
+
+				if ( isset( $body['deliveryAddress']['country'] ) ) {
+					$value['country']          = $body['deliveryAddress']['country'];
+					$value['shipping_country'] = $body['deliveryAddress']['country'];
+				}
+			}
+
+			WC()->session->set( $key, $value );
+		}
+
+		// Set the customer from the customer session data.
+		WC()->customer = new WC_Customer( $session['customer_id'] ?? 0, true );
+
+		// Calculate shipping for the session.
+		WC()->cart = new WC_Cart();
+		WC()->cart->get_cart_from_session();
+		WC()->cart->calculate_shipping();
 	}
 
 	/**
@@ -112,7 +153,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			return null;
 		}
 
-		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'] );
+		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'], $body );
 		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id );
 
 		return $session;
