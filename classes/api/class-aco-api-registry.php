@@ -75,7 +75,7 @@ class ACO_API_Registry {
 	 * @return string
 	 */
 	public static function get_auth_token() {
-		$settings = get_option( 'woocommerce_avarda_checkout_settings', array( 'shipping_broker_api_key' => null ) );
+		$settings = get_option( 'woocommerce_aco_settings', array( 'shipping_broker_api_key' => null ) );
 
 		return apply_filters( 'aco_rest_api_token', $settings['shipping_broker_api_key'] );
 	}
