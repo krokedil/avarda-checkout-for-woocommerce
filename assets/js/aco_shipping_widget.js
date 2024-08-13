@@ -25,11 +25,6 @@ jQuery(function($) {
             }
             );
 
-            // If we have a listener for the shipping_option_changed event, trigger it.
-            $('body').on( 'updated_checkout', function() {
-                aco_shipping_widget.dispatchEvent("shipping_option_changed");
-            });
-
             // Register the click event for the pickup point select box.
             $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
             $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
@@ -81,7 +76,17 @@ jQuery(function($) {
         },
 
         sessionHasUpdated: () => {
-            // Reload the window to ensure the checkout is loaded with new shipping options.
+            const $form = $('form.checkout');
+            // Reload the window to ensure the checkout is loaded with new shipping options. And stop any ajax calls from running while the checkout is reloaded.
+            $form.block({
+                message: null,
+                overlayCSS: {
+                    background: "#fff",
+                    opacity: 0.6,
+                },
+            });
+            $form.addClass("processing"); // Add processing class to form to prevent the form from submitting or updating.
+
             window.location.reload();
         },
 
@@ -361,6 +366,7 @@ jQuery(function($) {
 
             // Set the selected pickup point in WooCommerce by selecting the option in the form.
             aco_shipping_widget.syncWithKrokedilShippingSelect(merchantReference);
+            aco_shipping_widget.maybeSyncWithWebshipper(merchantReference);
             aco_shipping_widget.dispatchEvent("shipping_option_changed");
 
             // Copy the selected pickup point to the header.
@@ -390,6 +396,23 @@ jQuery(function($) {
 
             aco_shipping_widget.unblockElement(".woocommerce-checkout-review-order-table");
             aco_shipping_widget.unblockElement("#aco-iframe");
+        },
+
+        maybeSyncWithWebshipper: (value) => {
+            const $select = $('select[name="ws_drop_point_blob"]');
+            if ($select.length === 0) {
+                return;
+            }
+
+            // Set the option that contains the value in the option value.
+            const $option = $select.find('option').filter(function() {
+                return this.value.includes(value);
+            });
+
+            // If we have an option, set the select box to the value of the option.
+            if ($option.length > 0) {
+                $select.val($option.val()).trigger("change");
+            }
         },
 
         /**

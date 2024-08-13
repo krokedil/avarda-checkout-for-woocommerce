@@ -26,3 +26,10 @@
     top: -9999px;
     left: -9999px;
 }
+
+/* Hide the Webshipper pickup point in the order review if displayed in Avardas checkout */
+.aco-integrated-woo-shipping-display tr:has( td p#ws_drop_point_blob_field ) {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}

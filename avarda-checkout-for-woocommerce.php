@@ -140,6 +140,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		protected $rest_api;
 
 		/**
+		 * Webshipper compatibility class instance.
+		 *
+		 * @var ACO_Compatibility_Webshipper
+		 */
+		protected $webshipper;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -204,9 +211,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Delete transient when aco settings is saved.
 			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'delete_all_transients' ) );
 
-			// Register the shipping method with WooCommerce.
-			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
-
 			// Set class variables.
 			$this->checkout         = new ACO_Checkout();
 			$this->pickup_points    = new PickupPoints();
@@ -218,6 +222,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->customer         = new ACO_Helper_Customer();
 			$this->order_management = new ACO_Order_Management();
 			$this->cart_page        = new ACO_Cart_Page();
+			$this->webshipper       = new ACO_Compatibility_Webshipper();
 			$this->krokedil         = new KrokedilWooCommerce(
 				array(
 					'slug'         => 'aco',
@@ -325,6 +330,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			// Compatibility classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-wc-carrier-agents.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-webshipper.php';
 
 			// Requests.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
