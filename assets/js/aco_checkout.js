@@ -443,7 +443,7 @@ jQuery(function($) {
 				}
 
 				// Check if this is a standard field.
-				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
+				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) && name !== 'ws_drop_point_blob' ) {
 
 					// This is not a standard Woo field, move to our div.
 					if ( 0 < $( 'p#' + name + '_field' ).length ) {
