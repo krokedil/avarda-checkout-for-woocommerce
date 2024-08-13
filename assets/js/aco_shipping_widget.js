@@ -2,16 +2,17 @@ jQuery(function($) {
     const aco_shipping_widget = {
         listeners: {},
         element : null,
+        modules: null,
 
         init: (initObject) => {
             const $element = $(initObject.element);
             aco_shipping_widget.element = $element;
 
             // Json decode the modules.
-            const modules = JSON.parse(initObject.config.modules);
+            aco_shipping_widget.modules = JSON.parse(initObject.config.modules);
 
             // Loop the modules options and create the options HTML.
-            const optionsHtml = aco_shipping_widget.getOptionsHtml(modules.options, modules.selected_option);
+            const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
             // Append the options HTML to the element.
             $element.append(optionsHtml);
@@ -84,7 +85,8 @@ jQuery(function($) {
             window.location.reload();
         },
 
-        getOptionsHtml: (options, selectedOption) => {
+        getOptionsHtml: () => {
+            const {options, selectedOption} = aco_shipping_widget.modules;
             let html = `<style>
                 .radio-group {
                     display: flex;
@@ -183,7 +185,6 @@ jQuery(function($) {
                     border: 1px solid #ccc;
                     border-radius: 12px;
                     margin-top: 10px;
-                    margin-left: 34px;
                     overflow: hidden;
                 }
                 .pickup-point-select-header {
@@ -193,6 +194,7 @@ jQuery(function($) {
                     align-items: center;
                 }
                 .pickup-point-select-body {
+                    border-top: 1px solid #ccc;
                     display: none;
                 }
                 .pickup-point-select-item {
@@ -202,6 +204,9 @@ jQuery(function($) {
                 }
                 .pickup-point-select-item:hover {
                     background-color: #f9f9f9;
+                }
+                .pickup-point-select-item.selected {
+                    background-color: #eee;
                 }
                 .pickup-point-select-item:last-child {
                     border-bottom: none;
@@ -310,11 +315,13 @@ jQuery(function($) {
                     <div class="pickup-point-select-body">
                 `;
                 pickupPoints.forEach((pickupPoint) => {
+                    console.log(pickupPoint);
+                    let selected = pickupPoint.SelectedPickupPoint ? "selected" : "";
                     let address =
                       pickupPoint.Descriptions[0] +
                       " " +
                       pickupPoint.Descriptions[1];
-                    html += `<div class="pickup-point-select-item" data-rate-id="${method}" data-merchant-reference="${
+                    html += `<div class="pickup-point-select-item  ${selected}" data-rate-id="${method}" data-merchant-reference="${
                       pickupPoint.MerchantReference
                     }">
                         <div class="pickup-point-info">
@@ -363,6 +370,8 @@ jQuery(function($) {
               .html($select.find(".pickup-point-info").html());
 
             // Toggle the body element.
+            $select.addClass("selected");
+            $body.find(".pickup-point-select-item").not($select).removeClass("selected");
             $body.slideToggle();
             $wrapper.toggleClass("open");
             $wrapper.toggleClass("closed");
