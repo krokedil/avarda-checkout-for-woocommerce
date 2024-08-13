@@ -315,7 +315,6 @@ jQuery(function($) {
                     <div class="pickup-point-select-body">
                 `;
                 pickupPoints.forEach((pickupPoint) => {
-                    console.log(pickupPoint);
                     let selected = pickupPoint.SelectedPickupPoint ? "selected" : "";
                     let address =
                       pickupPoint.Descriptions[0] +
