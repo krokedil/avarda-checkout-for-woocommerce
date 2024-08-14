@@ -104,6 +104,8 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$session      = WC()->session->get_session( $customer_id );
 		}
 
+		$customer = array();
+
 		// Loop the session and set it as the current user session data.
 		foreach ( $session as $key => $value ) {
 			$value = maybe_unserialize( $value );
@@ -119,6 +121,8 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 					$value['country']          = $body['deliveryAddress']['country'];
 					$value['shipping_country'] = $body['deliveryAddress']['country'];
 				}
+
+				$customer = $value;
 			}
 
 			WC()->session->set( $key, $value );
@@ -126,6 +130,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 
 		// Set the customer from the customer session data.
 		WC()->customer = new WC_Customer( $session['customer_id'] ?? 0, true );
+		WC()->customer->set_shipping_location( $customer['country'] ?? '', $customer['state'] ?? '', $customer['postcode'], $customer['city'] );
 
 		// Calculate shipping for the session.
 		WC()->cart = new WC_Cart();
