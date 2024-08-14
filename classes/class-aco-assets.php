@@ -209,6 +209,10 @@ class ACO_Assets {
 
 		$shipping_widget = array(
 			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce,
+			'price_format'                    => array(
+				'format' => get_woocommerce_price_format(),
+				'symbol' => get_woocommerce_currency_symbol(),
+			),
 		);
 		wp_localize_script(
 			'aco_shipping_widget',
