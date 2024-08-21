@@ -350,9 +350,10 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function plugin_action_links( $links ) {
 			$setting_link = $this->get_setting_link();
+			$support_link = add_query_arg( 'subsection', 'support', $setting_link );
 			$plugin_links = array(
 				'<a href="' . $setting_link . '">' . __( 'Settings', 'avarda-checkout-for-woocommerce' ) . '</a>',
-				'<a href="http://krokedil.se/">' . __( 'Support', 'avarda-checkout-for-woocommerce' ) . '</a>',
+				'<a href="' . $support_link . '">' . __( 'Support', 'avarda-checkout-for-woocommerce' ) . '</a>',
 			);
 			return array_merge( $plugin_links, $links );
 		}
