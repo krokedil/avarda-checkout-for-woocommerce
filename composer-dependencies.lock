@@ -4,8 +4,53 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f716a200da2805033709b6305cd2600f",
+    "content-hash": "621c010ae698a8bff42a9c4f4506f203",
     "packages": [
+        {
+            "name": "krokedil/settings-page",
+            "version": "dev-develop-changes",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/krokedil/settings-page.git",
+                "reference": "5f84c5a2db108da3ee6599f20ca864a64ddccc53"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/krokedil/settings-page/zipball/5f84c5a2db108da3ee6599f20ca864a64ddccc53",
+                "reference": "5f84c5a2db108da3ee6599f20ca864a64ddccc53",
+                "shasum": ""
+            },
+            "require-dev": {
+                "php-stubs/woocommerce-stubs": "dev-master",
+                "wp-coding-standards/wpcs": "dev-develop"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Krokedil\\SettingsPage\\": "src/"
+                }
+            },
+            "scripts": {
+                "makepot": [
+                    "wp --allow-root i18n make-pot ./src ./languages/krokedil-settings.pot --domain=krokedil-settings"
+                ]
+            },
+            "license": [
+                "GPL-V2"
+            ],
+            "authors": [
+                {
+                    "name": "Krokedil AB",
+                    "email": "info@krokedil.se"
+                }
+            ],
+            "description": "A package to help setup settings pages in WordPress and WooCommerce for Krokedil plugins to add the Addons and Support tabs",
+            "support": {
+                "source": "https://github.com/krokedil/settings-page/tree/develop-changes",
+                "issues": "https://github.com/krokedil/settings-page/issues"
+            },
+            "time": "2024-08-21T09:53:36+00:00"
+        },
         {
             "name": "krokedil/shipping",
             "version": "dev-develop-fraktjakt",
@@ -71,12 +116,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/woocommerce.git",
-                "reference": "7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c"
+                "reference": "73c479f1d27fbb7f19b27b74fb290bab43d4154f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c",
-                "reference": "7686a969c8fa22cfe1a5c6f911c4f1f0ca6fce5c",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/73c479f1d27fbb7f19b27b74fb290bab43d4154f",
+                "reference": "73c479f1d27fbb7f19b27b74fb290bab43d4154f",
                 "shasum": ""
             },
             "require-dev": {
@@ -110,7 +155,7 @@
                 "source": "https://github.com/krokedil/woocommerce/tree/develop",
                 "issues": "https://github.com/krokedil/woocommerce/issues"
             },
-            "time": "2024-06-07T06:54:32+00:00"
+            "time": "2024-08-15T13:42:38+00:00"
         },
         {
             "name": "psr/container",
@@ -172,7 +217,8 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "krokedil/shipping": 20,
-        "krokedil/woocommerce": 20
+        "krokedil/woocommerce": 20,
+        "krokedil/settings-page": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

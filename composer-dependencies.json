@@ -3,7 +3,7 @@
         "php": ">=7.4",
         "krokedil/shipping": "dev-develop-fraktjakt",
         "krokedil/woocommerce": "dev-develop",
-        "krokedil/settings-page": "@dev"
+        "krokedil/settings-page": "dev-develop-changes"
     },
     "config": {
         "platform": {
@@ -20,11 +20,8 @@
             "url": "git@github.com:krokedil/woocommerce.git"
         },
         {
-            "type": "path",
-            "url": "../../../krokedil/settings-page",
-            "options": {
-                "symlink": false
-            }
+            "type": "vcs",
+            "url": "git@github.com:krokedil/settings-page"
         }
     ],
     "minimum-stability": "dev",
