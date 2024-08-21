@@ -451,9 +451,10 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$gateway_page = new Gateway( $this, $args );
 
 		$args['general_content'] = array( $gateway_page, 'output' );
-		$settings_page           = SettingsPage::get_instance();
-		$settings_page->register_page( $this->id, $args, $this );
-		$settings_page->output( $this->id );
+		$settings_page           = ( SettingsPage::get_instance() )
+			->set_plugin_name( 'Avarda Checkout' )
+			->register_page( $this->id, $args, $this )
+			->output( $this->id );
 	}
 }
 
