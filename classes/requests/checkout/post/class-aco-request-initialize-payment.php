@@ -65,8 +65,11 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 			$b2b = ! empty( WC()->customer->get_billing_company() );
 		}
 
-		// Add customer details to the request body.
-		$request_body[ $b2b ? 'b2B' : 'b2C' ] = ACO_WC()->customer->get_customer( $order, $b2b );
+		// Add customer details to the request body, but only if its not empty.
+		$customer = ACO_WC()->customer->get_customer( $order, $b2b );
+		if ( ! empty( $customer ) ) {
+			$request_body[ $b2b ? 'b2B' : 'b2C' ] = $customer;
+		}
 
 		return apply_filters( 'aco_create_args', $request_body, $order_id );
 	}
