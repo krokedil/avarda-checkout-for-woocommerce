@@ -60,6 +60,12 @@ $settings = array(
 		'default'     => '',
 		'desc_tip'    => false,
 	),
+	'display_items'                => array(
+		'title'       => __( 'Display items', 'avarda-checkout-for-woocommerce' ),
+		'type'        => 'checkbox',
+		'description' => __( 'Display the items in the Avarda Checkout. If disabled, the Avarda Checkout will only display the total amount.', 'avarda-checkout-for-woocommerce' ),
+		'default'     => 'no',
+	),
 	'order_management'             => array(
 		'title'   => __( 'Enable Order Management', 'avarda-checkout-for-woocommerce' ),
 		'type'    => 'checkbox',
