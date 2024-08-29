@@ -239,6 +239,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			ACO_Session::get_instance();
 
 			do_action( 'aco_initiated' );
+
+			add_filter( 'init', array( $this, 'migrate_settings' ) );
 		}
 
 		/**
@@ -402,6 +404,46 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				__FILE__,
 				'avarda-checkout-for-woocommerce'
 			);
+		}
+
+		/**
+		 * Maybe migrate settings when getting the settings from the database.
+		 *
+		 * @return void
+		 */
+		public function migrate_settings() {
+			$settings = get_option( 'woocommerce_aco_settings', array() );
+
+			// Bail early if no settings are found.
+			if ( empty( $settings ) ) {
+				return;
+			}
+
+			// Migrate shipping settings from old values to new.
+			$integrated_shipping    = $settings['integrated_shipping'] ?? '';
+			$integrated_shipping_wc = $settings['integrated_shipping_woocommerce'] ?? '';
+
+			// If nothing needs to be migrated, just return early.
+			if ( in_array( $integrated_shipping, array( 'avarda', 'woocommerce', '' ), true ) && in_array( $integrated_shipping_wc, array( 'no', '' ), true ) ) {
+				return;
+			}
+
+			if ( 'yes' === $integrated_shipping ) {
+				$settings['integrated_shipping'] = 'avarda';
+			} elseif ( 'no' === $integrated_shipping ) {
+				$settings['integrated_shipping'] = '';
+			}
+
+			if ( 'yes' === $integrated_shipping_wc ) {
+				$settings['integrated_shipping'] = 'woocommerce';
+			}
+
+			// Unset the woocommerce specific setting.
+			unset( $settings['integrated_shipping_woocommerce'] );
+
+			// Update the settings in the database to ensure they are migrated fully.
+			do_action( 'woocommerce_update_option', array( 'id' => 'woocommerce_aco_settings' ) );
+			update_option( 'woocommerce_aco_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_aco', $settings ), 'yes' );
 		}
 
 		/**
