@@ -211,6 +211,9 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			// Delete transient when aco settings is saved.
 			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'delete_all_transients' ) );
 
+			// Register the shipping method with WooCommerce.
+			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
+
 			// Set class variables.
 			$this->checkout         = new ACO_Checkout();
 			$this->pickup_points    = new PickupPoints();
