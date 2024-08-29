@@ -188,7 +188,7 @@ class ACO_Templates {
 			}
 
 			// If the setting for shipping in iframe is yes, then add the class.
-			if ( 'aco' === $first_gateway && 'yes' === $settings['integrated_shipping_woocommerce'] ) {
+			if ( 'aco' === $first_gateway && ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
 				$body_class[] = 'aco-integrated-woo-shipping-display';
 			}
 		}

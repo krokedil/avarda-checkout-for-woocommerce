@@ -167,7 +167,7 @@ class ACO_Assets {
 		$aco_two_column_checkout         = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
 		$styles                          = new stdClass(); // empty object as default value.
 		$aco_custom_css_styles           = apply_filters( 'aco_custom_css_styles', $styles );
-		$integrated_shipping_woocommerce = isset( $avarda_settings['integrated_shipping_woocommerce'] ) && 'yes' === $avarda_settings['integrated_shipping_woocommerce'] ? 'yes' : 'no';
+		$integrated_shipping_woocommerce = ACO_WC()->checkout->is_integrated_wc_shipping_enabled();
 
 		$params = array(
 			'ajax_url'                             => admin_url( 'admin-ajax.php' ),
