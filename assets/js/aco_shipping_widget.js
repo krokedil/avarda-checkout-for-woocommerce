@@ -245,6 +245,11 @@ jQuery(function($) {
                 .pickup-point-select.closed .arrow {
                     transform: rotate(0deg);
                 }
+                p.description {
+                    font-size: 13px;
+                    margin-top: 3px;
+                    color: #4C4C4C;
+                }
             </style>
             <div class="radio-group">
             `;
@@ -264,6 +269,7 @@ jQuery(function($) {
             const selected = selected_option === method ? "checked" : "";
             const pickupPoints = option.pickupPoints ? option.pickupPoints : [];
             const iconUrl = option.iconUrl ? option.iconUrl : '';
+            const description = option.description ? option.description : '';
             var iconHtml = '';
             if(iconUrl) {
                 iconHtml = `<img src="${iconUrl}" alt="Carrier icon" class="aco-carrier-icon">`;
@@ -289,10 +295,9 @@ jQuery(function($) {
                                 </div>
                                 <div class="main-column">${name}</div>
                                 <div class="right-column"><span class="price">${aco_shipping_widget.formatPrice(price)}</span>${iconHtml}</div>
-
-
                             </div>
                             <div class="details">
+                                <p class="description">${description}</p>
                                 ${aco_shipping_widget.getPickupPointsHtml(pickupPoints, method)}
                             </div>
                         </label>
