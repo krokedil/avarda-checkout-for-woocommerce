@@ -110,8 +110,8 @@ $settings = array(
 		'description' => __( 'Select which type of shipping you want to integrate in Avarda Checkout. This will display the shipping methods for the customer inside the Avarda Checkout instead of the WooCommerce order summary.', 'avarda-checkout-for-woocommerce' ),
 		'options'     => array(
 			''            => __( 'None', 'avarda-checkout-for-woocommerce' ),
-			'woocommerce' => __( 'WooCommerce Shipping', 'avarda-checkout-for-woocommerce' ),
-			'avarda'      => __( 'Partner Shipping', 'avarda-checkout-for-woocommerce' ),
+			'woocommerce' => __( 'Partner Shipping', 'avarda-checkout-for-woocommerce' ),
+			'avarda'      => __( 'Avarda Shipping Broker', 'avarda-checkout-for-woocommerce' ),
 		),
 		'default'     => '',
 	),
