@@ -147,6 +147,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		protected $webshipper;
 
 		/**
+		 * Shipping instance settings class instance.
+		 *
+		 * @var ACO_Shipping_Instance_Settings
+		 */
+		protected $shipping_instance_settings;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -215,24 +222,25 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
 
 			// Set class variables.
-			$this->checkout         = new ACO_Checkout();
-			$this->pickup_points    = new PickupPoints();
-			$this->api              = new ACO_API();
-			$this->logger           = new ACO_Logger();
-			$this->cart_items       = new ACO_Helper_Cart();
-			$this->order_items      = new ACO_Helper_Order();
-			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
-			$this->customer         = new ACO_Helper_Customer();
-			$this->order_management = new ACO_Order_Management();
-			$this->cart_page        = new ACO_Cart_Page();
-			$this->webshipper       = new ACO_Compatibility_Webshipper();
-			$this->krokedil         = new KrokedilWooCommerce(
+			$this->checkout                   = new ACO_Checkout();
+			$this->pickup_points              = new PickupPoints();
+			$this->api                        = new ACO_API();
+			$this->logger                     = new ACO_Logger();
+			$this->cart_items                 = new ACO_Helper_Cart();
+			$this->order_items                = new ACO_Helper_Order();
+			$this->checkout_setup             = new ACO_Helper_Checkout_Setup();
+			$this->customer                   = new ACO_Helper_Customer();
+			$this->order_management           = new ACO_Order_Management();
+			$this->cart_page                  = new ACO_Cart_Page();
+			$this->webshipper                 = new ACO_Compatibility_Webshipper();
+			$this->krokedil                   = new KrokedilWooCommerce(
 				array(
 					'slug'         => 'aco',
 					'price_format' => 'major',
 				)
 			);
-			$this->rest_api         = new ACO_API_Registry();
+			$this->shipping_instance_settings = new ACO_Shipping_Instance_Settings();
+			$this->rest_api                   = new ACO_API_Registry();
 			$this->rest_api->init();
 
 			// Create initial instance of the session class.
@@ -330,6 +338,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-status.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-meta-box.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-shipping-instance-settings.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-shipping.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-session.php';
 
