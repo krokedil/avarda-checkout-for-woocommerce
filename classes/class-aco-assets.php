@@ -291,10 +291,31 @@ class ACO_Assets {
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
 
-		if ( ! in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) && ! in_array( $screen_id, array( 'shop_order' ), true ) ) {
-			return;
+		if ( in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) || in_array( $screen_id, array( 'shop_order' ), true ) ) {
+			$this->enqueue_admin_shop_order_assets();
 		}
 
+		if ( 'woocommerce_page_wc-settings' === $hook && isset( $_GET['section'] ) && 'aco' === $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->enqueue_settings_assets();
+		}
+	}
+
+	/**
+	 * Enqueue the settings page assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_settings_assets() {
+		wp_register_script( 'aco_settings_page', AVARDA_CHECKOUT_URL . '/assets/js/aco_settings_page.js', array( 'jquery' ), AVARDA_CHECKOUT_VERSION, true );
+		wp_enqueue_script( 'aco_settings_page' );
+	}
+
+	/**
+	 * Enqueue the admin shop order page assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_shop_order_assets() {
 		$order_id = ! empty( filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) ) ? filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) : get_the_ID();
 
 		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery', 'jquery-blockui' ), AVARDA_CHECKOUT_VERSION, true );
