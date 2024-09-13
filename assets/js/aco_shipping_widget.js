@@ -140,8 +140,6 @@ jQuery(function($) {
 
                 .radio-input:checked + .radio-box .details {
                     max-height: fit-content;
-                    padding-top: 10px;
-                    padding-bottom: 10px;
                 }
 
                 .radio-input:checked + .radio-box .outer-circle {
@@ -194,7 +192,7 @@ jQuery(function($) {
                 .pickup-point-select {
                     border: 1px solid #ccc;
                     border-radius: 12px;
-                    margin-top: 10px;
+                    margin-top: 20px;
                     overflow: hidden;
                 }
                 .pickup-point-select-header {
@@ -247,7 +245,7 @@ jQuery(function($) {
                 }
                 p.description {
                     font-size: 13px;
-                    margin-top: 3px;
+                    margin-top: 13px;
                     color: #4C4C4C;
                 }
             </style>
@@ -296,10 +294,7 @@ jQuery(function($) {
                                 <div class="main-column">${name}</div>
                                 <div class="right-column"><span class="price">${aco_shipping_widget.formatPrice(price)}</span>${iconHtml}</div>
                             </div>
-                            <div class="details">
-                                <p class="description">${description}</p>
-                                ${aco_shipping_widget.getPickupPointsHtml(pickupPoints, method)}
-                            </div>
+                            <div class="details">${description !== '' ? `<p class="description">${description}</p>` : ''}${aco_shipping_widget.getPickupPointsHtml(pickupPoints, method)}</div>
                         </label>
                     </div>
                 </div>
