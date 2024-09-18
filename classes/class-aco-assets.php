@@ -208,7 +208,7 @@ class ACO_Assets {
 		wp_enqueue_script( 'aco_wc' );
 
 		$shipping_widget = array(
-			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce,
+			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
 			'price_format'                    => array(
 				'format' => get_woocommerce_price_format(),
 				'symbol' => get_woocommerce_currency_symbol(),
