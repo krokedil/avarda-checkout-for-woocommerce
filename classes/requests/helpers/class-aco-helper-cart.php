@@ -288,16 +288,16 @@ class ACO_Helper_Cart {
 					);
 				}
 
-				if ( $chosen_shipping === $rate->get_id() ) {
+				if ( $chosen_shipping === $rate->get_instance_id() ) {
 					$formatted_shipping = ( $rate->get_cost() > 0 ) ? array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
-						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate->get_instance_id(), 0, 34 ), // String.
 						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
 						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					) : array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
-						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate->get_instance_id(), 0, 34 ), // String.
 						'amount'      => 0, // Float.
 						'taxCode'     => '0', // String.
 						'taxAmount'   => 0, // Float.

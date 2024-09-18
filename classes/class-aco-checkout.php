@@ -210,7 +210,7 @@ class ACO_Checkout {
 	 * @return void
 	 */
 	public function print_extra_shipping_info( $rate ) {
-		if ( false === strpos( $rate->get_id(), 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
+		if ( false === strpos( $rate->get_instance_id(), 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
 			return;
 		}
 
