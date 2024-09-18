@@ -31,10 +31,11 @@ class ACO_Request_Refund_Order extends ACO_Request {
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/refund';
 		$request_args = apply_filters( 'aco_refund_order_args', $this->get_request_args( $order_id, $amount, $reason ) );
 		$response     = wp_remote_request( $request_url, $request_args );
-		$code         = wp_remote_retrieve_response_code( $response );
+		$code         = ( is_wp_error( $response ) ) ? $response->get_error_code() : wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( $aco_purchase_id, 'POST', 'ACO refund order', $request_url, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log_body = ( is_wp_error( $response ) ) ? $response->get_error_messages() : json_decode( wp_remote_retrieve_body( $response ), true );
+		$log      = ACO_Logger::format_log( $aco_purchase_id, 'POST', 'ACO refund order', $request_url, $request_args, $log_body, $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );
@@ -52,7 +53,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	public function get_body( $order_id, $amount, $reason ) {
 		$order            = wc_get_order( $order_id );
 		$order_number     = $order->get_order_number();
-		$aco_total_amount = ! empty( $order->get_meta('_avarda_payment_amount', true) ) ? $order->get_meta( '_avarda_payment_amount', true ) : 0;
+		$aco_total_amount = ! empty( $order->get_meta( '_avarda_payment_amount', true ) ) ? $order->get_meta( '_avarda_payment_amount', true ) : 0;
 
 		return array(
 			'orderReference' => $order_number,
@@ -78,4 +79,3 @@ class ACO_Request_Refund_Order extends ACO_Request {
 		);
 	}
 }
-
