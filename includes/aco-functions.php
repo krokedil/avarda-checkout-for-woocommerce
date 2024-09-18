@@ -300,7 +300,17 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		}
 
 		if ( 'Completed' === $aco_step ) {
-			ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
+			$response = ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
+
+			if ( is_wp_error( $response ) ) {
+				$note = sprintf(
+					// translators: %s error message.
+					__( 'Failed to set the WooCommerce order number to the Avarda order. Error: %s', 'avarda-checkout-for-woocommerce' ),
+					$response->get_error_message()
+				);
+				do_action( 'aco_wc_update_order_reference_failed', 'api_error', $note, $order );
+				$order->add_order_note( $note );
+			}
 
 			// Check order totals.
 			if ( aco_check_order_totals( $order, $avarda_order ) ) {
