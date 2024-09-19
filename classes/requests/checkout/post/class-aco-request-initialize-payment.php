@@ -26,10 +26,11 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		$request_args = apply_filters( 'aco_initialize_payment_args', $this->get_request_args( $order_id ) );
 
 		$response = wp_remote_request( $request_url, $request_args );
-		$code     = wp_remote_retrieve_response_code( $response );
+		$code     = ( is_wp_error( $response ) ) ? $response->get_error_code() : wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( '', 'POST', 'ACO initialize payment', $request_url, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log_body = ( is_wp_error( $response ) ) ? $response->get_error_messages() : json_decode( wp_remote_retrieve_body( $response ), true );
+		$log      = ACO_Logger::format_log( '', 'POST', 'ACO initialize payment', $request_url, $request_args, $log_body, $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );
