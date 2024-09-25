@@ -246,6 +246,7 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 	if ( is_wp_error( $avarda_order ) ) {
 		return;
 	}
+
 	$order = wc_get_order( $order_id );
 	$order->update_meta_data( '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	$order->update_meta_data( '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
@@ -284,6 +285,7 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
+		aco_set_customer_balance( $order, $avarda_order );
 
 		// Save any shipping module data to the order if available.
 		ACO_Order_Management::maybe_save_shipping_meta( $order, $avarda_order );
@@ -817,4 +819,23 @@ function aco_clear_shipping_package_hashes( $packages ) {
 
 	// Return the packages unchanged.
 	return $packages;
+}
+
+/**
+ * Set the customer balance to the order meta data. To prevent having to make requests to Avarda to get the customer ballance.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @param array    $avarda_order The Avarda order.
+ *
+ * @return void
+ */
+function aco_set_customer_balance( $order, $avarda_order ) {
+	$customer_balance = isset( $avarda_order['customerBalance'] ) ? $avarda_order['customerBalance'] : '';
+
+	if ( empty( $customer_balance ) ) {
+		return;
+	}
+
+	$order->update_meta_data( '_avarda_customer_balance', $customer_balance );
+	$order->save();
 }
