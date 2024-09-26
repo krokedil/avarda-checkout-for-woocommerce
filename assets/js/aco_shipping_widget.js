@@ -84,10 +84,15 @@ jQuery(function($) {
                 options: options,
             };
 
+            aco_shipping_widget.listeners[type].push(listenerObject);
         },
 
         dispatchEvent: (event) => {
             if (aco_shipping_widget.listeners[event]) {
+                // Loop each listener and trigger them
+                aco_shipping_widget.listeners[event].forEach((listener) => {
+                    listener.listener();
+                });
             }
         },
 
