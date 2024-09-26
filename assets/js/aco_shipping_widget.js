@@ -20,8 +20,20 @@ jQuery(function($) {
             // Register the change event for the radio buttons.
             $element.on( "change", 'input:radio[name="aco_shipping_method"]:checked', function () {
                 const shippingMethod = $(this).val();
+
                 // Set the selected shipping method in WooCommerce by checking the radio button in the form.
-                $('input:radio[name="shipping_method[0]"][value="' + shippingMethod + '"]').prop("checked", true).trigger("change");
+                $('input:radio[name="shipping_method[0]"][value="' + shippingMethod + '"]').prop("checked", true).trigger("change").trigger("click");
+
+                // Trigger the update_checkout event.
+                $(document.body).trigger("update_checkout");
+
+                // Trigger a custom event to let other scripts know that the shipping option has changed.
+                if (aco_shipping_widget.modules.selectedShippingOption !== shippingMethod) {
+                    $(document.body).on("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
+                }
+
+                // Update the select shipping option inside the modules object.
+                aco_shipping_widget.modules.selectedShippingOption = shippingMethod;
             }
             );
 
@@ -49,6 +61,13 @@ jQuery(function($) {
             }, 0);
         },
 
+        handleShippingOptionChange: () => {
+            aco_shipping_widget.dispatchEvent("shipping_option_changed");
+
+            // Remove the on updated_checkout event to avoid multiple calls.
+            $(document.body).off("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
+        },
+
         suspend: () => {
         },
 
@@ -65,12 +84,10 @@ jQuery(function($) {
                 options: options,
             };
 
-            aco_shipping_widget.listeners[type] = listenerObject;
         },
 
         dispatchEvent: (event) => {
             if (aco_shipping_widget.listeners[event]) {
-                aco_shipping_widget.listeners[event].listener();
             }
         },
 
