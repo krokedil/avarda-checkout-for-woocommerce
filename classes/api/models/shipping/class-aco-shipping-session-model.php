@@ -56,6 +56,11 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 
 		$options = array();
 		foreach ( $shipping_rates as $rate ) {
+			// If the rate is null, then skip it.
+			if ( is_null( $rate ) ) {
+				continue;
+			}
+
 			$options[] = ACO_Shipping_Option_Model::from_shipping_rate( $rate );
 		}
 
