@@ -30,6 +30,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_change_payment_method'          => true,
 			'aco_wc_log_js'                         => true,
 			'aco_iframe_shipping_option_change'     => true,
+			'aco_shipping_widget_get_options'       => true,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -229,6 +230,22 @@ class ACO_AJAX extends WC_AJAX {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Get the formatted shipping session from the shipping rates.
+	 *
+	 * @return void
+	 */
+	public static function aco_shipping_widget_get_options() {
+		check_ajax_referer( 'aco_shipping_widget_get_options', 'nonce' );
+
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$shipping_package        = WC()->session->get( 'shipping_for_package_0', array() );
+
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_package['rates'] ?? array(), $chosen_shipping_methods[0] ?? '', aco_get_purchase_id_from_session() );
+
+		wp_send_json_success( $session );
 	}
 
 	/**

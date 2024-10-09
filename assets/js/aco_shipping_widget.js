@@ -5,6 +5,8 @@ jQuery(function($) {
         modules: null,
 
         init: (initObject) => {
+            const { element, session_id, config } = initObject;
+
             const $element = $(initObject.element);
             aco_shipping_widget.element = $element;
 
@@ -52,6 +54,11 @@ jQuery(function($) {
             $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
             $('body').on( 'updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice );
 
+            $(document.body).on('updated_checkout', () => {
+                aco_shipping_widget.blockElement("body");
+                aco_shipping_widget.getShippingOptions();
+            });
+
             // Dispatch the loaded event once as soon as it is registered by avarda.
             const loadedTimeout = setTimeout(() => {
                 if (aco_shipping_widget.listeners["loaded"]) {
@@ -63,9 +70,42 @@ jQuery(function($) {
 
         handleShippingOptionChange: () => {
             aco_shipping_widget.dispatchEvent("shipping_option_changed");
-
+            aco_shipping_widget.getShippingOptions();
             // Remove the on updated_checkout event to avoid multiple calls.
             $(document.body).off("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
+        },
+
+        getShippingOptions: () => {
+            const { nonce, url } = aco_wc_shipping_params.ajax.get_shipping_options;
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    nonce: nonce,
+                },
+                success: function (response) {
+                    if (response.success) {
+                        const { modules } = response.data;
+
+                        // Update the modules object with the new shipping options.
+                        aco_shipping_widget.modules = JSON.parse(modules);
+
+                        // Update the options HTML with the new shipping options.
+                        const optionsHtml = aco_shipping_widget.getOptionsHtml();
+
+                        // Replace the options HTML in the element.
+                        aco_shipping_widget.element.html(optionsHtml);
+                    }
+                },
+                error: function (error) {
+                    console.error(error);
+                },
+                complete: function () {
+                    aco_shipping_widget.unblockElement("body");
+                },
+            });
+
         },
 
         suspend: () => {

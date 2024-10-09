@@ -213,6 +213,12 @@ class ACO_Assets {
 				'format' => get_woocommerce_price_format(),
 				'symbol' => get_woocommerce_currency_symbol(),
 			),
+			'ajax'                            => array(
+				'get_shipping_options' => array(
+					'nonce' => wp_create_nonce( 'aco_shipping_widget_get_options' ),
+					'url'   => WC_AJAX::get_endpoint( 'aco_shipping_widget_get_options' ),
+				),
+			),
 		);
 		wp_localize_script(
 			'aco_shipping_widget',
