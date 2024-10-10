@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "092ba8add005ee8cf8cb99f968a01f69",
+    "content-hash": "9ccf1dbb3502f9fa59d914a0a2f2007c",
     "packages": [
         {
             "name": "krokedil/settings-page",
-            "version": "1.1.0",
+            "version": "dev-develop-fix-system-report-error",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/settings-page.git",
-                "reference": "9a3a96dae9509fb647fdf910e790b0ad3e28065d"
+                "reference": "553df44426e0a7cd5a5de6ef77ef68b81f5afa42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/settings-page/zipball/9a3a96dae9509fb647fdf910e790b0ad3e28065d",
-                "reference": "9a3a96dae9509fb647fdf910e790b0ad3e28065d",
+                "url": "https://api.github.com/repos/krokedil/settings-page/zipball/553df44426e0a7cd5a5de6ef77ef68b81f5afa42",
+                "reference": "553df44426e0a7cd5a5de6ef77ef68b81f5afa42",
                 "shasum": ""
             },
             "require-dev": {
@@ -46,10 +46,10 @@
             ],
             "description": "A package to help setup settings pages in WordPress and WooCommerce for Krokedil plugins to add the Addons and Support tabs",
             "support": {
-                "source": "https://github.com/krokedil/settings-page/tree/1.1.0",
+                "source": "https://github.com/krokedil/settings-page/tree/develop-fix-system-report-error",
                 "issues": "https://github.com/krokedil/settings-page/issues"
             },
-            "time": "2024-09-11T09:36:09+00:00"
+            "time": "2024-10-10T11:18:27+00:00"
         },
         {
             "name": "krokedil/shipping",
@@ -216,7 +216,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "krokedil/shipping": 20
+        "krokedil/shipping": 20,
+        "krokedil/settings-page": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
