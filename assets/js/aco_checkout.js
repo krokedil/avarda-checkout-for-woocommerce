@@ -75,14 +75,6 @@ jQuery(function($) {
     documentReady: function () {
       aco_wc.moveExtraCheckoutFields();
       aco_wc.ACOCheckoutForm();
-
-      // Add two column class to checkout if Avarda setting in Woo is set.
-      if (true === aco_wc_params.aco_checkout_layout.two_column) {
-        $("form.checkout.woocommerce-checkout").addClass(
-          "aco-two-column-checkout-left"
-        );
-        $("#aco-iframe").addClass("aco-two-column-checkout-right");
-      }
     },
 
     ACOCheckoutForm: function () {
@@ -236,12 +228,16 @@ jQuery(function($) {
 
     setCustomerDeliveryData: function (data) {
       console.log(data);
-      $("#billing_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#billing_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#billing_country").val(
         data.customer_country ? data.customer_country : ""
       );
 
-      $("#shipping_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#shipping_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#shipping_country").val(
         data.customer_country ? data.customer_country : ""
       );
@@ -300,7 +296,7 @@ jQuery(function($) {
         ? customerAddress.billing.city
         : ".";
       var billing_postcode = customerAddress.billing.zip
-        ? customerAddress.billing.zip
+        ? customerAddress.billing.zip.replace(/\s/g, "")
         : "";
       var billing_phone = customerAddress.billing.phone
         ? customerAddress.billing.phone
@@ -358,7 +354,7 @@ jQuery(function($) {
       );
       $("#shipping_postcode").val(
         customerAddress.shipping.zip
-          ? customerAddress.shipping.zip
+          ? customerAddress.shipping.zip.replace(/\s/g, "")
           : billing_postcode
       );
     },
@@ -447,7 +443,7 @@ jQuery(function($) {
 				}
 
 				// Check if this is a standard field.
-				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
+				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) && name !== 'ws_drop_point_blob' ) {
 
 					// This is not a standard Woo field, move to our div.
 					if ( 0 < $( 'p#' + name + '_field' ).length ) {

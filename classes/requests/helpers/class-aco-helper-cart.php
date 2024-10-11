@@ -278,12 +278,12 @@ class ACO_Helper_Cart {
 			 * @var WC_Shipping_Rate $rate Shipping rate.
 			 */
 			foreach ( $package['rates'] as $rate ) {
-				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
 					return array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
 						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
-						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_taxes() * 100 ), // String.
+						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					);
 				}
@@ -308,5 +308,24 @@ class ACO_Helper_Cart {
 		}
 
 		return $formatted_shipping;
+	}
+
+	/**
+	 * Get the cart attachment as a json encoded string.
+	 *
+	 * @return string
+	 */
+	public function get_cart_attachment() {
+		$attachment = array();
+
+		if ( ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+			// Add the attachment with session information so we can use it in the API.
+			$attachment['shipping'] = array(
+				'customerId'            => WC()->session->get_customer_unique_id(),
+				'chosenShippingMethods' => WC()->session->get( 'chosen_shipping_methods' ),
+			);
+		}
+
+		return empty( $attachment ) ? '' : wp_json_encode( $attachment );
 	}
 }

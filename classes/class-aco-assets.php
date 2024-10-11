@@ -88,6 +88,14 @@ class ACO_Assets {
 				true
 			);
 
+			wp_register_script(
+				'aco_shipping_widget',
+				AVARDA_CHECKOUT_URL . '/assets/js/aco_shipping_widget.js',
+				array( 'jquery' ),
+				AVARDA_CHECKOUT_VERSION,
+				true
+			);
+
 			// Checkout style.
 			wp_register_style(
 				'aco',
@@ -153,12 +161,13 @@ class ACO_Assets {
 			$redirect_url = $order->get_checkout_payment_url( true );
 		}
 
-		$standard_woo_checkout_fields = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address', 'calc_shipping_country', 'calc_shipping_state', 'calc_shipping_postcode' ) );
-		$avarda_settings              = get_option( 'woocommerce_aco_settings' );
-		$aco_test_mode                = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
-		$aco_two_column_checkout      = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
-		$styles                       = new stdClass(); // empty object as default value.
-		$aco_custom_css_styles        = apply_filters( 'aco_custom_css_styles', $styles );
+		$standard_woo_checkout_fields    = apply_filters( 'aco_ignored_checkout_fields', array( 'billing_first_name', 'billing_last_name', 'billing_address_1', 'billing_address_2', 'billing_postcode', 'billing_city', 'billing_phone', 'billing_email', 'billing_state', 'billing_country', 'billing_company', 'shipping_first_name', 'shipping_last_name', 'shipping_address_1', 'shipping_address_2', 'shipping_postcode', 'shipping_city', 'shipping_state', 'shipping_country', 'shipping_company', 'terms', 'terms-field', '_wp_http_referer', 'ship_to_different_address', 'calc_shipping_country', 'calc_shipping_state', 'calc_shipping_postcode' ) );
+		$avarda_settings                 = get_option( 'woocommerce_aco_settings' );
+		$aco_test_mode                   = ( isset( $avarda_settings['testmode'] ) && 'yes' === $avarda_settings['testmode'] ) ? true : false;
+		$aco_two_column_checkout         = ( isset( $avarda_settings['two_column_checkout'] ) && 'yes' === $avarda_settings['two_column_checkout'] ) ? array( 'two_column' => true ) : array( 'two_column' => false );
+		$styles                          = new stdClass(); // empty object as default value.
+		$aco_custom_css_styles           = apply_filters( 'aco_custom_css_styles', $styles );
+		$integrated_shipping_woocommerce = ACO_WC()->checkout->is_integrated_wc_shipping_enabled();
 
 		$params = array(
 			'ajax_url'                             => admin_url( 'admin-ajax.php' ),
@@ -197,6 +206,26 @@ class ACO_Assets {
 			$params
 		);
 		wp_enqueue_script( 'aco_wc' );
+
+		$shipping_widget = array(
+			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
+			'price_format'                    => array(
+				'format' => get_woocommerce_price_format(),
+				'symbol' => get_woocommerce_currency_symbol(),
+			),
+			'ajax'                            => array(
+				'get_shipping_options' => array(
+					'nonce' => wp_create_nonce( 'aco_shipping_widget_get_options' ),
+					'url'   => WC_AJAX::get_endpoint( 'aco_shipping_widget_get_options' ),
+				),
+			),
+		);
+		wp_localize_script(
+			'aco_shipping_widget',
+			'aco_wc_shipping_params',
+			$shipping_widget
+		);
+		wp_enqueue_script( 'aco_shipping_widget' );
 	}
 
 	/**
@@ -268,10 +297,31 @@ class ACO_Assets {
 		$screen    = get_current_screen();
 		$screen_id = $screen ? $screen->id : '';
 
-		if ( ! in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) && ! in_array( $screen_id, array( 'shop_order' ), true ) ) {
-			return;
+		if ( in_array( $hook, array( 'shop_order', 'woocommerce_page_wc-orders' ), true ) || in_array( $screen_id, array( 'shop_order' ), true ) ) {
+			$this->enqueue_admin_shop_order_assets();
 		}
 
+		if ( 'woocommerce_page_wc-settings' === $hook && isset( $_GET['section'] ) && 'aco' === $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->enqueue_settings_assets();
+		}
+	}
+
+	/**
+	 * Enqueue the settings page assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_settings_assets() {
+		wp_register_script( 'aco_settings_page', AVARDA_CHECKOUT_URL . '/assets/js/aco_settings_page.js', array( 'jquery' ), AVARDA_CHECKOUT_VERSION, true );
+		wp_enqueue_script( 'aco_settings_page' );
+	}
+
+	/**
+	 * Enqueue the admin shop order page assets.
+	 *
+	 * @return void
+	 */
+	public function enqueue_admin_shop_order_assets() {
 		$order_id = ! empty( filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) ) ? filter_input( INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT ) : get_the_ID();
 
 		wp_register_script( 'aco_admin_js', AVARDA_CHECKOUT_URL . '/assets/js/aco-admin.js', array( 'jquery', 'jquery-blockui' ), AVARDA_CHECKOUT_VERSION, true );
