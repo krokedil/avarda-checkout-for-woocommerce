@@ -8,7 +8,7 @@ WC requires at least: 5.6.0
 WC tested up to: 9.0.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.14.1
+Stable tag: 1.15.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,16 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2024.10.14        - version 1.15.0 =
+* Feature           - Added support for core WooCommerce shipping.
+* Feature           - Integrated support for the [Post Purchase Upsell](https://krokedil.com/product/post-purchase-upsell-for-woocommerce/) plugin.
+* Feature           - Introduced a setting to control the display of the item list within the checkout form.
+* Tweak             - Added an order note when the WooCommerce order number cannot be saved to the Avarda order.
+* Tweak             - Enhanced logging for failed API requests.
+* Fix               - Resolved compatibility issues with currency switchers.
+* Fix               - Fixed a missing template issue for coupons.
+* Fix               - Corrected a critical error related to retrieving the shipping method ID. 
+
 = 2024.06.13        - version 1.14.1 =
 * Fix               - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.
 

@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         1.14.1
+ * Version:         1.15.0
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '1.14.1' );
+define( 'AVARDA_CHECKOUT_VERSION', '1.15.0' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://checkout-api.avarda.com' );
@@ -133,6 +133,27 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		public $krokedil = null;
 
 		/**
+		 * Rest api registry instance.
+		 *
+		 * @var ACO_API_Registry
+		 */
+		protected $rest_api;
+
+		/**
+		 * Webshipper compatibility class instance.
+		 *
+		 * @var ACO_Compatibility_Webshipper
+		 */
+		protected $webshipper;
+
+		/**
+		 * Shipping instance settings class instance.
+		 *
+		 * @var ACO_Shipping_Instance_Settings
+		 */
+		protected $shipping_instance_settings;
+
+		/**
 		 * Class constructor.
 		 */
 		public function __construct() {
@@ -201,27 +222,33 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			add_filter( 'woocommerce_shipping_methods', ACO_Shipping::class . '::register' );
 
 			// Set class variables.
-			$this->checkout         = new ACO_Checkout();
-			$this->pickup_points    = new PickupPoints();
-			$this->api              = new ACO_API();
-			$this->logger           = new ACO_Logger();
-			$this->cart_items       = new ACO_Helper_Cart();
-			$this->order_items      = new ACO_Helper_Order();
-			$this->checkout_setup   = new ACO_Helper_Checkout_Setup();
-			$this->customer         = new ACO_Helper_Customer();
-			$this->order_management = new ACO_Order_Management();
-			$this->cart_page        = new ACO_Cart_Page();
-			$this->krokedil         = new KrokedilWooCommerce(
+			$this->checkout                   = new ACO_Checkout();
+			$this->pickup_points              = new PickupPoints();
+			$this->api                        = new ACO_API();
+			$this->logger                     = new ACO_Logger();
+			$this->cart_items                 = new ACO_Helper_Cart();
+			$this->order_items                = new ACO_Helper_Order();
+			$this->checkout_setup             = new ACO_Helper_Checkout_Setup();
+			$this->customer                   = new ACO_Helper_Customer();
+			$this->order_management           = new ACO_Order_Management();
+			$this->cart_page                  = new ACO_Cart_Page();
+			$this->webshipper                 = new ACO_Compatibility_Webshipper();
+			$this->krokedil                   = new KrokedilWooCommerce(
 				array(
 					'slug'         => 'aco',
 					'price_format' => 'major',
 				)
 			);
+			$this->shipping_instance_settings = new ACO_Shipping_Instance_Settings();
+			$this->rest_api                   = new ACO_API_Registry();
+			$this->rest_api->init();
 
 			// Create initial instance of the session class.
 			ACO_Session::get_instance();
 
 			do_action( 'aco_initiated' );
+
+			add_filter( 'init', array( $this, 'migrate_settings' ) );
 		}
 
 		/**
@@ -311,11 +338,13 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-subscription.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-status.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-meta-box.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-shipping-instance-settings.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-shipping.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-session.php';
 
 			// Compatibility classes.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-wc-carrier-agents.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/compatibility/class-aco-compatibility-webshipper.php';
 
 			// Requests.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/class-aco-request.php';
@@ -323,12 +352,16 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-initialize-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/get/class-aco-request-get-payment.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-extra-identifiers.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-payment.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/checkout/put/class-aco-request-update-order-reference.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-activate-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-cancel-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-return-order.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/order-management/post/class-aco-request-refund-order.php'; // For aco refund.
+
+			// REST API.
+			include_once AVARDA_CHECKOUT_PATH . '/classes/api/class-aco-api-registry.php';
 
 			// Request Helpers.
 			include_once AVARDA_CHECKOUT_PATH . '/classes/requests/helpers/class-aco-helper-cart.php';
@@ -380,6 +413,46 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				__FILE__,
 				'avarda-checkout-for-woocommerce'
 			);
+		}
+
+		/**
+		 * Maybe migrate settings when getting the settings from the database.
+		 *
+		 * @return void
+		 */
+		public function migrate_settings() {
+			$settings = get_option( 'woocommerce_aco_settings', array() );
+
+			// Bail early if no settings are found.
+			if ( empty( $settings ) ) {
+				return;
+			}
+
+			// Migrate shipping settings from old values to new.
+			$integrated_shipping    = $settings['integrated_shipping'] ?? '';
+			$integrated_shipping_wc = $settings['integrated_shipping_woocommerce'] ?? '';
+
+			// If nothing needs to be migrated, just return early.
+			if ( in_array( $integrated_shipping, array( 'avarda', 'woocommerce', '' ), true ) && in_array( $integrated_shipping_wc, array( 'no', '' ), true ) ) {
+				return;
+			}
+
+			if ( 'yes' === $integrated_shipping ) {
+				$settings['integrated_shipping'] = 'avarda';
+			} elseif ( 'no' === $integrated_shipping ) {
+				$settings['integrated_shipping'] = '';
+			}
+
+			if ( 'yes' === $integrated_shipping_wc ) {
+				$settings['integrated_shipping'] = 'woocommerce';
+			}
+
+			// Unset the woocommerce specific setting.
+			unset( $settings['integrated_shipping_woocommerce'] );
+
+			// Update the settings in the database to ensure they are migrated fully.
+			do_action( 'woocommerce_update_option', array( 'id' => 'woocommerce_aco_settings' ) );
+			update_option( 'woocommerce_aco_settings', apply_filters( 'woocommerce_settings_api_sanitized_fields_aco', $settings ), 'yes' );
 		}
 
 		/**

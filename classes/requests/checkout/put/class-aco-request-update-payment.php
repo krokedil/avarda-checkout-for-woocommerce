@@ -36,10 +36,11 @@ class ACO_Request_Update_Payment extends ACO_Request {
 		WC()->session->set( 'aco_update_md5', md5( wp_json_encode( $request_args ) ) );
 
 		$response = wp_remote_request( $request_url, $request_args );
-		$code     = wp_remote_retrieve_response_code( $response );
+		$code     = ( is_wp_error( $response ) ) ? $response->get_error_code() : wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( $aco_purchase_id, 'PUT', 'ACO update payment', $request_url, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log_body = ( is_wp_error( $response ) ) ? $response->get_error_messages() : json_decode( wp_remote_retrieve_body( $response ), true );
+		$log      = ACO_Logger::format_log( $aco_purchase_id, 'PUT', 'ACO update payment', $request_url, $request_args, $log_body, $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );

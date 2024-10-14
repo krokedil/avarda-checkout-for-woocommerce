@@ -61,6 +61,9 @@ class ACO_Helper_Checkout_Setup {
 			$checkout_setup = $this->set_international_properties( $checkout_setup );
 		}
 
+		// Set display items based on the setting.
+		$checkout_setup['displayItems'] = 'yes' === ( $avarda_settings['display_items'] ?? 'no' );
+
 		return $checkout_setup;
 	}
 

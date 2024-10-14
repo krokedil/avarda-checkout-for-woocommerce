@@ -30,6 +30,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_change_payment_method'          => true,
 			'aco_wc_log_js'                         => true,
 			'aco_iframe_shipping_option_change'     => true,
+			'aco_shipping_widget_get_options'       => true,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -208,17 +209,11 @@ class ACO_AJAX extends WC_AJAX {
 	public static function aco_iframe_shipping_option_change() {
 		check_ajax_referer( 'aco_iframe_shipping_option_change', 'nonce' );
 
-		add_filter(
-			'woocommerce_cart_shipping_packages',
-			'aco_clear_shipping_package_hashes'
-		);
+		if ( ! ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+			wp_send_json_success( array( 'fragments' => array() ) );
+		}
 
-		// Force shipping to be re-calculated.
-		WC()->cart->calculate_shipping();
-		remove_filter(
-			'woocommerce_cart_shipping_packages',
-			'aco_clear_shipping_package_hashes'
-		);
+		self::process_integrated_partner_shipping();
 
 		WC()->cart->calculate_totals();
 
@@ -234,6 +229,42 @@ class ACO_AJAX extends WC_AJAX {
 					'.woocommerce-checkout-review-order-table' => $order_review,
 				),
 			)
+		);
+	}
+
+	/**
+	 * Get the formatted shipping session from the shipping rates.
+	 *
+	 * @return void
+	 */
+	public static function aco_shipping_widget_get_options() {
+		check_ajax_referer( 'aco_shipping_widget_get_options', 'nonce' );
+
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$shipping_package        = WC()->session->get( 'shipping_for_package_0', array() );
+
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_package['rates'] ?? array(), $chosen_shipping_methods[0] ?? '', aco_get_purchase_id_from_session() );
+
+		wp_send_json_success( $session );
+	}
+
+	/**
+	 * Process integrated partner shipping.
+	 *
+	 * @return void
+	 */
+	private static function process_integrated_partner_shipping() {
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
+		);
+
+		// Force shipping to be re-calculated.
+		WC()->cart->calculate_shipping();
+
+		remove_filter(
+			'woocommerce_cart_shipping_packages',
+			'aco_clear_shipping_package_hashes'
 		);
 	}
 }

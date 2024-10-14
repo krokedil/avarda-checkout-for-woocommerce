@@ -1,5 +1,5 @@
 @media only screen and (min-width : 769px) {
-    .aco-two-column-checkout-left {
+    .aco-two-column-checkout-left form.checkout.woocommerce-checkout {
         float: left;
         width: 40%;
         padding-right: 20px;
@@ -7,7 +7,7 @@
         box-sizing: border-box;
     }
 
-    .aco-two-column-checkout-right {
+    .aco-two-column-checkout-left #aco-iframe {
         float: right;
         width: 60%;
         padding-left: 20px;
@@ -18,4 +18,18 @@
 .avarda-shipping-info p {
     margin-top: 0;
     margin-bottom: 0;
+}
+
+/* Hide shipping methods in order review if displayed in Avardas checkout */
+.aco-integrated-woo-shipping-display ul#shipping_method {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+/* Hide the Webshipper pickup point in the order review if displayed in Avardas checkout */
+.aco-integrated-woo-shipping-display tr:has( td p#ws_drop_point_blob_field ) {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
 }
