@@ -1,238 +1,238 @@
 {
-     "0.1.0" : {
-          "description" : "<ul><li>Initial release.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4"
+     "0.1.0": {
+          "description": "<ul><li>Initial release.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4"
      },
-     "0.1.1" : {
-          "description" : "<ul><li>Updated readme file.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4"
+     "0.1.1": {
+          "description": "<ul><li>Updated readme file.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4"
      },
-     "0.1.2" : {
-          "description" : "<ul><li>Feature - Added support for customizing the Avarda Checkout through a filter.</li><li>Fix - Fix for endless spinning wheel at checkout if something went wrong in Avarda.</li><li>Change the way plugin is fetching data from payment status request.</li><li>Initialize new payment at checkout if current payment timed out.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4"
+     "0.1.2": {
+          "description": "<ul><li>Feature - Added support for customizing the Avarda Checkout through a filter.</li><li>Fix - Fix for endless spinning wheel at checkout if something went wrong in Avarda.</li><li>Change the way plugin is fetching data from payment status request.</li><li>Initialize new payment at checkout if current payment timed out.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4"
      },
-     "0.1.3" : {
-          "description" : "<ul><li>Fix - Fix for extra checkout fields not showing up on checkout page.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4.1"
-     },
-     "0.1.4" : {
-          "description" : "<ul><li>Enhancement - Prevent doing update request when payment has state Completed or TimedOut.</li></ul>",
-          "requires" : "4.7.0",
+     "0.1.3": {
+          "description": "<ul><li>Fix - Fix for extra checkout fields not showing up on checkout page.</li></ul>",
+          "requires": "4.7.0",
           "tested": "5.4.1"
      },
-     "0.1.5" : {
-          "description" : "<ul><li>Enhancement - Support for Swedish, Finnish and English language in the checkout.</li></ul>",
-          "requires" : "4.7.0",
+     "0.1.4": {
+          "description": "<ul><li>Enhancement - Prevent doing update request when payment has state Completed or TimedOut.</li></ul>",
+          "requires": "4.7.0",
           "tested": "5.4.1"
      },
-     "0.1.6" : {
-          "description" : "<ul><li>Tweak - Initialize payment request is using the Avarda legacy endpoint.</li><li>Enhancement - Trigger event when Avarda Checkout form is loaded on checkout page.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4.2"
+     "0.1.5": {
+          "description": "<ul><li>Enhancement - Support for Swedish, Finnish and English language in the checkout.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4.1"
      },
-     "0.1.7" : {
-          "description" : "<ul><li>Fix - Load correct JavaScript checkout file depending on if plugin is in testmode or not.</li><li>Fix - Delete request token transient when credentials is changed.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4.2"
+     "0.1.6": {
+          "description": "<ul><li>Tweak - Initialize payment request is using the Avarda legacy endpoint.</li><li>Enhancement - Trigger event when Avarda Checkout form is loaded on checkout page.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4.2"
      },
-     "0.1.8" : {
-          "description" : "<ul><li>Enhancement - Avarda payment method title is added to the WooCommerce order.</li><li>Enhancement - Added support for displaying the languages Norwegian and Danish in Avarda checkout.</li><li>Enhancement - WooCommerce order number is now saved as the order reference in AvardaOnline.</li><li>Fix - Fix for validating order correct in checkout.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4.2"
+     "0.1.7": {
+          "description": "<ul><li>Fix - Load correct JavaScript checkout file depending on if plugin is in testmode or not.</li><li>Fix - Delete request token transient when credentials is changed.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4.2"
      },
-     "0.1.9" : {
-          "description" : "<ul><li>Enhancement - Added Swedish translation.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.4.2"
+     "0.1.8": {
+          "description": "<ul><li>Enhancement - Avarda payment method title is added to the WooCommerce order.</li><li>Enhancement - Added support for displaying the languages Norwegian and Danish in Avarda checkout.</li><li>Enhancement - WooCommerce order number is now saved as the order reference in AvardaOnline.</li><li>Fix - Fix for validating order correct in checkout.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4.2"
      },
-     "0.2.0" : {
-          "description" : "<ul><li>Enhancement - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.</li><li>Tweak - Increased timeout time to 10 seconds in request to Avarda.</li><li>Tweak - Move Woo order confirmation process to separate class.</li><li>Fix - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.5.1"
+     "0.1.9": {
+          "description": "<ul><li>Enhancement - Added Swedish translation.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.4.2"
      },
-     "1.0.0" : {
-          "description" : "<ul><li>Tweak - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.</li><li>Tweak - Adds logging to logfile from frontend actions in checkout (during payment completion).</li><li>Tweak - Don't load checkout scripts on thankyou page.</li></ul>",
-          "requires" : "4.7.0",
-          "tested" : "5.6"
+     "0.2.0": {
+          "description": "<ul><li>Enhancement - Added support for server side callback url. Handles order status control better for payments where customer not returning to shop after completed Card/Swish payments.</li><li>Tweak - Increased timeout time to 10 seconds in request to Avarda.</li><li>Tweak - Move Woo order confirmation process to separate class.</li><li>Fix - Don't make cancel or activate requests if the WooCommerce order hasn't been paid for.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.5.1"
      },
-     "1.0.1" : {
-          "description" : "<ul><li>Tweak - Added stack trace to logger.</li><li>Tweak - Reduce the amount of update requests in checkout.</li><li>Fix - Delete current purchase id stored in Woo session if GET or PUT request to Avarda fails.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.7.1"
+     "1.0.0": {
+          "description": "<ul><li>Tweak - Tweak WC checkout form submission logic. The plugin is no longer reliant on a hashchange to send beforeSubmitContinue reponse to Avarda.</li><li>Tweak - Adds logging to logfile from frontend actions in checkout (during payment completion).</li><li>Tweak - Don't load checkout scripts on thankyou page.</li></ul>",
+          "requires": "4.7.0",
+          "tested": "5.6"
      },
-     "1.1.0" : {
-          "description" : "<ul><li>Feature - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).</li><li>Tweak - Changed Initialize checkout request endpoint to /api/partner/payments/.</li><li>Tweak - Adds request_url to logging.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.7.2"
+     "1.0.1": {
+          "description": "<ul><li>Tweak - Added stack trace to logger.</li><li>Tweak - Reduce the amount of update requests in checkout.</li><li>Fix - Delete current purchase id stored in Woo session if GET or PUT request to Avarda fails.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.7.1"
      },
-     "1.1.1" : {
-          "description" : "<ul><li>Tweak - Bumped required PHP version to 7.0.</li><li>Fix - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.1"
+     "1.1.0": {
+          "description": "<ul><li>Feature - Adds support for sending in termsAndConditionsUrl to Avarda (if set in WooCommerce).</li><li>Tweak - Changed Initialize checkout request endpoint to /api/partner/payments/.</li><li>Tweak - Adds request_url to logging.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.7.2"
      },
-     "1.1.2" : {
-          "description" : "<ul><li>Fix - Improvement of previous fix where to many decimals might get sent in prices to Avarda.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.1"
+     "1.1.1": {
+          "description": "<ul><li>Tweak - Bumped required PHP version to 7.0.</li><li>Fix - Solved issue with to many decimals sent to Avarda (could happen in certain dev environments). Change from round to number_format.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.1"
      },
-     "1.1.3" : {
-          "description" : "<ul><li>Fix - Save Billing company name correct in WooCommerce order for B2B purchases.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.1"
+     "1.1.2": {
+          "description": "<ul><li>Fix - Improvement of previous fix where to many decimals might get sent in prices to Avarda.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.1"
      },
-     "1.2.0" : {
-          "description" : "<ul><li>Tweak - Standard Woo checkout fields check improvement.</li><li>Tweak - Adds filter aco_ignored_checkout_fields to be able to modify the checkout form fields that should not be isplayed on the Avarda Checkout page.</li><li>Fix - Adds JWT token time expiry check.</li><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.2"
+     "1.1.3": {
+          "description": "<ul><li>Fix - Save Billing company name correct in WooCommerce order for B2B purchases.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.1"
      },
-     "1.2.1" : {
-          "description" : "<ul><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.2"
+     "1.2.0": {
+          "description": "<ul><li>Tweak - Standard Woo checkout fields check improvement.</li><li>Tweak - Adds filter aco_ignored_checkout_fields to be able to modify the checkout form fields that should not be isplayed on the Avarda Checkout page.</li><li>Fix - Adds JWT token time expiry check.</li><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.2"
      },
-     "1.2.2" : {
-          "description" : "<ul><li>Fix - Save company name correctly to WooCommerce order for B2B purchases.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.2"
+     "1.2.1": {
+          "description": "<ul><li>Fix - Floating point precision fix (many decimals sent to Avarda) for refund requests.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.2"
      },
-     "1.2.3" : {
-          "description" : "<ul><li>Enhancement - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.2"
+     "1.2.2": {
+          "description": "<ul><li>Fix - Save company name correctly to WooCommerce order for B2B purchases.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.2"
      },
-     "1.3.0" : {
-          "description" : "<ul><li>Tweak - Create new purchase ID if customer changes currency or language during ongoing session.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.8.2"
+     "1.2.3": {
+          "description": "<ul><li>Enhancement - Adds separate filters for create (aco_create_args) and update (aco_update_args) requests sent to Avarda.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.2"
      },
-     "1.4.0" : {
-          "description" : "<ul><li>Enhancement - Adds filter aco_locate_template to be able to load ACO checkout template from other plugins.</li><li>Enhancement - Adds hook aco_wc_confirm_avarda_order in confirmation step.</li><li>Enhancement - Adds payment gateway logo displayed in checkout.</li><li>Tweak - Stores _avarda_payment_method_fee if returned from Avarda.</li><li>Tweak - Adds calc_shipping_country, calc_shipping_state and calc_shipping_postcode as standard checkout fields (that should not be displayed in checkout when ACO is the selected payment method).</li><li>Tweak - Moves add_extra_checkout_fields function to aco-functions file. Makes it easier to use remove_cation if checkout design modifications is performed via separate plugin/theme.</li><li>Tweak - Adds logging to update Avarda order ajax request. For easier trouble shooting.</li><li>Fix - Saves all Avarda payment info (JWT token and purchase ID) in the same WC session (aco_wc_payment_data). To avoid updating different sessions in frontend and backend.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.9.1"
+     "1.3.0": {
+          "description": "<ul><li>Tweak - Create new purchase ID if customer changes currency or language during ongoing session.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.8.2"
      },
-     "1.4.1" : {
-          "description" : "<ul><li>Fix - Creates a new Avarda session if purchase_id has state TimedOut. Avoids issue when customer don't finalize purchase under 1 hour.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.9.2"
+     "1.4.0": {
+          "description": "<ul><li>Enhancement - Adds filter aco_locate_template to be able to load ACO checkout template from other plugins.</li><li>Enhancement - Adds hook aco_wc_confirm_avarda_order in confirmation step.</li><li>Enhancement - Adds payment gateway logo displayed in checkout.</li><li>Tweak - Stores _avarda_payment_method_fee if returned from Avarda.</li><li>Tweak - Adds calc_shipping_country, calc_shipping_state and calc_shipping_postcode as standard checkout fields (that should not be displayed in checkout when ACO is the selected payment method).</li><li>Tweak - Moves add_extra_checkout_fields function to aco-functions file. Makes it easier to use remove_cation if checkout design modifications is performed via separate plugin/theme.</li><li>Tweak - Adds logging to update Avarda order ajax request. For easier trouble shooting.</li><li>Fix - Saves all Avarda payment info (JWT token and purchase ID) in the same WC session (aco_wc_payment_data). To avoid updating different sessions in frontend and backend.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.9.1"
      },
-     "1.4.2" : {
-          "description" : "<ul><li>Tweak - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.</li><li>Fix - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).</li><li>Fix - Use billing address data if shipping address doesn't exist. Fixes issue where shipping first and last name might be missing when order should be created in Woo.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "5.9.2"
+     "1.4.1": {
+          "description": "<ul><li>Fix - Creates a new Avarda session if purchase_id has state TimedOut. Avoids issue when customer don't finalize purchase under 1 hour.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.9.2"
      },
-     "1.5.0" : {
-          "description" : "<ul><li>Feature - Adds support for pay for order logic. Merchant can now create an order in admin and send a pay link to a customer, where they can finish the payment using Avarda Checkout.</li><li>Feature - Adds support for redirect checkout flow. Regular Woo checkout page is used and Avarda Checkout is instead rendered on order recipt page.</li><li>Tweak - Adds compatibility support with Woo Carrier Agents plugin.</li><li>Tweak - Logging improvements.</li><li>Fix - Redirects customer to thankyou page directly instead of rendering Avarda Checkout and then redirecting customer. Avoids potential issues if customer is redirected back from 3DS after Avarda session time expired.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0"
+     "1.4.2": {
+          "description": "<ul><li>Tweak - Adds helper function get_tax_rate and get_item_tax_amount to improve tax calculation for fees in order management.</li><li>Fix - Unset session and trigger reload of checkout page if GET request in process_payment function fails (usually when Avarda session has timed out).</li><li>Fix - Use billing address data if shipping address doesn't exist. Fixes issue where shipping first and last name might be missing when order should be created in Woo.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "5.9.2"
      },
-     "1.5.1" : {
-          "description" : "<ul><li>Fix - Send correct data to customer city & country for redirect flow.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.1"
+     "1.5.0": {
+          "description": "<ul><li>Feature - Adds support for pay for order logic. Merchant can now create an order in admin and send a pay link to a customer, where they can finish the payment using Avarda Checkout.</li><li>Feature - Adds support for redirect checkout flow. Regular Woo checkout page is used and Avarda Checkout is instead rendered on order recipt page.</li><li>Tweak - Adds compatibility support with Woo Carrier Agents plugin.</li><li>Tweak - Logging improvements.</li><li>Fix - Redirects customer to thankyou page directly instead of rendering Avarda Checkout and then redirecting customer. Avoids potential issues if customer is redirected back from 3DS after Avarda session time expired.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0"
      },
-     "1.5.2" : {
-          "description" : "<ul><li>Tweak - Logging improvements..</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.1"
+     "1.5.1": {
+          "description": "<ul><li>Fix - Send correct data to customer city & country for redirect flow.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.1"
      },
-     "1.6.0" : {
-          "description" : "<ul><li>Tweak - Move update request to Avarda from ajax function to woocommerce_after_calculate_totals.</li><li>Tweak - Improve request class logic.</li><li>Tweak - Improve error message notice display in checkout.</li><li>Tweak - Query orders 5 days back in confirm_order sequence.</li><li>Tweak - Remove wc_print_notices in template files. Not needed anymore. WooCommerce handles this.</li><li>Tweak - Callback notifications now handled 2 minutes after purchase if needed.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.2"
+     "1.5.2": {
+          "description": "<ul><li>Tweak - Logging improvements..</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.1"
      },
-     "1.6.1" : {
-          "description" : "<ul><li>Fix - Confirm that the JWT token used in frontend is the same as the one stored in backend when sending session updates to Avarda.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.2"
+     "1.6.0": {
+          "description": "<ul><li>Tweak - Move update request to Avarda from ajax function to woocommerce_after_calculate_totals.</li><li>Tweak - Improve request class logic.</li><li>Tweak - Improve error message notice display in checkout.</li><li>Tweak - Query orders 5 days back in confirm_order sequence.</li><li>Tweak - Remove wc_print_notices in template files. Not needed anymore. WooCommerce handles this.</li><li>Tweak - Callback notifications now handled 2 minutes after purchase if needed.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.2"
      },
-     "1.6.2" : {
-          "description" : "<ul><li>Tweak - Adds functionality to enable custom payment method names. Can be filtered/tweaked via aco_order_set_payment_method_title.</li><li>Tweak - Set orderReference on init call to Avarda when Woo order is vailable (used for redirect flow).</li><li>Tweak - Move enqueue of JS and CSS to assets class.</li><li>Tweak - Only run wp_localize_script & wp_enqueue_script if ACO is used. Results in Avarda purchase session only created if Avarda Checkout is about to be displayed.</li><li>Tweak - Move maybeChangeToACO JS function into separate utility JS file.</li><li>Fix - Fix bug related to \"Avarda JWT token issue\" error message displayed in checkout. Could happen if checkout flow settings wasn't saved in plugin settings page.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.2"
+     "1.6.1": {
+          "description": "<ul><li>Fix - Confirm that the JWT token used in frontend is the same as the one stored in backend when sending session updates to Avarda.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.2"
      },
-     "1.7.0" : {
-          "description" : "<ul><li>Feature - Adds last 15 requests to Avarda that had an API error and display them on the WooCommerce status page. These will also be in the status report that you can send to Krokedil for support tickets.</li><li>Fix - Do not try to make update payment session request to Avara if session is in redirected to payment method state.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.2"
+     "1.6.2": {
+          "description": "<ul><li>Tweak - Adds functionality to enable custom payment method names. Can be filtered/tweaked via aco_order_set_payment_method_title.</li><li>Tweak - Set orderReference on init call to Avarda when Woo order is vailable (used for redirect flow).</li><li>Tweak - Move enqueue of JS and CSS to assets class.</li><li>Tweak - Only run wp_localize_script & wp_enqueue_script if ACO is used. Results in Avarda purchase session only created if Avarda Checkout is about to be displayed.</li><li>Tweak - Move maybeChangeToACO JS function into separate utility JS file.</li><li>Fix - Fix bug related to \"Avarda JWT token issue\" error message displayed in checkout. Could happen if checkout flow settings wasn't saved in plugin settings page.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.2"
      },
-     "1.7.1" : {
-          "description" : "<ul><li>Fix - Improvement in check that current Avarda session step can be updated before sending update request. Solves potential issue with deleted/missing payment session.</li><li>Fix - Solve issue with fee amount and fee tax amount in activate order request.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.0.3"
+     "1.7.0": {
+          "description": "<ul><li>Feature - Adds last 15 requests to Avarda that had an API error and display them on the WooCommerce status page. These will also be in the status report that you can send to Krokedil for support tickets.</li><li>Fix - Do not try to make update payment session request to Avara if session is in redirected to payment method state.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.2"
      },
-     "1.8.0" : {
-          "description" : "<ul><li>Feature - Adds support for Avardas refund order logic (refund/release reserved amount before the payment is captured).</li><li>Feature - Adds settings for custom payment gateway icon.</li><li>Tweak - Specifying quantity on order lines sent to Avarda.</li><li>Fix - PHP 8.1 deprecated notice fix.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.1.1"
+     "1.7.1": {
+          "description": "<ul><li>Fix - Improvement in check that current Avarda session step can be updated before sending update request. Solves potential issue with deleted/missing payment session.</li><li>Fix - Solve issue with fee amount and fee tax amount in activate order request.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.0.3"
      },
-     "1.9.0" : {
-          "description" : "<ul><li>Tweak - Updates plugin to use new endpoint URLs for Avarda API.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.2.2"
+     "1.8.0": {
+          "description": "<ul><li>Feature - Adds support for Avardas refund order logic (refund/release reserved amount before the payment is captured).</li><li>Feature - Adds settings for custom payment gateway icon.</li><li>Tweak - Specifying quantity on order lines sent to Avarda.</li><li>Fix - PHP 8.1 deprecated notice fix.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.1.1"
      },
-     "1.10.0" : {
-          "description" : "<ul><li>Feature - Adds support for gift cards via Smart Coupons plugin.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.2.2"
+     "1.9.0": {
+          "description": "<ul><li>Tweak - Updates plugin to use new endpoint URLs for Avarda API.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.2.2"
      },
-     "1.10.1" : {
-          "description" : "<ul><li>Fix - Trigger update to Avarda on a later priority (999999) in woocommerce_after_calculate_totals action to be compatible with newer versions of Smart Coupons.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.2.2"
+     "1.10.0": {
+          "description": "<ul><li>Feature - Adds support for gift cards via Smart Coupons plugin.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.2.2"
      },
-     "1.10.2" : {
-          "description" : "<ul><li>Fix - Fix compatibility with Smart Coupons.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.2.2"
+     "1.10.1": {
+          "description": "<ul><li>Fix - Trigger update to Avarda on a later priority (999999) in woocommerce_after_calculate_totals action to be compatible with newer versions of Smart Coupons.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.2.2"
      },
-     "1.11.0" : {
-          "description" : "<ul><li>Feature - Adds support for recurring payments via WooCommerce Subscriptions plugin.</li><li>Feature - Adds support for WooCommerce \"High-Performance Order Storage\" (HPOS) feature.</li><li>Feature - Add setting and logic for age validation.</li><li>Tweak - Improvements in how and when customer full address data is fetched from Avarda during creation of Woo order.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.1"
+     "1.10.2": {
+          "description": "<ul><li>Fix - Fix compatibility with Smart Coupons.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.2.2"
      },
-     "1.11.1" : {
-          "description" : "<ul><li>Fix - Delete meta data fix for redirect flow. Could cause fatal error.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.1"
+     "1.11.0": {
+          "description": "<ul><li>Feature - Adds support for recurring payments via WooCommerce Subscriptions plugin.</li><li>Feature - Adds support for WooCommerce \"High-Performance Order Storage\" (HPOS) feature.</li><li>Feature - Add setting and logic for age validation.</li><li>Tweak - Improvements in how and when customer full address data is fetched from Avarda during creation of Woo order.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.1"
      },
-     "1.11.2" : {
-          "description" : "<ul><li>Fix - Fixed an incorrect meta query during the confirmation step if the order id was missing from the url.</li><li>Fix - Improved checks before we confirm an order to ensure the payment id from Avarda matches the stored payment id in the order.</li><li>Fix - Fixed a potential fatal error when handling a callback from Avarda, that happened due to logging the order id before ensuring we had an order.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.1"
+     "1.11.1": {
+          "description": "<ul><li>Fix - Delete meta data fix for redirect flow. Could cause fatal error.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.1"
      },
-     "1.11.3" : {
-          "description" : "<ul><li>Fix - Limit name of Smart coupon gift card names sent to Avarda to 35 characters.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.2"
+     "1.11.2": {
+          "description": "<ul><li>Fix - Fixed an incorrect meta query during the confirmation step if the order id was missing from the url.</li><li>Fix - Improved checks before we confirm an order to ensure the payment id from Avarda matches the stored payment id in the order.</li><li>Fix - Fixed a potential fatal error when handling a callback from Avarda, that happened due to logging the order id before ensuring we had an order.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.1"
      },
-     "1.11.4" : {
-          "description" : "<ul><li>Fix - Use update_status instead of set_status so order status changes are saved correctly when cancel and activate requests fails.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.2"
+     "1.11.3": {
+          "description": "<ul><li>Fix - Limit name of Smart coupon gift card names sent to Avarda to 35 characters.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.2"
      },
-     "1.11.5" : {
-          "description" : "<ul><li>Enhancement - Adds aco_om_failed hook so other plugins can listen to and take action if activation and cancellation logic fails.</li><li>Fix - Use transaction id in activate and cancel requests if _wc_avarda_purchase_id is missing in order.</li><li>Fix - Add note and set order status to On hold if order totals do not match between Woo and Avarda during confirmation step.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.2"
+     "1.11.4": {
+          "description": "<ul><li>Fix - Use update_status instead of set_status so order status changes are saved correctly when cancel and activate requests fails.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.2"
      },
-     "1.12.0" : {
-          "description" : "<ul><li>Feature - Adds logic to trigger activate and cancel order request to Avarda without changing order status. This is done via WooCommerce Order action logic.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.2"
+     "1.11.5": {
+          "description": "<ul><li>Enhancement - Adds aco_om_failed hook so other plugins can listen to and take action if activation and cancellation logic fails.</li><li>Fix - Use transaction id in activate and cancel requests if _wc_avarda_purchase_id is missing in order.</li><li>Fix - Add note and set order status to On hold if order totals do not match between Woo and Avarda during confirmation step.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.2"
      },
-     "1.13.0" : {
-          "description" : "<ul><li>Feature - Adds metabox that fetches Avarda payment and displays current status when viewing a single order in Woo admin.</li><li>Feature - Add support for disabling order management connection between Woo and Avarda on a single order.</li><li>Enhancement - Adds aco_wc_confirm_failed hook so other plugins can listen to and take action if confirm order step fails.</li><li>Tweak - Respond with 404 if no Woo order is found during callbacks from Avarda.</li><li>Fix - Make sure plugin only sends 35 characters in product names, also for refunds.</li><li>Fix - Check for Avarda TimedOut step/status even when making GET avarda order when fetching customer data and submitting WC checkout form.</li><li>Fix - Fix issue with the _wc_avarda_purchase_id meta data field not being deleted correctly in pending Woo order (if one exist) if a new Avarda payment session being created.</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.4.3"
+     "1.12.0": {
+          "description": "<ul><li>Feature - Adds logic to trigger activate and cancel order request to Avarda without changing order status. This is done via WooCommerce Order action logic.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.2"
      },
-     "1.13.1" : {
-          "description" : "<ul><li>Tweak - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).</li></ul>",
-          "requires" : "5.0.0",
-          "tested" : "6.5.2"
+     "1.13.0": {
+          "description": "<ul><li>Feature - Adds metabox that fetches Avarda payment and displays current status when viewing a single order in Woo admin.</li><li>Feature - Add support for disabling order management connection between Woo and Avarda on a single order.</li><li>Enhancement - Adds aco_wc_confirm_failed hook so other plugins can listen to and take action if confirm order step fails.</li><li>Tweak - Respond with 404 if no Woo order is found during callbacks from Avarda.</li><li>Fix - Make sure plugin only sends 35 characters in product names, also for refunds.</li><li>Fix - Check for Avarda TimedOut step/status even when making GET avarda order when fetching customer data and submitting WC checkout form.</li><li>Fix - Fix issue with the _wc_avarda_purchase_id meta data field not being deleted correctly in pending Woo order (if one exist) if a new Avarda payment session being created.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.4.3"
+     },
+     "1.13.1": {
+          "description": "<ul><li>Tweak - Delete meta data fields _wc_avarda_jwt & _wc_avarda_expiredUtc in Woo order when deleting _wc_avarda_purchase_id (if Avarda session expires and a new one is created).</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.5.2"
      },
      "1.14.0": {
           "description": "<ul><li>Feature - Adds support for international checkout using the international credentials setting fields. If a currency the customer is using does not have their own credentials in Avarda the international credentials will be used instead.</li><li>Feature - Adds filters for the credentials used in the requests. These are aco_credentials, aco_client_id and aco_client_secret.</li><li>Feature - Add support for integrated shipping methods in Avarda Checkout for nShift and Ingrid with Pickup point support.</li><li>Enhancement - Improved session handling with Avarda to reduce the amount of requests needed for each order.</li><li>Enhancement - Added log levels to different log messages to allow limiting of the messages logged.</li><li>Enhancement - Auth tokens created for the requests are now stored individually based on currency as transients to prevent new tokens being generated each time a new currency is used. Should reduce the amount of requests made on stores using multiple </li>currencies with Avarda.<li>Enhancement - Adds a validation for the cart total against the Avarda session before WooCommerce creates an order. This should prevent on-hold orders from being created when a mismatch is detected.</li><li>Fix - Fixes an issue with token validation when loading the Javascript that caused us to not properly handle orders that had been completed, and had their session expired in Avarda.</li><li>Fix - Fixed PHP 8.2 deprecation warnings.</li></ul>",
@@ -241,6 +241,11 @@
      },
      "1.14.1": {
           "description": "<ul><li>Fix - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.</li></ul>",
+          "requires": "5.0.0",
+          "tested": "6.5.4"
+     },
+     "1.15.0": {
+          "description": "<ul><li>Feature - Added support for core WooCommerce shipping.</li><li>Feature - Integrated support for the <a href=\"https://krokedil.com/product/post-purchase-upsell-for-woocommerce/\">Post Purchase Upsell</a> plugin.</li><li>Feature - Introduced a setting to control the display of the item list within the checkout form.</li><li>Tweak - Added an order note when the WooCommerce order number cannot be saved to the Avarda order.</li><li>Tweak - Enhanced logging for failed API requests.</li><li>Fix - Resolved compatibility issues with currency switchers.</li><li>Fix - Fixed a missing template issue for coupons.</li><li>Fix - Corrected a critical error related to retrieving the shipping method ID.</li></ul>",
           "requires": "5.0.0",
           "tested": "6.5.4"
      }
