@@ -229,6 +229,10 @@ class ACO_Checkout {
 	 * @return void
 	 */
 	public function print_extra_shipping_info( $rate ) {
+		if ( false === $rate instanceof WC_Shipping_Rate ) { // Make sure it's a shipping rate, as this may not be the case in some setups.
+			return;
+		}
+
 		$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
 		if ( false === strpos( $rate_id, 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
 			return;
