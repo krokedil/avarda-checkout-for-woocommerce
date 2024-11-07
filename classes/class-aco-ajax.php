@@ -98,6 +98,17 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 
+		// Get the Avarda payment.
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
+
+		if ( is_wp_error( $avarda_order ) ) {
+			wp_send_json_error(
+				array(
+					'error' => 'avarda_request_error',
+				)
+			);
+		}
+
 		$customer_data = array();
 		$update_needed = 'no';
 
@@ -131,6 +142,7 @@ class ACO_AJAX extends WC_AJAX {
 				'update_needed'    => $update_needed,
 				'customer_zip'     => $zip,
 				'customer_country' => $country,
+				'customer_data'    => aco_format_address_data( $avarda_order ),
 			)
 		);
 	}

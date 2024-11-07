@@ -216,6 +216,10 @@ jQuery(function($) {
           } else {
             callback.deliveryAddressChangedContinue();
           }
+
+          if(response.data.hasOwnProperty('customer_data')) {
+            aco_wc.fillForm(response.data.customer_data);
+          }
         },
         error: function (response) {
           console.log(response);
