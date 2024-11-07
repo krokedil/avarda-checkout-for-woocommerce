@@ -92,11 +92,11 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * Setup the session data for the customer.
 	 *
 	 * @param string $customer_id The customer unique id.
-	 * @param array  $body The body from the Avarda request.
+	 * @param array  $avarda_order The order from Avarda.
 	 *
 	 * @return void
 	 */
-	private function setup_customer_session( $customer_id, $body ) {
+	private function setup_customer_session( $customer_id, $avarda_order ) {
 		if ( null !== WC()->session && method_exists( WC()->session, 'get_session' ) ) {
 			$session = WC()->session->get_session( $customer_id );
 		} else {
@@ -104,7 +104,8 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$session      = WC()->session->get_session( $customer_id );
 		}
 
-		$customer = array();
+		$customer_address = aco_format_address_data( $avarda_order );
+		$customer         = array();
 
 		// Loop the session and set it as the current user session data.
 		foreach ( $session as $key => $value ) {
@@ -112,17 +113,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 
 			// If its the customer session, set the address data from the body.
 			if ( 'customer' === $key ) {
-				if ( isset( $body['deliveryAddress']['zip'] ) ) {
-					$value['postcode']          = $body['deliveryAddress']['zip'];
-					$value['shipping_postcode'] = $body['deliveryAddress']['zip'];
-				}
-
-				if ( isset( $body['deliveryAddress']['country'] ) ) {
-					$value['country']          = $body['deliveryAddress']['country'];
-					$value['shipping_country'] = $body['deliveryAddress']['country'];
-				}
-
-				$customer = $value;
+				$customer = self::process_customer_address( $value, $customer_address );
 			}
 
 			WC()->session->set( $key, $value );
@@ -130,7 +121,16 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 
 		// Set the customer from the customer session data.
 		WC()->customer = new WC_Customer( $session['customer_id'] ?? 0, true );
-		WC()->customer->set_shipping_location( $customer['country'] ?? '', $customer['state'] ?? '', $customer['postcode'], $customer['city'] );
+
+		// Set the customers shipping location, use shipping address if it exists, otherwise use billing address.
+		// phpcs:disable Universal.Operators.DisallowShortTernary
+		WC()->customer->set_shipping_location(
+			$customer['shipping_country'] ?: $customer['customer'],
+			$customer['shipping_state'] ?: $customer['state'],
+			$customer['shipping_postcode'] ?: $customer['postcode'],
+			$customer['shipping_city'] ?: $customer['city']
+		);
+		// phpcs:enable Universal.Operators.DisallowShortTernary
 
 		// Calculate shipping for the session.
 		WC()->cart = new WC_Cart();
@@ -141,24 +141,24 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	/**
 	 * Create or update a shipping session.
 	 *
-	 * @param array $body The body from the Avarda request.
+	 * @param array $avarda_order The order from Avarda.
 	 *
 	 * @return ACO_Shipping_Session_Model|null
 	 */
-	private function create_or_update_session( $body ) {
-		if ( empty( $body ) ) {
+	private function create_or_update_session( $avarda_order ) {
+		if ( empty( $avarda_order ) ) {
 			return null;
 		}
 
-		$purchase_id         = $body['purchaseId'] ?? '';
-		$attachments         = json_decode( $body['extraIdentifiers']['attachment'], true ) ?? array();
+		$purchase_id         = $avarda_order['purchaseId'] ?? '';
+		$attachments         = json_decode( $avarda_order['extraIdentifiers']['attachment'], true ) ?? array();
 		$shipping_attachment = $attachments['shipping'] ?? array();
 
 		if ( empty( $purchase_id ) || empty( $attachments ) || empty( $shipping_attachment ) || ! isset( $shipping_attachment['customerId'] ) ) {
 			return null;
 		}
 
-		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'], $body );
+		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'], $avarda_order );
 		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id );
 
 		return $session;
@@ -237,8 +237,19 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 */
 	public function create_session( $request ) {
 		try {
-			$body    = $request->get_json_params();
-			$session = $this->create_or_update_session( $body );
+			$body = $request->get_json_params();
+
+			// Get the purchase id from the request url.
+			$purchase_id = $body['purchaseId'];
+
+			// Get the avarda order.
+			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
+
+			if ( is_wp_error( $avarda_order ) ) {
+				$this->send_response( new WP_Error( 404, 'Not found' ) );
+			}
+
+			$session = $this->create_or_update_session( $avarda_order );
 
 			if ( ! $session ) {
 				$this->send_response( new WP_Error( 400, 'Bad request' ) );
@@ -259,8 +270,19 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 */
 	public function update_session( $request ) {
 		try {
-			$body    = $request->get_json_params();
-			$session = $this->create_or_update_session( $body );
+			$body = $request->get_json_params();
+
+			// Get the purchase id from the request url.
+			$purchase_id = $body['purchaseId'] ?? $request->get_param( 'id' );
+
+			// Get the avarda order.
+			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
+
+			if ( is_wp_error( $avarda_order ) ) {
+				$this->send_response( new WP_Error( 404, 'Not found' ) );
+			}
+
+			$session = $this->create_or_update_session( $avarda_order );
 
 			if ( ! $session ) {
 				$this->send_response( new WP_Error( 400, 'Bad request' ) );
@@ -313,5 +335,55 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		} catch ( Exception $e ) {
 			$this->send_response( new WP_Error( 500, 'Server error' ) );
 		}
+	}
+
+	/**
+	 * Process the customer address data and set the correct customer data.
+	 *
+	 * @param array $value The customer data.
+	 * @param array $address The address data.
+	 *
+	 * @return array
+	 */
+	private static function process_customer_address( $value, $address ) {
+		// Set the billing address data.
+		foreach ( $address['billing'] as $address_key => $address_value ) {
+			// If the key is date_of_birth, continue.
+			if ( 'date_of_birth' === $address_key ) {
+				continue;
+			}
+
+			// Change some keys to match WooCommerce names.
+			if ( 'address1' === $address_key ) {
+				$address_key = 'address_1';
+			} elseif ( 'address2' === $address_key ) {
+				$address_key = 'address_2';
+			} elseif ( 'zip' === $address_key ) {
+				$address_key = 'postcode';
+			}
+
+			$value[ $address_key ] = $address_value;
+		}
+
+		// Set the shipping address data.
+		foreach ( $address['shipping'] as $address_key => $address_value ) {
+			// If the key is date_of_birth, continue.
+			if ( 'date_of_birth' === $address_key ) {
+				continue;
+			}
+
+			// If the key is address1, change to address_1.
+			if ( 'address1' === $address_key ) {
+				$address_key = 'address_1';
+			} elseif ( 'address2' === $address_key ) {
+				$address_key = 'address_2';
+			} elseif ( 'zip' === $address_key ) {
+				$address_key = 'postcode';
+			}
+
+			$value[ 'shipping_' . $address_key ] = $address_value;
+		}
+
+		return $value;
 	}
 }
