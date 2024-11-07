@@ -3,6 +3,20 @@ jQuery(function($) {
         listeners: {},
         element : null,
         modules: null,
+        paymentMethod: null,
+
+        registerEvents: () => {
+            // Set the payment method to aco if we have the payment method radio buttons.
+            if (0 < $('input[name="payment_method"]').length) {
+                aco_shipping_widget.paymentMethod = $('input[name="payment_method"]').filter(':checked').val();
+            } else {
+                aco_shipping_widget.paymentMethod = 'aco';
+            }
+
+            // Display the shipping prices in the order review.
+            $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
+            $(document.body).on('updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice);
+        },
 
         init: (initObject) => {
             const { element, session_id, config } = initObject;
@@ -42,17 +56,6 @@ jQuery(function($) {
             // Register the click event for the pickup point select box.
             $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
             $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
-
-            // Set the payment method to aco if we have the payment method radio buttons.
-            if ( 0 < $('input[name="payment_method"]').length ) {
-                aco_shipping_widget.paymentMethod = $('input[name="payment_method"]').filter( ':checked' ).val();
-            } else {
-                aco_shipping_widget.paymentMethod = 'aco';
-            }
-
-            // Display the shipping price in the order review.
-            $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
-            $('body').on( 'updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice );
 
             $(document.body).on('updated_checkout', () => {
                 aco_shipping_widget.blockElement("body");
@@ -567,4 +570,7 @@ jQuery(function($) {
 
     // Make the aco_shipping_widget object available globally under avardaShipping.
     window.avardaShipping = aco_shipping_widget;
+
+    // Trigger the load function to register events that does not need the init object.
+    aco_shipping_widget.registerEvents();
 });
