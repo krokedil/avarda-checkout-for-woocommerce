@@ -44,15 +44,15 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 	 * @return ACO_Shipping_Session_Model
 	 */
 	public static function from_shipping_rates( $shipping_rates, $chosen_shipping_method, $purchase_id ) {
-		$session = new self();
+		$session            = new self();
+		$selected           = $shipping_rates[ $chosen_shipping_method ] ?? null;
+		$session->id        = $purchase_id;
+		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
+		$session->status    = 'ACTIVE';
 
-		$chosen_shipping_method = empty( $chosen_shipping_method ) ? array_key_first( $shipping_rates ) : $chosen_shipping_method;
-		$selected               = $shipping_rates[ $chosen_shipping_method ];
-
-		$session->id                     = $purchase_id;
-		$session->expiresAt              = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
-		$session->status                 = 'ACTIVE';
-		$session->selectedShippingOption = ACO_Shipping_Option_Model::from_shipping_rate( $selected );
+		if ( $selected ) {
+			$session->selectedShippingOption = ACO_Shipping_Option_Model::from_shipping_rate( $selected );
+		}
 
 		$options = array();
 		foreach ( $shipping_rates as $rate ) {
@@ -67,7 +67,7 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 		$session->modules = wp_json_encode(
 			array(
 				'options'         => $options,
-				'selected_option' => $selected->get_id(),
+				'selected_option' => $selected ? $selected->get_id() : null,
 			)
 		);
 
