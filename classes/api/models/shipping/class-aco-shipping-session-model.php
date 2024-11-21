@@ -50,6 +50,21 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
 		$session->status    = 'ACTIVE';
 
+		// If we should not show shipping options yet, set the selected option to 'no_shipping'.
+		if ( ! WC()->cart->show_shipping() ) {
+			$session->selectedShippingOption = ACO_Shipping_Option_Model::no_shipping();
+			$session->modules                = wp_json_encode(
+				array(
+					'options'          => array(
+						$session->selectedShippingOption,
+					),
+					'selected_option'  => 'no_shipping',
+					'customer_zip'     => WC()->customer->get_shipping_postcode(),
+					'customer_country' => WC()->customer->get_shipping_country(),
+				)
+			);
+		}
+
 		if ( $selected ) {
 			$session->selectedShippingOption = ACO_Shipping_Option_Model::from_shipping_rate( $selected );
 		}
@@ -66,8 +81,10 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 
 		$session->modules = wp_json_encode(
 			array(
-				'options'         => $options,
-				'selected_option' => $selected ? $selected->get_id() : null,
+				'options'          => $options,
+				'selected_option'  => $selected ? $selected->get_id() : null,
+				'customer_zip'     => WC()->customer->get_shipping_postcode(),
+				'customer_country' => WC()->customer->get_shipping_country(),
 			)
 		);
 
