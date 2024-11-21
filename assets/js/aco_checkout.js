@@ -209,6 +209,11 @@ jQuery(function($) {
 
           aco_wc.setCustomerDeliveryData(response.data);
 
+          if (response.data.hasOwnProperty('customer_data') && null !== response.data.customer_data) {
+            aco_wc.fillForm(response.data.customer_data);
+            window.avardaShipping.setHasFullAddress(true);
+          }
+
           if ("yes" === response.data.update_needed) {
             // All good refresh aco form and trigger update_checkout event.
             callback.refreshForm();
@@ -217,9 +222,6 @@ jQuery(function($) {
             callback.deliveryAddressChangedContinue();
           }
 
-          if(response.data.hasOwnProperty('customer_data')) {
-            aco_wc.fillForm(response.data.customer_data);
-          }
         },
         error: function (response) {
           console.log(response);
