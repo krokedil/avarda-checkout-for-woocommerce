@@ -196,6 +196,15 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		}
 
 		/**
+		 * Load the plugin text domain for translation.
+		 *
+		 * @return void
+		 */
+		public function load_textdomain() {
+			load_plugin_textdomain( 'avarda-checkout-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+		}
+
+		/**
 		 * Initiates the plugin.
 		 *
 		 * @return void
@@ -206,7 +215,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				return;
 			}
 
-			load_plugin_textdomain( 'avarda-checkout-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+			add_action( 'init', array( $this, 'load_textdomain' ) );
+
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
 			if ( ! $this->init_composer() ) {
