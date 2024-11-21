@@ -98,25 +98,15 @@ class ACO_AJAX extends WC_AJAX {
 			exit;
 		}
 
-		// Get the Avarda payment.
-		$avarda_order = ACO_WC()->session()->get_avarda_payment();
-
-		if ( is_wp_error( $avarda_order ) ) {
-			wp_send_json_error(
-				array(
-					'error' => 'avarda_request_error',
-				)
-			);
-		}
+		$full_address = null;
 
 		$customer_data = array();
 		$update_needed = 'no';
 
 		$zip     = isset( $_REQUEST['address']['zip'] ) ? sanitize_key( wp_unslash( $_REQUEST['address']['zip'] ) ) : '';
 		$country = isset( $_REQUEST['address']['country'] ) ? strtoupper( sanitize_key( wp_unslash( $_REQUEST['address']['country'] ) ) ) : '';
-
 		// Check if we have new country or zip.
-		if ( WC()->customer->get_billing_country() !== $country || WC()->customer->get_shipping_postcode() !== $zip ) {
+		if ( WC()->customer->get_billing_country() !== $country || str_replace( ' ', '', WC()->customer->get_shipping_postcode() ) !== str_replace( ' ', '', $zip ) ) {
 			$update_needed = 'yes';
 
 			if ( ! empty( $zip ) ) {
@@ -137,14 +127,64 @@ class ACO_AJAX extends WC_AJAX {
 			WC()->cart->calculate_totals();
 		}
 
+		if ( ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+			$full_address = self::process_integrated_wc_shipping();
+		}
+
 		wp_send_json_success(
 			array(
 				'update_needed'    => $update_needed,
 				'customer_zip'     => $zip,
 				'customer_country' => $country,
-				'customer_data'    => aco_format_address_data( $avarda_order ),
+				'customer_data'    => $full_address,
 			)
 		);
+	}
+
+	/**
+	 * Process integrated WooCommerce shipping.
+	 *
+	 * @return array
+	 */
+	private static function process_integrated_wc_shipping() {
+		// Get the Avarda payment.
+		$avarda_order = ACO_WC()->session()->get_avarda_payment();
+		if ( is_wp_error( $avarda_order ) ) {
+			wp_send_json_error(
+				array(
+					'error' => 'avarda_request_error',
+				)
+			);
+		}
+
+		$customer_address = aco_format_address_data( $avarda_order );
+
+		// phpcs:disable
+		$customer_data    = array(
+			'billing_postcode'   => str_replace( ' ', '', $customer_address['billing']['zip'] ),
+			'shipping_postcode'  => str_replace( ' ', '', $customer_address['shipping']['zip'] ?: $customer_address['billing']['zip'] ),
+			'billing_country'    => $customer_address['billing']['country'],
+			'shipping_country'   => $customer_address['shipping']['country'] ?: $customer_address['billing']['country'],
+			'billing_city'       => $customer_address['billing']['city'],
+			'shipping_city'      => $customer_address['shipping']['city'] ?: $customer_address['billing']['city'],
+			'billing_address_1'  => $customer_address['billing']['address1'],
+			'shipping_address_1' => $customer_address['shipping']['address1'] ?: $customer_address['billing']['address1'],
+			'billing_address_2'  => $customer_address['billing']['address2'],
+			'shipping_address_2' => $customer_address['shipping']['address2'] ?: $customer_address['billing']['address2'],
+		);
+		// phpcs:enable
+
+		// Unset any empty values from the customer data.
+		$customer_data = array_filter( $customer_data );
+
+		WC()->customer->set_props( $customer_data );
+		WC()->customer->apply_changes();
+		WC()->customer->save();
+
+		// Recalculate the shipping again.
+		WC()->cart->calculate_shipping();
+
+		return $customer_address;
 	}
 
 	/**

@@ -81,7 +81,6 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 
 		$shipping                = WC()->session->get( 'shipping_for_package_0' ) ?? array();
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
-
 		return array(
 			'shipping'               => $shipping,
 			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
@@ -113,25 +112,36 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 
 			// If its the customer session, set the address data from the body.
 			if ( 'customer' === $key ) {
-				$customer = self::process_customer_address( $value, $customer_address );
+				$value    = self::process_customer_address( $value, $customer_address );
+				$customer = $value;
 			}
 
 			WC()->session->set( $key, $value );
 		}
 
-		// Set the customer from the customer session data.
+		// Load the customer from the session.
 		WC()->customer = new WC_Customer( $session['customer_id'] ?? 0, true );
 
-		// Set the customers shipping location, use shipping address if it exists, otherwise use billing address.
-		// phpcs:disable Universal.Operators.DisallowShortTernary
-		WC()->customer->set_shipping_location(
-			$customer['shipping_country'] ?: $customer['customer'],
-			$customer['shipping_state'] ?: $customer['state'],
-			$customer['shipping_postcode'] ?: $customer['postcode'],
-			$customer['shipping_city'] ?: $customer['city']
+		// phpcs:disable
+		$customer_data = array(
+			'billing_postcode'   => str_replace( ' ', '', $customer_address['billing']['zip'] ),
+			'shipping_postcode'  => str_replace( ' ', '', $customer_address['shipping']['zip'] ?: $customer_address['billing']['zip'] ),
+			'billing_country'    => $customer_address['billing']['country'],
+			'shipping_country'   => $customer_address['shipping']['country'] ?: $customer_address['billing']['country'],
+			'billing_city'       => $customer_address['billing']['city'],
+			'shipping_city'      => $customer_address['shipping']['city'] ?: $customer_address['billing']['city'],
+			'billing_address_1'  => $customer_address['billing']['address1'],
+			'shipping_address_1' => $customer_address['shipping']['address1'] ?: $customer_address['billing']['address1'],
+			'billing_address_2'  => $customer_address['billing']['address2'],
+			'shipping_address_2' => $customer_address['shipping']['address2'] ?: $customer_address['billing']['address2'],
 		);
-		// phpcs:enable Universal.Operators.DisallowShortTernary
+		// phpcs:enable
 
+		// Unset any empty values from the customer data.
+		$customer_data = array_filter( $customer_data );
+		WC()->customer->set_props( $customer_data );
+		WC()->customer->apply_changes();
+		WC()->customer->save();
 		// Calculate shipping for the session.
 		WC()->cart = new WC_Cart();
 		WC()->cart->get_cart_from_session();
@@ -159,7 +169,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		}
 
 		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'], $avarda_order );
-		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id );
+		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id, $attachments['shipping']['customerId'] );
 
 		return $session;
 	}
