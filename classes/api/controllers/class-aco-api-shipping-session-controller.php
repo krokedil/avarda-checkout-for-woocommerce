@@ -72,15 +72,15 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * Get the customer session from the customer unique id.
 	 *
 	 * @param string $customer_id The customer unique id.
-	 * @param array  $body The body from the Avarda request.
 	 *
 	 * @return array
 	 */
-	private function get_customer_session( $customer_id, $body ) {
-		$this->setup_customer_session( $customer_id, $body );
+	private function get_customer_session( $customer_id ) {
+		$this->setup_customer_session( $customer_id );
 
 		$shipping                = WC()->session->get( 'shipping_for_package_0' ) ?? array();
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
+
 		return array(
 			'shipping'               => $shipping,
 			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
@@ -91,11 +91,10 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * Setup the session data for the customer.
 	 *
 	 * @param string $customer_id The customer unique id.
-	 * @param array  $avarda_order The order from Avarda.
 	 *
 	 * @return void
 	 */
-	private function setup_customer_session( $customer_id, $avarda_order ) {
+	private function setup_customer_session( $customer_id ) {
 		if ( null !== WC()->session && method_exists( WC()->session, 'get_session' ) ) {
 			$session = WC()->session->get_session( $customer_id );
 		} else {
@@ -103,49 +102,11 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$session      = WC()->session->get_session( $customer_id );
 		}
 
-		$customer_address = aco_format_address_data( $avarda_order );
-		$customer         = array();
-
 		// Loop the session and set it as the current user session data.
 		foreach ( $session as $key => $value ) {
 			$value = maybe_unserialize( $value );
-
-			// If its the customer session, set the address data from the body.
-			if ( 'customer' === $key ) {
-				$value    = self::process_customer_address( $value, $customer_address );
-				$customer = $value;
-			}
-
 			WC()->session->set( $key, $value );
 		}
-
-		// Load the customer from the session.
-		WC()->customer = new WC_Customer( $session['customer_id'] ?? 0, true );
-
-		// phpcs:disable
-		$customer_data = array(
-			'billing_postcode'   => str_replace( ' ', '', $customer_address['billing']['zip'] ),
-			'shipping_postcode'  => str_replace( ' ', '', $customer_address['shipping']['zip'] ?: $customer_address['billing']['zip'] ),
-			'billing_country'    => $customer_address['billing']['country'],
-			'shipping_country'   => $customer_address['shipping']['country'] ?: $customer_address['billing']['country'],
-			'billing_city'       => $customer_address['billing']['city'],
-			'shipping_city'      => $customer_address['shipping']['city'] ?: $customer_address['billing']['city'],
-			'billing_address_1'  => $customer_address['billing']['address1'],
-			'shipping_address_1' => $customer_address['shipping']['address1'] ?: $customer_address['billing']['address1'],
-			'billing_address_2'  => $customer_address['billing']['address2'],
-			'shipping_address_2' => $customer_address['shipping']['address2'] ?: $customer_address['billing']['address2'],
-		);
-		// phpcs:enable
-
-		// Unset any empty values from the customer data.
-		$customer_data = array_filter( $customer_data );
-		WC()->customer->set_props( $customer_data );
-		WC()->customer->apply_changes();
-		WC()->customer->save();
-		// Calculate shipping for the session.
-		WC()->cart = new WC_Cart();
-		WC()->cart->get_cart_from_session();
-		WC()->cart->calculate_shipping();
 	}
 
 	/**
@@ -168,74 +129,30 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			return null;
 		}
 
-		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'], $avarda_order );
+		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'] );
 		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id, $attachments['shipping']['customerId'] );
 
 		return $session;
 	}
 
 	/**
-	 * Process the address from Avarda.
+	 * Get the shipping session for the customer.
 	 *
-	 * @param array $address The address from Avarda.
+	 * @param string $customer_id The customer unique id.
+	 * @param string $purchase_id The purchase id.
 	 *
-	 * @return array
+	 * @return ACO_Shipping_Session_Model|null
 	 */
-	private function process_address( $address ) {
-		return array(
-			'destination' => array(
-				'country'   => $address['country'] ?? '',
-				'state'     => $address['state'] ?? '',
-				'postcode'  => $address['zip'] ?? '',
-				'city'      => $address['city'] ?? '',
-				'address'   => $address['address1'] ?? '',
-				'address_1' => $address['address1'] ?? '',
-				'address_2' => $address['address2'] ?? '',
-			),
-		);
-	}
+	private function get_shipping_session_for_customer( $customer_id, $purchase_id ) {
+		$this->setup_customer_session( $customer_id );
 
-	/**
-	 * Process the items from Avarda.
-	 *
-	 * @param array $items The items from Avarda.
-	 *
-	 * @return array
-	 */
-	private function process_items( $items ) {
-		$cart_total    = 0;
-		$content_total = 0;
-		$contents      = array();
+		// Get the shipping rates from the session.
+		$shipping_rates          = WC()->session->get( 'shipping_for_package_0' ) ?? array();
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
 
-		// Loop each item in the order and set the total amount, and the content needed for the shipping.
-		foreach ( $items as $item ) {
-			$cart_total += $item['amount'] * $item['quantity'];
-			$product     = wc_get_product( wc_get_product_id_by_sku( $item['notes'] ) ) ?? wc_get_product( $item['notes'] ) ?? null;
-			if ( ! $product || ! $product->needs_shipping() ) {
-				continue;
-			}
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_rates['rates'], is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '', $purchase_id );
 
-			$content_total += $item['amount'] * $item['quantity'];
-
-			// Check if the product is a variation or not.
-			$is_variation = $product->is_type( 'variation' );
-
-			// Add the product to the contents array using the product id as the key.
-			$contents[ $product->get_id() ] = array(
-				'key'          => $product->get_id(),
-				'product_id'   => $is_variation ? $product->get_parent_id() : $product->get_id(),
-				'variation_id' => $is_variation ? $product->get_id() : 0,
-				'quantity'     => $item['quantity'],
-				'data'         => $product,
-				'data_hash'    => wc_get_cart_item_data_hash( $product ),
-			);
-		}
-
-		return array(
-			'cart_subtotal' => $cart_total,
-			'contents_cost' => $content_total,
-			'contents'      => $contents,
-		);
+		return $session;
 	}
 
 	/**
@@ -249,17 +166,12 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		try {
 			$body = $request->get_json_params();
 
-			// Get the purchase id from the request url.
+			// Get the customerId from the attachment data in the extraIdentifiers.
 			$purchase_id = $body['purchaseId'];
+			$attachments = json_decode( $body['extraIdentifiers']['attachment'], true );
+			$customer_id = $attachments['shipping']['customerId'];
 
-			// Get the avarda order.
-			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
-
-			if ( is_wp_error( $avarda_order ) ) {
-				$this->send_response( new WP_Error( 404, 'Not found' ) );
-			}
-
-			$session = $this->create_or_update_session( $avarda_order );
+			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
 				$this->send_response( new WP_Error( 400, 'Bad request' ) );
@@ -282,17 +194,12 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		try {
 			$body = $request->get_json_params();
 
-			// Get the purchase id from the request url.
-			$purchase_id = $body['purchaseId'] ?? $request->get_param( 'id' );
+			// Get the customerId from the attachment data in the extraIdentifiers.
+			$purchase_id = $body['purchaseId'];
+			$attachments = json_decode( $body['extraIdentifiers']['attachment'], true );
+			$customer_id = $attachments['shipping']['customerId'];
 
-			// Get the avarda order.
-			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
-
-			if ( is_wp_error( $avarda_order ) ) {
-				$this->send_response( new WP_Error( 404, 'Not found' ) );
-			}
-
-			$session = $this->create_or_update_session( $avarda_order );
+			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
 				$this->send_response( new WP_Error( 400, 'Bad request' ) );
@@ -326,7 +233,6 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		try {
 			// Get the purchase id from the request url.
 			$purchase_id = $request->get_param( 'id' );
-
 			// Get the avarda order.
 			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
 
@@ -334,14 +240,18 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 				$this->send_response( new WP_Error( 404, 'Not found' ) );
 			}
 
-			// Get the shipping session from the order.
-			$shipping_session = $this->create_or_update_session( $avarda_order );
+			$purchase_id = $avarda_order['purchaseId'] ?? '';
+			$attachments = json_decode( $avarda_order['extraIdentifiers']['attachment'], true ) ?? array();
+			$customer_id = $attachments['shipping']['customerId'] ?? '';
 
-			if ( ! $shipping_session ) {
+			// Get the shipping session from the order.
+			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
+
+			if ( ! $session ) {
 				$this->send_response( new WP_Error( 404, 'Not found' ) );
 			}
 
-			$this->send_response( $shipping_session );
+			$this->send_response( $session );
 		} catch ( Exception $e ) {
 			$this->send_response( new WP_Error( 500, 'Server error' ) );
 		}
