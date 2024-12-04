@@ -197,7 +197,7 @@ class ACO_Assets {
 			'is_aco_action'                        => $is_aco_action,
 			'aco_order_id'                         => $order_id,
 			'confirmation_url'                     => $confirmation_url,
-
+			'integrated_shipping_woocommerce'      => $integrated_shipping_woocommerce ? 'yes' : 'no',
 		);
 
 		wp_localize_script(
