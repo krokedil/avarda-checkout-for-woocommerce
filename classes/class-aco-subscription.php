@@ -29,6 +29,7 @@ class ACO_Subscription {
 		add_filter( 'aco_wc_api_request_args', array( $this, 'set_recurring' ) );
 		add_action( 'aco_wc_payment_complete', array( $this, 'set_recurring_token_for_order' ), 10, 2 );
 		add_action( 'woocommerce_scheduled_subscription_payment_aco', array( $this, 'trigger_scheduled_payment' ), 10, 2 );
+		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'save_recurring_token' ), 45, 2 );
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'show_recurring_token' ) );
 		add_action( 'init', array( $this, 'display_thankyou_message_for_payment_method_change' ) );
 
@@ -158,11 +159,16 @@ class ACO_Subscription {
 	 */
 	public function show_recurring_token( $order ) {
 		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_aco_recurring_token' ) ) {
+			$recurring_token = $order->get_meta( '_aco_recurring_token', true );
+			if ( empty( $recurring_token ) ) {
+				$parent          = $order->get_parent() ?? false;
+				$recurring_token = ! empty( $parent ) ? $parent->get_meta( '_aco_recurring_token', true ) : '';
+			}
 			?>
 			<div class="order_data_column" style="clear:both; float:none; width:100%;">
 				<div class="address">
 					<p>
-						<strong><?php echo esc_html( 'Avarda recurring token' ); ?>:</strong><?php echo esc_html( $order->get_meta( '_aco_recurring_token', true ) ); ?>
+						<strong><?php echo esc_html( 'Avarda recurring token' ); ?>:</strong><?php echo esc_html( $recurring_token ); ?>
 					</p>
 				</div>
 				<div class="edit_address">
@@ -172,6 +178,7 @@ class ACO_Subscription {
 							'id'            => '_aco_recurring_token',
 							'label'         => __( 'Avarda recurring token', 'avarda-checkout-for-woocommerce' ),
 							'wrapper_class' => '_billing_company_field',
+							'value'         => $recurring_token,
 						)
 					);
 					?>
@@ -253,6 +260,22 @@ class ACO_Subscription {
 		if ( ! empty( $aco_action ) && 'subs-payment-changed' === $aco_action ) {
 			wc_add_notice( __( 'Thank you, your subscription payment method is now updated.', 'avarda-checkout-for-woocommerce' ), 'success' );
 			aco_wc_unset_sessions();
+		}
+	}
+
+	/**
+	 * Saves the recurring token.
+	 *
+	 * @param int     $post_id WordPress post id.
+	 * @param WP_Post $post The WordPress post.
+	 * @return void
+	 */
+	public function save_recurring_token( $post_id, $post ) {
+		$recurring_token = filter_input( INPUT_POST, '_aco_recurring_token', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+		$order           = wc_get_order( $post_id );
+		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_aco_recurring_token', true ) ) {
+			$order->update_meta_data( '_aco_recurring_token', $recurring_token );
+			$order->save();
 		}
 	}
 }
