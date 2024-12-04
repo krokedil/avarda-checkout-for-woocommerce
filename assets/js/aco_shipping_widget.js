@@ -5,6 +5,7 @@ jQuery(function($) {
         modules: null,
         paymentMethod: null,
         hasFullAddress: false,
+        changedShippingOption: false,
 
         registerEvents: () => {
             // Set the payment method to aco if we have the payment method radio buttons.
@@ -20,27 +21,12 @@ jQuery(function($) {
         },
 
         init: (initObject) => {
-            console.log("ACO Shipping Widget Init", initObject);
             const { element, session_id, config } = initObject;
             const $element = $(element);
             aco_shipping_widget.element = $element;
 
             // Json decode the modules.
             aco_shipping_widget.modules = JSON.parse(config.modules);
-            console.log( aco_shipping_widget.modules );
-
-            // Set the customer postcode and country in the WooCommerce checkout form.
-            if (aco_shipping_widget.modules.customer_zip) {
-                $('#shipping_postcode').val(aco_shipping_widget.modules.customer_zip);
-                $('#billing_postcode').val(aco_shipping_widget.modules.customer_zip);
-            }
-
-            if (aco_shipping_widget.modules.customer_country) {
-                $('#shipping_country').val(aco_shipping_widget.modules.customer_country);
-                $('#billing_country').val(aco_shipping_widget.modules.customer_country);
-            }
-
-
             aco_shipping_widget.hasFullAddress = aco_shipping_widget.hasFullAddressData();
 
             // Loop the modules options and create the options HTML.
@@ -59,6 +45,7 @@ jQuery(function($) {
 
                 // Trigger a custom event to let other scripts know that the shipping option has changed.
                 if (aco_shipping_widget.modules.selected_option !== shippingMethod) {
+                    aco_shipping_widget.changedShippingOption = true;
                     // Trigger the update_checkout event.
                     $(document.body).trigger("update_checkout");
                 }
@@ -73,7 +60,11 @@ jQuery(function($) {
             $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
 
             $(document.body).on('updated_checkout', () => {
-                aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                if(aco_shipping_widget.changedShippingOption) {
+                    aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                    aco_shipping_widget.changedShippingOption = false;
+                }
+
                 aco_shipping_widget.getShippingOptions();
             });
 
@@ -84,9 +75,6 @@ jQuery(function($) {
                     clearTimeout(loadedTimeout);
                 }
             }, 0);
-
-            // Trigger update_checkout to ensure everything is in sync.
-            $(document.body).trigger("update_checkout");
         },
 
         hasFullAddressData: () => {
@@ -100,45 +88,19 @@ jQuery(function($) {
             return country && postcode && city && address;
         },
 
-        handleShippingOptionChange: () => {
-            console.log("Shipping option changed");
-            aco_shipping_widget.dispatchEvent("shipping_option_changed");
-            aco_shipping_widget.getShippingOptions();
-            // Remove the on updated_checkout event to avoid multiple calls.
-            $(document.body).off("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
-        },
-
         getShippingOptions: () => {
-            const { nonce, url } = aco_wc_shipping_params.ajax.get_shipping_options;
+            // Read the .aco-shipping-session field and parse the json from the value.
+            const {modules} = JSON.parse($('.aco-shipping-session').val());
 
-            $.ajax({
-                url: url,
-                type: "GET",
-                data: {
-                    nonce: nonce,
-                },
-                success: function (response) {
-                    if (response.success) {
-                        const { modules } = response.data;
+            // Update the modules object with the new shipping options.
+            aco_shipping_widget.modules = JSON.parse(modules);
 
-                        // Update the modules object with the new shipping options.
-                        aco_shipping_widget.modules = JSON.parse(modules);
+            // Update the options HTML with the new shipping options.
+            const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
-                        // Update the options HTML with the new shipping options.
-                        const optionsHtml = aco_shipping_widget.getOptionsHtml();
-
-                        // Replace the options HTML in the element.
-                        aco_shipping_widget.element.html(optionsHtml);
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                },
-                complete: function () {
-                    aco_shipping_widget.unblockElement("body");
-                },
-            });
-
+            // Replace the options HTML in the element.
+            aco_shipping_widget.element.html(optionsHtml);
+            aco_shipping_widget.unblockElement("body");
         },
 
         suspend: () => {
