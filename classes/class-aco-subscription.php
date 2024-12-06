@@ -273,7 +273,7 @@ class ACO_Subscription {
 	public function save_recurring_token( $post_id, $post ) {
 		$recurring_token = filter_input( INPUT_POST, '_aco_recurring_token', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order           = wc_get_order( $post_id );
-		if ( 'shop_subscription' === $order->get_type() && $order->get_meta( '_aco_recurring_token', true ) ) {
+		if ( 'shop_subscription' === $order->get_type() && $recurring_token ) {
 			$order->update_meta_data( '_aco_recurring_token', $recurring_token );
 			$order->save();
 		}
