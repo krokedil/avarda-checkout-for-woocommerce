@@ -216,6 +216,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 				return;
 			}
 
+			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
+
 			if ( ! $this->init_composer() ) {
 				return;
 			}
