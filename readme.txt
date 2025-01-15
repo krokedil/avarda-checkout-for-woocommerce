@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.5.4
+Tested up to: 6.7.1
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 9.0.0
+WC tested up to: 9.5.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.15.0
+Stable tag: 1.16.0
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,15 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2025.01.15        - version 1.16.0 =
+* Feature           - Added a sync to load shipping methods from the frontend when using the WooCommerce shipping methods inside Avarda Checkout.
+* Feature           - Added the ability to send a no shipping option to Avarda Checkout when using the WooCommerce shipping methods, if no shipping methods could be found.
+* Fix               - Improved loading of shipping methods from WooCommerce into the Avarda Checkout to lower the loading time.
+* Fix               - Fixed issues with address data not being set properly when showing shipping methods in the Avarda Checkout in some cases.
+* Fix               - Fixed issues with the order review on the checkout not always updating properly when changing shipping methods in the Avarda Checkout.
+* Fix               - Fixed an issue when saving the recurring token to a order or subscription when updating them in the WooCommerce admin.
+* Fix               - Fixed a deprecation notice when loading the plugin text domain.
+
 = 2024.10.14        - version 1.15.0 =
 * Feature           - Added support for core WooCommerce shipping.
 * Feature           - Integrated support for the [Post Purchase Upsell](https://krokedil.com/product/post-purchase-upsell-for-woocommerce/) plugin.
@@ -39,7 +48,7 @@ More information on how to get started can be found in the [plugin documentation
 * Tweak             - Enhanced logging for failed API requests.
 * Fix               - Resolved compatibility issues with currency switchers.
 * Fix               - Fixed a missing template issue for coupons.
-* Fix               - Corrected a critical error related to retrieving the shipping method ID. 
+* Fix               - Corrected a critical error related to retrieving the shipping method ID.
 
 = 2024.06.13        - version 1.14.1 =
 * Fix               - Fixes compatibility with Smart Coupons plugin when using Apply Before taxes on a coupon.
