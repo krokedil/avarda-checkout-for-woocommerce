@@ -162,6 +162,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			$this->checkout_flow = isset( $avarda_settings['checkout_flow'] ) ? $avarda_settings['checkout_flow'] : 'embedded';
 			add_action( 'plugins_loaded', array( $this, 'init' ) );
 			add_action( 'plugins_loaded', array( $this, 'check_version' ) );
+			add_action( 'init', array( $this, 'load_textdomain' ) );
 		}
 
 		/**
@@ -196,7 +197,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		}
 
 		/**
-		 * Load the plugin text domain for translation.
+		 * Load the plugin textdomain.
 		 *
 		 * @return void
 		 */
@@ -214,10 +215,6 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 				return;
 			}
-
-			add_action( 'init', array( $this, 'load_textdomain' ) );
-
-			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
 			if ( ! $this->init_composer() ) {
 				return;
