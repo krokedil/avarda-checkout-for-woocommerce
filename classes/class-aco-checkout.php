@@ -47,6 +47,12 @@ class ACO_Checkout {
 
 		if ( 'embedded' === $this->checkout_flow ) {
 			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
+
+			// If we are using integrated wc shipping, add a hidden field for the shipping information.
+			if ( $this->is_integrated_wc_shipping_enabled() ) {
+				add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_shipping_field' ), 30 );
+				add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'update_order_review_fragments' ), 10, 1 );
+			}
 		}
 
 		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
@@ -222,6 +228,51 @@ class ACO_Checkout {
 	}
 
 	/**
+	 * Adds a hidden shipping checkout form field.
+	 * Used to send the shipping information to Avarda.
+	 *
+	 * @param array $fields WooCommerce checkout form fields.
+	 * @return array
+	 */
+	public function add_hidden_shipping_field( $fields ) {
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$shipping_package        = WC()->session->get( 'shipping_for_package_0', array() );
+
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_package['rates'] ?? array(), $chosen_shipping_methods[0] ?? '', aco_get_purchase_id_from_session() );
+
+		$fields['billing']['aco_shipping'] = array(
+			'type'    => 'hidden',
+			'class'   => array( 'aco-shipping-session' ),
+			'default' => wp_json_encode( $session ),
+		);
+
+		return $fields;
+	}
+
+
+	/**
+	 * Pass the shipping session as a fragment to the order review.
+	 *
+	 * @param array $fragments The fragments to update.
+	 * @return array
+	 */
+	public function update_order_review_fragments( $fragments ) {
+		if ( ! $this->is_integrated_wc_shipping_enabled() ) {
+			return $fragments;
+		}
+
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$shipping_package        = WC()->session->get( 'shipping_for_package_0', array() );
+
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_package['rates'] ?? array(), $chosen_shipping_methods[0] ?? '', aco_get_purchase_id_from_session() );
+
+		// Add the session as a json object to the fragment.
+		$fragments['.aco-shipping-session'] = '<input type="hidden" value="' . esc_attr( wp_json_encode( $session ) ) . '" class="aco-shipping-session" />';
+
+		return $fragments;
+	}
+
+	/**
 	 * Print the extra shipping info.
 	 *
 	 * @param WC_Shipping_Rate $rate The shipping rate.
@@ -229,6 +280,10 @@ class ACO_Checkout {
 	 * @return void
 	 */
 	public function print_extra_shipping_info( $rate ) {
+		if ( false === $rate instanceof WC_Shipping_Rate ) { // Make sure it's a shipping rate, as this may not be the case in some setups.
+			return;
+		}
+
 		$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
 		if ( false === strpos( $rate_id, 'aco_shipping' ) ) { // Explicitly check for false, as strpos can return 0.
 			return;

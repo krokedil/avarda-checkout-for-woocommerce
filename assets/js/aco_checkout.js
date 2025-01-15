@@ -122,8 +122,11 @@ jQuery(function($) {
         acoInit.deliveryAddressChangedCallback =
           aco_wc.handleDeliveryAddressChangedCallback;
         acoInit.beforeSubmitCallback = aco_wc.handleBeforeSubmitCallback;
-        acoInit.shippingOptionChangedCallback =
-          aco_wc.handleShippingOptionChangedCallback;
+
+        // Only register the shipping option change callback if the integrated shipping is not WooCommerce.
+        if (aco_wc_params.integrated_shipping_woocommerce !== "yes") {
+          acoInit.shippingOptionChangedCallback = aco_wc.handleShippingOptionChangedCallback;
+        }
       }
       window.avardaCheckoutInit(acoInit);
     },
@@ -132,8 +135,6 @@ jQuery(function($) {
       { price, currency },
       checkout
     ) {
-      console.log("shipping_option_change");
-
       $(".woocommerce-checkout-review-order-table").block({
         message: null,
         overlayCSS: {
@@ -141,15 +142,6 @@ jQuery(function($) {
           opacity: 0.6,
         },
       });
-
-      console.log(
-        "iframe_shipping_option_change_url",
-        aco_wc_params.iframe_shipping_option_change_url
-      );
-      console.log(
-        "iframe_shipping_option_change_nonce",
-        aco_wc_params.iframe_shipping_option_change_nonce
-      );
 
       // Trigger update checkout event and force shipping to be recalculated.
       $.ajax({
@@ -209,13 +201,19 @@ jQuery(function($) {
 
           aco_wc.setCustomerDeliveryData(response.data);
 
+          if (response.data.hasOwnProperty('customer_data') && null !== response.data.customer_data) {
+            aco_wc.fillForm(response.data.customer_data);
+            window.avardaShipping.setHasFullAddress(true);
+          }
+
           if ("yes" === response.data.update_needed) {
             // All good refresh aco form and trigger update_checkout event.
-            callback.refreshForm();
+            //callback.deliveryAddressChangedContinue();
             $("body").trigger("update_checkout");
           } else {
             callback.deliveryAddressChangedContinue();
           }
+
         },
         error: function (response) {
           console.log(response);
