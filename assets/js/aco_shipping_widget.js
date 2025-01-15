@@ -3,15 +3,31 @@ jQuery(function($) {
         listeners: {},
         element : null,
         modules: null,
+        paymentMethod: null,
+        hasFullAddress: false,
+        changedShippingOption: false,
+
+        registerEvents: () => {
+            // Set the payment method to aco if we have the payment method radio buttons.
+            if (0 < $('input[name="payment_method"]').length) {
+                aco_shipping_widget.paymentMethod = $('input[name="payment_method"]').filter(':checked').val();
+            } else {
+                aco_shipping_widget.paymentMethod = 'aco';
+            }
+
+            // Display the shipping prices in the order review.
+            $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
+            $(document.body).on('updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice);
+        },
 
         init: (initObject) => {
             const { element, session_id, config } = initObject;
-
-            const $element = $(initObject.element);
+            const $element = $(element);
             aco_shipping_widget.element = $element;
 
             // Json decode the modules.
-            aco_shipping_widget.modules = JSON.parse(initObject.config.modules);
+            aco_shipping_widget.modules = JSON.parse(config.modules);
+            aco_shipping_widget.hasFullAddress = aco_shipping_widget.hasFullAddressData();
 
             // Loop the modules options and create the options HTML.
             const optionsHtml = aco_shipping_widget.getOptionsHtml();
@@ -21,21 +37,21 @@ jQuery(function($) {
 
             // Register the change event for the radio buttons.
             $element.on( "change", 'input:radio[name="aco_shipping_method"]:checked', function () {
+                aco_shipping_widget.blockElement("body");
                 const shippingMethod = $(this).val();
 
                 // Set the selected shipping method in WooCommerce by checking the radio button in the form.
                 $('input:radio[name="shipping_method[0]"][value="' + shippingMethod + '"]').prop("checked", true).trigger("change").trigger("click");
 
-                // Trigger the update_checkout event.
-                $(document.body).trigger("update_checkout");
-
                 // Trigger a custom event to let other scripts know that the shipping option has changed.
-                if (aco_shipping_widget.modules.selectedShippingOption !== shippingMethod) {
-                    $(document.body).on("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
+                if (aco_shipping_widget.modules.selected_option !== shippingMethod) {
+                    aco_shipping_widget.changedShippingOption = true;
+                    // Trigger the update_checkout event.
+                    $(document.body).trigger("update_checkout");
                 }
 
                 // Update the select shipping option inside the modules object.
-                aco_shipping_widget.modules.selectedShippingOption = shippingMethod;
+                aco_shipping_widget.modules.selected_option = shippingMethod;
             }
             );
 
@@ -43,19 +59,12 @@ jQuery(function($) {
             $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
             $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
 
-            // Set the payment method to aco if we have the payment method radio buttons.
-            if ( 0 < $('input[name="payment_method"]').length ) {
-                aco_shipping_widget.paymentMethod = $('input[name="payment_method"]').filter( ':checked' ).val();
-            } else {
-                aco_shipping_widget.paymentMethod = 'aco';
-            }
-
-            // Display the shipping price in the order review.
-            $(document).ready(aco_shipping_widget.maybeDisplayShippingPrice);
-            $('body').on( 'updated_checkout', aco_shipping_widget.maybeDisplayShippingPrice );
-
             $(document.body).on('updated_checkout', () => {
-                aco_shipping_widget.blockElement("body");
+                if(aco_shipping_widget.changedShippingOption) {
+                    aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                    aco_shipping_widget.changedShippingOption = false;
+                }
+
                 aco_shipping_widget.getShippingOptions();
             });
 
@@ -68,44 +77,39 @@ jQuery(function($) {
             }, 0);
         },
 
-        handleShippingOptionChange: () => {
-            aco_shipping_widget.dispatchEvent("shipping_option_changed");
-            aco_shipping_widget.getShippingOptions();
-            // Remove the on updated_checkout event to avoid multiple calls.
-            $(document.body).off("updated_checkout", aco_shipping_widget.handleShippingOptionChange);
+        hasFullAddressData: () => {
+            // Check if we have a value, and thats its not empty for country, postcode, city and address 1. Start with shipping and then check billing.
+            const country = ( $('#shipping_country').val() || $('#billing_country').val() );
+            const postcode = ( $('#shipping_postcode').val() || $('#billing_postcode').val() );
+            const city = ( $('#shipping_city').val() || $('#billing_city').val() );
+            const address = ( $('#shipping_address_1').val() || $('#billing_address_1').val() );
+
+            // If any are undefined, or empty strings, return false.
+            return country && postcode && city && address;
         },
 
         getShippingOptions: () => {
-            const { nonce, url } = aco_wc_shipping_params.ajax.get_shipping_options;
+            // Read the .aco-shipping-session field and parse the json from the value.
+            const {modules} = JSON.parse($('.aco-shipping-session').val());
 
-            $.ajax({
-                url: url,
-                type: "GET",
-                data: {
-                    nonce: nonce,
-                },
-                success: function (response) {
-                    if (response.success) {
-                        const { modules } = response.data;
+            // Set the current selected option so we can check if it has changed when getting them from the server.
+            const previousSelectedOption = aco_shipping_widget.modules.selected_option;
 
-                        // Update the modules object with the new shipping options.
-                        aco_shipping_widget.modules = JSON.parse(modules);
+            // Update the modules object with the new shipping options.
+            aco_shipping_widget.modules = JSON.parse(modules);
 
-                        // Update the options HTML with the new shipping options.
-                        const optionsHtml = aco_shipping_widget.getOptionsHtml();
+            // Update the options HTML with the new shipping options.
+            const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
-                        // Replace the options HTML in the element.
-                        aco_shipping_widget.element.html(optionsHtml);
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                },
-                complete: function () {
-                    aco_shipping_widget.unblockElement("body");
-                },
-            });
+            // Replace the options HTML in the element.
+            aco_shipping_widget.element.html(optionsHtml);
 
+            // If the selected option has changed, trigger the shipping_option_changed event.
+            if (aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
+                aco_shipping_widget.dispatchEvent("shipping_option_changed");
+            }
+
+            aco_shipping_widget.unblockElement("body");
         },
 
         suspend: () => {
@@ -143,18 +147,11 @@ jQuery(function($) {
         },
 
         sessionHasUpdated: () => {
-            const $form = $('form.checkout');
-            // Reload the window to ensure the checkout is loaded with new shipping options. And stop any ajax calls from running while the checkout is reloaded.
-            $form.block({
-                message: null,
-                overlayCSS: {
-                    background: "#fff",
-                    opacity: 0.6,
-                },
-            });
-            $form.addClass("processing"); // Add processing class to form to prevent the form from submitting or updating.
+            // Block the body.
+            //aco_shipping_widget.blockElement("body");
 
-            window.location.reload();
+            // Get the updated shipping options.
+            //aco_shipping_widget.getShippingOptions();
         },
 
         getOptionsHtml: () => {
@@ -310,9 +307,24 @@ jQuery(function($) {
                     margin-top: 13px;
                     color: #4C4C4C;
                 }
+                label.disabled {
+                    position: relative;
+                    cursor: not-allowed;
+                    pointer-events: none;
+                }
+                label.disabled::before {
+                    content: "";
+                    background-color: rgba(255, 255, 255, 0.5);
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                }
             </style>
             <div class="radio-group">
             `;
+
             options.forEach((option) => {
             html += aco_shipping_widget.getOptionHtml(option, selected_option);
             });
@@ -330,6 +342,8 @@ jQuery(function($) {
             const pickupPoints = option.pickupPoints ? option.pickupPoints : [];
             const iconUrl = option.iconUrl ? option.iconUrl : '';
             const description = option.description ? option.description : '';
+            const disabled = aco_shipping_widget.hasFullAddress ? "" : "disabled";
+
             var iconHtml = '';
             if(iconUrl) {
                 iconHtml = `<img src="${iconUrl}" alt="Carrier icon" class="aco-carrier-icon">`;
@@ -343,9 +357,10 @@ jQuery(function($) {
                         name="aco_shipping_method"
                         value="${method}"
                         ${selected ? "checked" : ""}
+                        ${disabled}
                     />
                     <div class="radio-box">
-                        <label class="radio-label" for="${formattedMethod}">
+                        <label class="radio-label ${disabled}" for="${formattedMethod}">
                             <div class="radio-button-wrapper">
                                 <div class="left-column">
                                     <svg width="24" height="24" role="radio">
@@ -557,14 +572,38 @@ jQuery(function($) {
             const words = string.split(" ");
 
             for (let i = 0; i < words.length; i++) {
+                // If the string is empty, continue to the next iteration.
+                if (words[i] === "") {
+                    continue;
+                }
+
               words[i] = words[i][0].toUpperCase() + words[i].substr(1);
             }
 
             return words.join(" ");
         },
 
+        /**
+         * Set that we now have full address details, and show the shipping methods again.
+         *
+         * @param {boolean} hasFullAddress
+         * @returns {void}
+         */
+        setHasFullAddress: (hasFullAddress) => {
+            // Only if the value has changed.
+            if (aco_shipping_widget.hasFullAddress === hasFullAddress) {
+                return;
+            }
+
+            aco_shipping_widget.hasFullAddress = hasFullAddress;
+            aco_shipping_widget.getShippingOptions();
+        }
+
     };
 
     // Make the aco_shipping_widget object available globally under avardaShipping.
     window.avardaShipping = aco_shipping_widget;
+
+    // Trigger the load function to register events that does not need the init object.
+    aco_shipping_widget.registerEvents();
 });

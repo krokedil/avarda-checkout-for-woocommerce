@@ -279,10 +279,13 @@ class ACO_Helper_Cart {
 			 */
 			foreach ( $package['rates'] as $rate ) {
 				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+					// If we should not show shipping, send the amount as 0.
+					$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
+
 					return array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
-						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
+						'amount'      => $amount,
 						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					);

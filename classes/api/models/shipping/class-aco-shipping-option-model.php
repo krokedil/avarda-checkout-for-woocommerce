@@ -102,6 +102,26 @@ class ACO_Shipping_Option_Model {
 	}
 
 	/**
+	 * Create a shipping option model with no shipping.
+	 *
+	 * @return ACO_Shipping_Option_Model
+	 */
+	public static function no_shipping() {
+		$option = new self();
+
+		$option->shippingMethod  = 'no_shipping';
+		$option->deliveryType    = 'mailbox';
+		$option->carrier         = 'no_shipping';
+		$option->iconUrl         = AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-neutral.svg';
+		$option->shippingProduct = __( 'No shipping', 'avarda-checkout-for-woocommerce' );
+		$option->price           = 0;
+		$option->currency        = get_woocommerce_currency();
+		$option->description     = __( 'Please enter your full address to see available shipping methods.', 'avarda-checkout-for-woocommerce' );
+
+		return $option;
+	}
+
+	/**
 	 * Set pickup points for the shipping method.
 	 *
 	 * @param object           $option ACO_Shipping_Option_Model.
