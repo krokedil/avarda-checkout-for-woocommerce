@@ -92,6 +92,9 @@ jQuery(function($) {
             // Read the .aco-shipping-session field and parse the json from the value.
             const {modules} = JSON.parse($('.aco-shipping-session').val());
 
+            // Set the current selected option so we can check if it has changed when getting them from the server.
+            const previousSelectedOption = aco_shipping_widget.modules.selected_option;
+
             // Update the modules object with the new shipping options.
             aco_shipping_widget.modules = JSON.parse(modules);
 
@@ -100,6 +103,12 @@ jQuery(function($) {
 
             // Replace the options HTML in the element.
             aco_shipping_widget.element.html(optionsHtml);
+
+            // If the selected option has changed, trigger the shipping_option_changed event.
+            if (aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
+                aco_shipping_widget.dispatchEvent("shipping_option_changed");
+            }
+
             aco_shipping_widget.unblockElement("body");
         },
 
