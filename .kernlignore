@@ -11,7 +11,9 @@ README.md
 tsconfig.json
 webpack.config.js
 
+.git/
 .git/**/*
+.github/
 .github/**/*
 node_modules/**/*
 node_modules
