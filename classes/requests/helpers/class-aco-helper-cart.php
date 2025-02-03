@@ -222,10 +222,13 @@ class ACO_Helper_Cart {
 	 * Gets the tax code for the product.
 	 *
 	 * @param object $cart_item The cart item.
-	 * @return float
+	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {
-		return (string) round( $this->get_product_tax_rate( $cart_item ) * 100 );
+		if ( 0 === intval( $cart_item['line_total'] ) ) {
+			return '0';
+		}
+		return (string) number_format( ( $cart_item['line_tax'] / $cart_item['line_total'] ) * 100, 1, '.', '' );
 	}
 
 	/**

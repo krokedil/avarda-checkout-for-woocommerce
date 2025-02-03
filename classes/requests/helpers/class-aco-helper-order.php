@@ -132,14 +132,14 @@ class ACO_Helper_Order {
 	 *
 	 * @param object $order The order item.
 	 * @param object $order_item The WooCommerce order item.
-	 * @return float
+	 * @return string
 	 */
 	public function get_product_tax_code( $order, $order_item ) {
 		$tax_items = $order->get_items( 'tax' );
 		foreach ( $tax_items as $tax_item ) {
 			$rate_id = $tax_item->get_rate_id();
 			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
-				return (string) round( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'], 2 );
+				return (string) number_format( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] * 100, 1, '.', '' );
 			}
 		}
 	}
