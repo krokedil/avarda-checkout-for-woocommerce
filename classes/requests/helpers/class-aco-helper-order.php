@@ -139,7 +139,7 @@ class ACO_Helper_Order {
 		foreach ( $tax_items as $tax_item ) {
 			$rate_id = $tax_item->get_rate_id();
 			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
-				return (string) number_format( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] * 100, 1, '.', '' );
+				return (string) WC_Tax::_get_tax_rate( $rate_id )['tax_rate'];
 			}
 		}
 	}

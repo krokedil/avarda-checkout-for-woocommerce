@@ -225,10 +225,10 @@ class ACO_Helper_Cart {
 	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {
-		if ( 0 === intval( $cart_item['line_total'] ) ) {
-			return '0';
-		}
-		return (string) number_format( ( $cart_item['line_tax'] / $cart_item['line_total'] ) * 100, 1, '.', '' );
+		$tax_class = isset( $cart_item['data'] ) ? $cart_item['data']->get_tax_class() : false;
+		$tax_rate  = $tax_class && WC_Tax::get_rates( $tax_class ) ? reset( WC_Tax::get_rates( $tax_class ) )['rate'] : 0;
+
+		return (string) $tax_rate;
 	}
 
 	/**
