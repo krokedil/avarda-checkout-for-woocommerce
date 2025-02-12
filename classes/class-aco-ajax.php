@@ -89,8 +89,9 @@ class ACO_AJAX extends WC_AJAX {
 
 		// Check if we have a Avarda purchase id.
 		if ( empty( $avarda_purchase_id ) ) {
-			wc_add_notice( 'Avarda purchase id is missing.', 'error' );
-			wp_send_json_error();
+			ACO_Logger::log( 'Missing purchase id in aco_wc_iframe_shipping_address_change function. Clearing Avarda session and reloading the checkout page.' );
+			aco_wc_unset_sessions();
+			wp_send_json_error( 'missing_purchase_id' );
 		}
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
