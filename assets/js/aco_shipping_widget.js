@@ -327,7 +327,8 @@ jQuery(function($) {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    height: 100px;
+                    height: 200px;
+                    flex-direction: column;
                 }
                 .aco-spinner::before {
                     content: "";
@@ -348,7 +349,7 @@ jQuery(function($) {
 
             // If the cart needs shipping, but we don't have any options, show a spinner instead.
             if (aco_shipping_widget.cartNeedsShipping && ( options.length === 0 || options[0].shippingMethod === 'no_shipping' )) {
-                html += "<div class='aco-spinner'></div>";
+                html += `<div class='aco-spinner'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.spinner_text}</p></div>`;
                 return html;
             }
 
