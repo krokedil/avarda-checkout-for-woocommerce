@@ -205,6 +205,18 @@ class ACO_AJAX extends WC_AJAX {
 
 		$avarda_order = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
 
+		// Check if session TimedOut.
+		if ( is_wp_error( $avarda_order ) ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Failed to get the avarda order (in aco_wc_get_avarda_payment function). Clearing Avarda session and reloading the checkout page.' );
+			wp_send_json_error(
+				array(
+					'error'    => 'wp_error',
+					'redirect' => wc_get_checkout_url(),
+				)
+			);
+		}
+
 		// Get current status of Avarda session.
 		$aco_step = aco_get_payment_step( $avarda_order );
 

@@ -209,6 +209,7 @@ class ACO_Assets {
 
 		$shipping_widget = array(
 			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
+			'cart_needs_shipping'             => WC()->cart->needs_shipping(),
 			'price_format'                    => array(
 				'format' => get_woocommerce_price_format(),
 				'symbol' => get_woocommerce_currency_symbol(),

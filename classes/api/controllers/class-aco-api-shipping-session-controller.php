@@ -219,7 +219,18 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @return void
 	 */
 	public function complete_session( $request ) {
-		$this->send_response( array() );
+		$purchase_id = $request->get_param( 'id' );
+
+		// Get the WooCommerce order for the purchase id.
+		$order = aco_get_order_by_purchase_id( $purchase_id );
+
+		if ( ! $order ) {
+			$this->send_response( new WP_Error( 404, 'Not found' ) );
+		}
+
+		$session = ACO_Shipping_Session_Model::completed_session( $purchase_id );
+		error_log( var_export( $session, true ) );
+		$this->send_response( $session );
 	}
 
 	/**
