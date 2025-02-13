@@ -225,10 +225,21 @@ class ACO_Helper_Cart {
 	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {
-		$tax_class = isset( $cart_item['data'] ) ? $cart_item['data']->get_tax_class() : false;
-		$tax_rate  = $tax_class && WC_Tax::get_rates( $tax_class ) ? reset( WC_Tax::get_rates( $tax_class ) )['rate'] : 0;
+		// Check if 'data' exists and get the tax class, and ensure get_tax_class exists as a method to prevent errors.
+		if ( isset( $cart_item['data'] ) && method_exists( $cart_item['data'], 'get_tax_class' ) ) {
+			$tax_class = $cart_item['data']->get_tax_class();
 
-		return (string) $tax_rate;
+			// Get the tax rates from the tax class.
+			$rates = WC_Tax::get_rates( $tax_class );
+			if ( ! empty( $rates ) ) {
+				$first_rate = reset( $rates ); // Only use the first rate returned.
+				// Check if 'rate' key exists; otherwise, fallback to 0
+				return (string) ( $first_rate['rate'] ?? 0 );
+			}
+		}
+
+		// Return a default value if no rate is found.
+		return '0';
 	}
 
 	/**
