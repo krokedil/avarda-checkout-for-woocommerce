@@ -229,7 +229,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		}
 
 		$session = ACO_Shipping_Session_Model::completed_session( $purchase_id );
-		error_log( var_export( $session, true ) );
+
 		$this->send_response( $session );
 	}
 
