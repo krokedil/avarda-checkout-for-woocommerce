@@ -209,6 +209,8 @@ class ACO_Assets {
 
 		$shipping_widget = array(
 			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
+			'cart_needs_shipping'             => WC()->cart->needs_shipping(),
+			'spinner_text'                    => apply_filters( 'aco_shipping_widget_spinner_text', __( 'Waiting for shipping options...', 'avarda-checkout-for-woocommerce' ) ),
 			'price_format'                    => array(
 				'format' => get_woocommerce_price_format(),
 				'symbol' => get_woocommerce_currency_symbol(),

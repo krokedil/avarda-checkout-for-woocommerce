@@ -1,4 +1,4 @@
-# Copyright (C) 2024 avarda-checkout-for-woocommerce
+# Copyright (C) 2025 avarda-checkout-for-woocommerce
 # This file is distributed under the same license as the avarda-checkout-for-woocommerce package.
 msgid ""
 msgstr ""
@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Krokedil <info@krokedil.se>\n"
 "Last-Translator: Krokedil <info@krokedil.se>\n"
-"POT-Creation-Date: 2024-10-14 08:53+0000\n"
+"POT-Creation-Date: 2025-02-12 14:57+0000\n"
 "Report-Msgid-Bugs-To: http://krokedil.se\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -17,19 +17,19 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../avarda-checkout-for-woocommerce.php:186, ../avarda-checkout-for-woocommerce.php:195, ../classes/class-aco-session.php:47, ../classes/class-aco-session.php:56
+#: ../avarda-checkout-for-woocommerce.php:187, ../avarda-checkout-for-woocommerce.php:196, ../classes/class-aco-session.php:47, ../classes/class-aco-session.php:56
 msgid "Nope"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:283, ../avarda-checkout-for-woocommerce.php:292
+#: ../avarda-checkout-for-woocommerce.php:292, ../avarda-checkout-for-woocommerce.php:301
 msgid "Your installation of Avarda Checkout is not complete. If you installed this plugin directly from Github please refer to the README.DEV.md file in the plugin."
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:387
+#: ../avarda-checkout-for-woocommerce.php:396
 msgid "Settings"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:388
+#: ../avarda-checkout-for-woocommerce.php:397
 msgid "Support"
 msgstr ""
 
@@ -39,6 +39,10 @@ msgstr ""
 
 #: ../classes/class-aco-assets.php:191
 msgid "Please fill in all required checkout fields."
+msgstr ""
+
+#: ../classes/class-aco-assets.php:213
+msgid "Waiting for shipping options..."
 msgstr ""
 
 #. translators: Avarda purchase ID.
@@ -249,33 +253,33 @@ msgid "The price of the fallback shipping method., this will be used in cases wh
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../classes/class-aco-subscription.php:53
+#: ../classes/class-aco-subscription.php:54
 msgid "Avarda subscription ID/recurring token %s saved"
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../classes/class-aco-subscription.php:72
+#: ../classes/class-aco-subscription.php:73
 msgid "Avarda subscription ID/recurring token %s saved."
 msgstr ""
 
 #. translators: Error message.
-#: ../classes/class-aco-subscription.php:145
+#: ../classes/class-aco-subscription.php:146
 msgid "Subscription payment failed with Avarda. Message: %1$s"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:133
+#: ../classes/class-aco-subscription.php:134
 msgid "Subscription payment made with Avarda. Avarda purchase id: %s"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:173
+#: ../classes/class-aco-subscription.php:179
 msgid "Avarda recurring token"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:207, ../includes/aco-form-fields.php:104, ../classes/requests/helpers/class-aco-helper-order.php:189
+#: ../classes/class-aco-subscription.php:214, ../includes/aco-form-fields.php:104, ../classes/requests/helpers/class-aco-helper-order.php:189
 msgid "Shipping"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:254
+#: ../classes/class-aco-subscription.php:261
 msgid "Thank you, your subscription payment method is now updated."
 msgstr ""
 
@@ -547,4 +551,12 @@ msgstr ""
 
 #: ../includes/admin/views/status-report.php:31
 msgid "Response Message"
+msgstr ""
+
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:116
+msgid "No shipping"
+msgstr ""
+
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:119
+msgid "Please enter your full address to see available shipping methods."
 msgstr ""

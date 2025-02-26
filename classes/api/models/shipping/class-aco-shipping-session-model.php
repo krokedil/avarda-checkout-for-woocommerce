@@ -50,7 +50,21 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
 		$session->status    = 'ACTIVE';
 
-		if ( $selected ) {
+		if ( empty( $shipping_rates ) ) {
+			$no_shipping                     = ACO_Shipping_Option_Model::no_shipping();
+			$session->selectedShippingOption = $no_shipping;
+
+			$session->modules = wp_json_encode(
+				array(
+					'options'         => array( $no_shipping ),
+					'selected_option' => 'no_shipping',
+				)
+			);
+
+			return $session;
+		}
+
+		if ( ! empty( $selected ) ) {
 			$session->selectedShippingOption = ACO_Shipping_Option_Model::from_shipping_rate( $selected );
 		}
 
@@ -80,5 +94,21 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 		 * @param string                     $purchase_id The purchase id for the Avarda order.
 		 */
 		return apply_filters( 'aco_shipping_session', $session, $shipping_rates, $chosen_shipping_method, $purchase_id );
+	}
+
+	/**
+	 * Create a instance for a completed session.
+	 *
+	 * @param string $purchase_id The purchase id.
+	 *
+	 * @return ACO_Shipping_Session_Model
+	 */
+	public static function completed_session( $purchase_id ) {
+		$session            = new self();
+		$session->id        = $purchase_id;
+		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
+		$session->status    = 'COMPLETED';
+
+		return $session;
 	}
 }
