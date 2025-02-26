@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 9.5.2
+WC tested up to: 9.7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.16.0
+Stable tag: 1.16.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2025.02.16        - version 1.16.1 =
+* Enhancement       - Added a spinner to show while shipping methods are being calculated when using the WooCommerce shipping methods inside Avarda Checkout.
+* Enhancement       - Changed how we get the tax rate of order lines to prevent issues when calculating the rate.
+* Fix               - Fixed an issue with sending tax rates to Avarda that included decimals. For example for Finish 25.5% VAT rate.
+* Fix               - Fixed an issue that could cause customer to see an error message saying the purchase id is missing.
+
 = 2025.01.15        - version 1.16.0 =
 * Feature           - Added a sync to load shipping methods from the frontend when using the WooCommerce shipping methods inside Avarda Checkout.
 * Feature           - Added the ability to send a no shipping option to Avarda Checkout when using the WooCommerce shipping methods, if no shipping methods could be found.
