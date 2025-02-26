@@ -71,12 +71,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/woocommerce.git",
-                "reference": "ac1bcf7bd55d6b1c3b93623008c7d835f43aaaf6"
+                "reference": "bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/ac1bcf7bd55d6b1c3b93623008c7d835f43aaaf6",
-                "reference": "ac1bcf7bd55d6b1c3b93623008c7d835f43aaaf6",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5",
+                "reference": "bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5",
                 "shasum": ""
             },
             "require-dev": {
@@ -107,10 +107,10 @@
             ],
             "description": "A library package for Krokedils plugins that contains helper methods when working with WooCommerce.",
             "support": {
-                "source": "https://github.com/krokedil/woocommerce/tree/develop",
+                "source": "https://github.com/krokedil/woocommerce/tree/1.8.0",
                 "issues": "https://github.com/krokedil/woocommerce/issues"
             },
-            "time": "2024-11-08T13:49:59+00:00"
+            "time": "2025-02-05T14:02:57+00:00"
         },
         {
             "name": "psr/container",

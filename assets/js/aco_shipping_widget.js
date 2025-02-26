@@ -6,6 +6,7 @@ jQuery(function($) {
         paymentMethod: null,
         hasFullAddress: false,
         changedShippingOption: false,
+        cartNeedsShipping: false,
 
         registerEvents: () => {
             // Set the payment method to aco if we have the payment method radio buttons.
@@ -24,6 +25,7 @@ jQuery(function($) {
             const { element, session_id, config } = initObject;
             const $element = $(element);
             aco_shipping_widget.element = $element;
+            aco_shipping_widget.cartNeedsShipping = aco_wc_shipping_params.cart_needs_shipping;
 
             // Json decode the modules.
             aco_shipping_widget.modules = JSON.parse(config.modules);
@@ -321,10 +323,37 @@ jQuery(function($) {
                     width: 100%;
                     height: 100%;
                 }
+                .aco-spinner {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 200px;
+                    flex-direction: column;
+                }
+                .aco-spinner::before {
+                    content: "";
+                    width: 40px;
+                    height: 40px;
+                    border: 5px solid #ccc;
+                    border-top-color: #000;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+                @keyframes spin {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                }
             </style>
-            <div class="radio-group">
             `;
 
+            // If the cart needs shipping, but we don't have any options, show a spinner instead.
+            if (aco_shipping_widget.cartNeedsShipping && ( options.length === 0 || options[0].shippingMethod === 'no_shipping' )) {
+                html += `<div class='aco-spinner'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.spinner_text}</p></div>`;
+                return html;
+            }
+
+            html += "<div class='radio-group'>";
             options.forEach((option) => {
             html += aco_shipping_widget.getOptionHtml(option, selected_option);
             });

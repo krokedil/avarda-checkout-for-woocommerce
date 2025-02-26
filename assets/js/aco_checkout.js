@@ -198,6 +198,10 @@ jQuery(function($) {
         },
         success: function (response) {
           console.log(response);
+          if(response.success === false && 'missing_purchase_id' === response.data) {
+            window.location.reload();
+            return;
+          }
 
           aco_wc.setCustomerDeliveryData(response.data);
 

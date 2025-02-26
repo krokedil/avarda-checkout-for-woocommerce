@@ -89,8 +89,9 @@ class ACO_AJAX extends WC_AJAX {
 
 		// Check if we have a Avarda purchase id.
 		if ( empty( $avarda_purchase_id ) ) {
-			wc_add_notice( 'Avarda purchase id is missing.', 'error' );
-			wp_send_json_error();
+			ACO_Logger::log( 'Missing purchase id in aco_wc_iframe_shipping_address_change function. Clearing Avarda session and reloading the checkout page.' );
+			aco_wc_unset_sessions();
+			wp_send_json_error( 'missing_purchase_id' );
 		}
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_key( $_POST['nonce'] ) : '';
 		if ( ! wp_verify_nonce( $nonce, 'aco_wc_iframe_shipping_address_change' ) ) { // Input var okay.
@@ -204,6 +205,18 @@ class ACO_AJAX extends WC_AJAX {
 		}
 
 		$avarda_order = ACO_WC()->api->request_get_payment( aco_get_purchase_id_from_session() );
+
+		// Check if session TimedOut.
+		if ( is_wp_error( $avarda_order ) ) {
+			aco_wc_unset_sessions();
+			ACO_Logger::log( 'Failed to get the avarda order (in aco_wc_get_avarda_payment function). Clearing Avarda session and reloading the checkout page.' );
+			wp_send_json_error(
+				array(
+					'error'    => 'wp_error',
+					'redirect' => wc_get_checkout_url(),
+				)
+			);
+		}
 
 		// Get current status of Avarda session.
 		$aco_step = aco_get_payment_step( $avarda_order );

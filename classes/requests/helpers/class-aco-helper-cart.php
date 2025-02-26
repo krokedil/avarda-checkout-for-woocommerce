@@ -222,10 +222,24 @@ class ACO_Helper_Cart {
 	 * Gets the tax code for the product.
 	 *
 	 * @param object $cart_item The cart item.
-	 * @return float
+	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {
-		return (string) round( $this->get_product_tax_rate( $cart_item ) * 100 );
+		// Check if 'data' exists and get the tax class, and ensure get_tax_class exists as a method to prevent errors.
+		if ( isset( $cart_item['data'] ) && method_exists( $cart_item['data'], 'get_tax_class' ) ) {
+			$tax_class = $cart_item['data']->get_tax_class();
+
+			// Get the tax rates from the tax class.
+			$rates = WC_Tax::get_rates( $tax_class );
+			if ( ! empty( $rates ) ) {
+				$first_rate = reset( $rates ); // Only use the first rate returned.
+				// Check if 'rate' key exists; otherwise, fallback to 0
+				return (string) ( $first_rate['rate'] ?? 0 );
+			}
+		}
+
+		// Return a default value if no rate is found.
+		return '0';
 	}
 
 	/**
