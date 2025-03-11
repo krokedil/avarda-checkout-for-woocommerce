@@ -285,10 +285,10 @@ jQuery(function($) {
       console.log("fillForm", customerAddress);
       var billing_first_name = customerAddress.billing.first_name
         ? customerAddress.billing.first_name
-        : ".";
+        : "";
       var billing_last_name = customerAddress.billing.last_name
         ? customerAddress.billing.last_name
-        : ".";
+        : "";
       var billing_company = customerAddress.billing.company
         ? customerAddress.billing.company
         : "";
@@ -296,13 +296,13 @@ jQuery(function($) {
       var billing_address_2 = customerAddress.billing.address2;
       var billing_city = customerAddress.billing.city
         ? customerAddress.billing.city
-        : ".";
+        : "";
       var billing_postcode = customerAddress.billing.zip
         ? customerAddress.billing.zip.replace(/\s/g, "")
         : "";
       var billing_phone = customerAddress.billing.phone
         ? customerAddress.billing.phone
-        : ".";
+        : "";
       var billing_email = customerAddress.billing.email
         ? customerAddress.billing.email
         : "krokedil@krokedil.se";
