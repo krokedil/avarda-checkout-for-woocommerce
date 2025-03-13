@@ -305,18 +305,18 @@ jQuery(function($) {
         : "";
       var billing_email = customerAddress.billing.email
         ? customerAddress.billing.email
-        : "krokedil@krokedil.se";
+        : "";
 
-      $("#billing_first_name").val(billing_first_name);
-      $("#billing_last_name").val(billing_last_name);
-      $("#billing_company").val(billing_company);
+      billing_first_name && $("#billing_first_name").val(billing_first_name);
+      billing_last_name && $("#billing_last_name").val(billing_last_name);
+      billing_company && $("#billing_company").val(billing_company);
 
-      $("#billing_address_1").val(billing_address_1);
-      $("#billing_address_2").val(billing_address_2);
-      $("#billing_city").val(billing_city);
-      $("#billing_postcode").val(billing_postcode);
-      $("#billing_phone").val(billing_phone);
-      $("#billing_email").val(billing_email);
+      billing_address_1 && $("#billing_address_1").val(billing_address_1);
+      billing_address_2 && $("#billing_address_2").val(billing_address_2);
+      billing_city && $("#billing_city").val(billing_city);
+      billing_postcode && $("#billing_postcode").val(billing_postcode);
+      billing_phone && $("#billing_phone").val(billing_phone);
+      billing_email && $("#billing_email").val(billing_email);
 
       if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
         $("form.checkout #ship-to-different-address-checkbox").prop(
