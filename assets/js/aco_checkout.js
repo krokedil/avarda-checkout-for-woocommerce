@@ -350,6 +350,7 @@ jQuery(function($) {
       shipping_first_name && $("#shipping_first_name").val(shipping_first_name);
       shipping_last_name && $("#shipping_last_name").val(shipping_last_name);
       shipping_company && $("#shipping_company").val(shipping_company);
+
       shipping_address_1 && $("#shipping_address_1").val(shipping_address_1);
       shipping_address_2 && $("#shipping_address_2").val(shipping_address_2);
       shipping_city && $("#shipping_city").val(shipping_city);
