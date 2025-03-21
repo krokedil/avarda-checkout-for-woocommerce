@@ -222,10 +222,24 @@ class ACO_Helper_Cart {
 	 * Gets the tax code for the product.
 	 *
 	 * @param object $cart_item The cart item.
-	 * @return float
+	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {
-		return (string) round( $this->get_product_tax_rate( $cart_item ) * 100 );
+		// Check if 'data' exists and get the tax class, and ensure get_tax_class exists as a method to prevent errors.
+		if ( isset( $cart_item['data'] ) && method_exists( $cart_item['data'], 'get_tax_class' ) ) {
+			$tax_class = $cart_item['data']->get_tax_class();
+
+			// Get the tax rates from the tax class.
+			$rates = WC_Tax::get_rates( $tax_class );
+			if ( ! empty( $rates ) ) {
+				$first_rate = reset( $rates ); // Only use the first rate returned.
+				// Check if 'rate' key exists; otherwise, fallback to 0
+				return (string) ( $first_rate['rate'] ?? 0 );
+			}
+		}
+
+		// Return a default value if no rate is found.
+		return '0';
 	}
 
 	/**
@@ -278,26 +292,30 @@ class ACO_Helper_Cart {
 			 * @var WC_Shipping_Rate $rate Shipping rate.
 			 */
 			foreach ( $package['rates'] as $rate ) {
-				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() ) {
+				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+					// If we should not show shipping, send the amount as 0.
+					$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
+
 					return array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
-						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
-						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_taxes() * 100 ), // String.
+						'amount'      => $amount,
+						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					);
 				}
 
-				if ( $chosen_shipping === $rate->get_id() ) {
+				$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
+				if ( $chosen_shipping === $rate_id ) {
 					$formatted_shipping = ( $rate->get_cost() > 0 ) ? array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
-						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate_id, 0, 34 ), // String.
 						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
 						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					) : array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
-						'notes'       => substr( 'shipping|' . $rate->get_id(), 0, 34 ), // String.
+						'notes'       => substr( 'shipping|' . $rate_id, 0, 34 ), // String.
 						'amount'      => 0, // Float.
 						'taxCode'     => '0', // String.
 						'taxAmount'   => 0, // Float.
@@ -307,5 +325,24 @@ class ACO_Helper_Cart {
 		}
 
 		return $formatted_shipping;
+	}
+
+	/**
+	 * Get the cart attachment as a json encoded string.
+	 *
+	 * @return string
+	 */
+	public function get_cart_attachment() {
+		$attachment = array();
+
+		if ( ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+			// Add the attachment with session information so we can use it in the API.
+			$attachment['shipping'] = array(
+				'customerId'            => WC()->session->get_customer_unique_id(),
+				'chosenShippingMethods' => WC()->session->get( 'chosen_shipping_methods' ),
+			);
+		}
+
+		return empty( $attachment ) ? '' : wp_json_encode( $attachment );
 	}
 }

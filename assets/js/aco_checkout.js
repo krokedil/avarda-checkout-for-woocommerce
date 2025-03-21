@@ -75,14 +75,6 @@ jQuery(function($) {
     documentReady: function () {
       aco_wc.moveExtraCheckoutFields();
       aco_wc.ACOCheckoutForm();
-
-      // Add two column class to checkout if Avarda setting in Woo is set.
-      if (true === aco_wc_params.aco_checkout_layout.two_column) {
-        $("form.checkout.woocommerce-checkout").addClass(
-          "aco-two-column-checkout-left"
-        );
-        $("#aco-iframe").addClass("aco-two-column-checkout-right");
-      }
     },
 
     ACOCheckoutForm: function () {
@@ -130,8 +122,11 @@ jQuery(function($) {
         acoInit.deliveryAddressChangedCallback =
           aco_wc.handleDeliveryAddressChangedCallback;
         acoInit.beforeSubmitCallback = aco_wc.handleBeforeSubmitCallback;
-        acoInit.shippingOptionChangedCallback =
-          aco_wc.handleShippingOptionChangedCallback;
+
+        // Only register the shipping option change callback if the integrated shipping is not WooCommerce.
+        if (aco_wc_params.integrated_shipping_woocommerce !== "yes") {
+          acoInit.shippingOptionChangedCallback = aco_wc.handleShippingOptionChangedCallback;
+        }
       }
       window.avardaCheckoutInit(acoInit);
     },
@@ -140,8 +135,6 @@ jQuery(function($) {
       { price, currency },
       checkout
     ) {
-      console.log("shipping_option_change");
-
       $(".woocommerce-checkout-review-order-table").block({
         message: null,
         overlayCSS: {
@@ -149,15 +142,6 @@ jQuery(function($) {
           opacity: 0.6,
         },
       });
-
-      console.log(
-        "iframe_shipping_option_change_url",
-        aco_wc_params.iframe_shipping_option_change_url
-      );
-      console.log(
-        "iframe_shipping_option_change_nonce",
-        aco_wc_params.iframe_shipping_option_change_nonce
-      );
 
       // Trigger update checkout event and force shipping to be recalculated.
       $.ajax({
@@ -214,16 +198,26 @@ jQuery(function($) {
         },
         success: function (response) {
           console.log(response);
+          if(response.success === false && 'missing_purchase_id' === response.data) {
+            window.location.reload();
+            return;
+          }
 
           aco_wc.setCustomerDeliveryData(response.data);
 
+          if (response.data.hasOwnProperty('customer_data') && null !== response.data.customer_data) {
+            aco_wc.fillForm(response.data.customer_data);
+            window.avardaShipping.setHasFullAddress(true);
+          }
+
           if ("yes" === response.data.update_needed) {
             // All good refresh aco form and trigger update_checkout event.
-            callback.refreshForm();
+            //callback.deliveryAddressChangedContinue();
             $("body").trigger("update_checkout");
           } else {
             callback.deliveryAddressChangedContinue();
           }
+
         },
         error: function (response) {
           console.log(response);
@@ -236,12 +230,16 @@ jQuery(function($) {
 
     setCustomerDeliveryData: function (data) {
       console.log(data);
-      $("#billing_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#billing_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#billing_country").val(
         data.customer_country ? data.customer_country : ""
       );
 
-      $("#shipping_postcode").val(data.customer_zip ? data.customer_zip : "");
+      $("#shipping_postcode").val(
+        data.customer_zip ? data.customer_zip.replace(/\s/g, "") : ""
+      );
       $("#shipping_country").val(
         data.customer_country ? data.customer_country : ""
       );
@@ -300,7 +298,7 @@ jQuery(function($) {
         ? customerAddress.billing.city
         : ".";
       var billing_postcode = customerAddress.billing.zip
-        ? customerAddress.billing.zip
+        ? customerAddress.billing.zip.replace(/\s/g, "")
         : "";
       var billing_phone = customerAddress.billing.phone
         ? customerAddress.billing.phone
@@ -358,7 +356,7 @@ jQuery(function($) {
       );
       $("#shipping_postcode").val(
         customerAddress.shipping.zip
-          ? customerAddress.shipping.zip
+          ? customerAddress.shipping.zip.replace(/\s/g, "")
           : billing_postcode
       );
     },
@@ -447,7 +445,7 @@ jQuery(function($) {
 				}
 
 				// Check if this is a standard field.
-				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) ) {
+				if ( -1 === $.inArray( name, aco_wc_params.standard_woo_checkout_fields ) && name !== 'ws_drop_point_blob' ) {
 
 					// This is not a standard Woo field, move to our div.
 					if ( 0 < $( 'p#' + name + '_field' ).length ) {

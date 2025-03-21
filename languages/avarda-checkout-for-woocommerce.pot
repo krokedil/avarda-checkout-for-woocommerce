@@ -1,4 +1,4 @@
-# Copyright (C) 2024 avarda-checkout-for-woocommerce
+# Copyright (C) 2025 avarda-checkout-for-woocommerce
 # This file is distributed under the same license as the avarda-checkout-for-woocommerce package.
 msgid ""
 msgstr ""
@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Krokedil <info@krokedil.se>\n"
 "Last-Translator: Krokedil <info@krokedil.se>\n"
-"POT-Creation-Date: 2024-06-03 08:36+0000\n"
+"POT-Creation-Date: 2025-02-12 14:57+0000\n"
 "Report-Msgid-Bugs-To: http://krokedil.se\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -17,28 +17,32 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../avarda-checkout-for-woocommerce.php:157, ../avarda-checkout-for-woocommerce.php:166, ../classes/class-aco-session.php:47, ../classes/class-aco-session.php:56
+#: ../avarda-checkout-for-woocommerce.php:187, ../avarda-checkout-for-woocommerce.php:196, ../classes/class-aco-session.php:47, ../classes/class-aco-session.php:56
 msgid "Nope"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:242, ../avarda-checkout-for-woocommerce.php:251
+#: ../avarda-checkout-for-woocommerce.php:292, ../avarda-checkout-for-woocommerce.php:301
 msgid "Your installation of Avarda Checkout is not complete. If you installed this plugin directly from Github please refer to the README.DEV.md file in the plugin."
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:340
+#: ../avarda-checkout-for-woocommerce.php:396
 msgid "Settings"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:341
+#: ../avarda-checkout-for-woocommerce.php:397
 msgid "Support"
 msgstr ""
 
-#: ../classes/class-aco-assets.php:165, ../includes/aco-functions.php:633
+#: ../classes/class-aco-assets.php:174, ../includes/aco-functions.php:645
 msgid "Select another payment method"
 msgstr ""
 
-#: ../classes/class-aco-assets.php:182
+#: ../classes/class-aco-assets.php:191
 msgid "Please fill in all required checkout fields."
+msgstr ""
+
+#: ../classes/class-aco-assets.php:213
+msgid "Waiting for shipping options..."
 msgstr ""
 
 #. translators: Avarda purchase ID.
@@ -50,15 +54,15 @@ msgstr ""
 msgid "Something went wrong in the checkout process. Please contact the store."
 msgstr ""
 
-#: ../classes/class-aco-gateway.php:42, ../includes/aco-functions.php:563, ../includes/admin/views/status-report.php:17
+#: ../classes/class-aco-gateway.php:56, ../includes/aco-functions.php:575, ../includes/admin/views/status-report.php:17
 msgid "Avarda Checkout"
 msgstr ""
 
-#: ../classes/class-aco-gateway.php:402, ../classes/class-aco-gateway.php:416
+#: ../classes/class-aco-gateway.php:422, ../classes/class-aco-gateway.php:436
 msgid "The order could not be verified, please try again."
 msgstr ""
 
-#: ../classes/class-aco-meta-box.php:49
+#: ../classes/class-aco-meta-box.php:49, ../classes/class-aco-shipping-instance-settings.php:50
 msgid "Avarda"
 msgstr ""
 
@@ -208,6 +212,22 @@ msgstr ""
 msgid "%1$s Purchase Id: %2$s.%3$s"
 msgstr ""
 
+#: ../classes/class-aco-shipping-instance-settings.php:55
+msgid "Description (Avarda)"
+msgstr ""
+
+#: ../classes/class-aco-shipping-instance-settings.php:58
+msgid "This sets the description which the user sees during checkout in the Avarda Checkout."
+msgstr ""
+
+#: ../classes/class-aco-shipping-instance-settings.php:63
+msgid "Icon URL (Avarda)"
+msgstr ""
+
+#: ../classes/class-aco-shipping-instance-settings.php:66
+msgid "This sets the URL for the icon the shipping method will get in Avarda Checkout. Use a square icon for best results."
+msgstr ""
+
 #: ../classes/class-aco-shipping.php:24, ../classes/class-aco-shipping.php:25, ../classes/class-aco-shipping.php:448
 msgid "Avarda Checkout Shipping"
 msgstr ""
@@ -233,232 +253,266 @@ msgid "The price of the fallback shipping method., this will be used in cases wh
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../classes/class-aco-subscription.php:53
+#: ../classes/class-aco-subscription.php:54
 msgid "Avarda subscription ID/recurring token %s saved"
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../classes/class-aco-subscription.php:72
+#: ../classes/class-aco-subscription.php:73
 msgid "Avarda subscription ID/recurring token %s saved."
 msgstr ""
 
 #. translators: Error message.
-#: ../classes/class-aco-subscription.php:145
+#: ../classes/class-aco-subscription.php:146
 msgid "Subscription payment failed with Avarda. Message: %1$s"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:133
+#: ../classes/class-aco-subscription.php:134
 msgid "Subscription payment made with Avarda. Avarda purchase id: %s"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:173
+#: ../classes/class-aco-subscription.php:179
 msgid "Avarda recurring token"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:207, ../classes/requests/helpers/class-aco-helper-order.php:189
+#: ../classes/class-aco-subscription.php:214, ../includes/aco-form-fields.php:104, ../classes/requests/helpers/class-aco-helper-order.php:189
 msgid "Shipping"
 msgstr ""
 
-#: ../classes/class-aco-subscription.php:254
+#: ../classes/class-aco-subscription.php:261
 msgid "Thank you, your subscription payment method is now updated."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:10
+#: ../includes/aco-form-fields.php:13
 msgid "Enable/Disable"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:16
+#: ../includes/aco-form-fields.php:19
 msgid "Title"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:18
+#: ../includes/aco-form-fields.php:21
 msgid "This controls the title which the user sees during checkout."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:23
+#: ../includes/aco-form-fields.php:26
 msgid "Description"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:25
+#: ../includes/aco-form-fields.php:28
 msgid "Pay with Avarda via invoice, card and direct bank payments."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:27
+#: ../includes/aco-form-fields.php:30
 msgid "This controls the description which the user sees during checkout."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:30
+#: ../includes/aco-form-fields.php:33
 msgid "Other payment method button text"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:32
+#: ../includes/aco-form-fields.php:35
 msgid "Customize the <em>Select another payment method</em> button text that is displayed in checkout if using other payment methods than Avarda Checkout. Leave blank to use the default (and translatable) text."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:37
+#: ../includes/aco-form-fields.php:40
 msgid "Checkout flow"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:40
+#: ../includes/aco-form-fields.php:43
 msgid "Embedded"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:41
+#: ../includes/aco-form-fields.php:44
 msgid "Redirect"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:43
+#: ../includes/aco-form-fields.php:46
 msgid "Select how Avarda Checkout should be integrated in WooCommerce. <strong>Embedded</strong> – the checkout is embedded in the WooCommerce checkout page and partially replaces the checkout form. <strong>Redirect</strong> – the customer is redirected to WooCommerce order pay page where the Avarda Checkout is displayed."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:48
+#: ../includes/aco-form-fields.php:51
 msgid "Testmode"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:50
+#: ../includes/aco-form-fields.php:53
 msgid "Enable Avarda Checkout testmode"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:54
+#: ../includes/aco-form-fields.php:57
 msgid "Age validation"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:56
+#: ../includes/aco-form-fields.php:59
 msgid "Enter an age if you only want to offer purchases from customers older than the specified age. Leave blank or set to 0 to disable age validation."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:61
+#: ../includes/aco-form-fields.php:64
+msgid "Display items"
+msgstr ""
+
+#: ../includes/aco-form-fields.php:66
+msgid "Display the items in the Avarda Checkout. If disabled, the Avarda Checkout will only display the total amount."
+msgstr ""
+
+#: ../includes/aco-form-fields.php:70
 msgid "Enable Order Management"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:63
+#: ../includes/aco-form-fields.php:72
 msgid "Enable Avarda order capture on WooCommerce order completion and Avarda order cancellation on WooCommerce order cancellation"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:67
+#: ../includes/aco-form-fields.php:76
 msgid "Debug Log"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:69
+#: ../includes/aco-form-fields.php:78
 msgid "Enable logging"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:74
+#: ../includes/aco-form-fields.php:83
 msgid "Payment gateway icon"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:76
+#: ../includes/aco-form-fields.php:85
 msgid "Enter an URL to the icon you want to display for the payment method. Use <i>default</i> to display the Avarda logo. Leave blank to not show an icon at all."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:81
+#: ../includes/aco-form-fields.php:90
 msgid "Payment gateway icon width"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:83
+#: ../includes/aco-form-fields.php:92
 msgid "Specify the max width (in px) of the payment gateway icon."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:88
+#: ../includes/aco-form-fields.php:97
 msgid "Two column checkout layout"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:90
+#: ../includes/aco-form-fields.php:99
 msgid "Enable Two column checkout layout"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:94
+#: ../includes/aco-form-fields.php:108
 msgid "Integrated Shipping"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:96
-msgid "Enable Avarda Checkout integrated shipping with for example Ingrid or nShift."
+#: ../includes/aco-form-fields.php:110
+msgid "Select which type of shipping you want to integrate in Avarda Checkout. This will display the shipping methods for the customer inside the Avarda Checkout instead of the WooCommerce order summary."
 msgstr ""
 
-#: ../includes/aco-form-fields.php:105, ../includes/aco-form-fields.php:122, ../includes/aco-form-fields.php:139, ../includes/aco-form-fields.php:156, ../includes/aco-form-fields.php:173
+#: ../includes/aco-form-fields.php:112
+msgid "None"
+msgstr ""
+
+#: ../includes/aco-form-fields.php:113
+msgid "Partner Shipping"
+msgstr ""
+
+#: ../includes/aco-form-fields.php:114
+msgid "Avarda Shipping Broker"
+msgstr ""
+
+#: ../includes/aco-form-fields.php:119
+msgid "Shipping Broker API Key"
+msgstr ""
+
+#. translators: %s: token suggestion.
+#: ../includes/aco-form-fields.php:122
+msgid "Enter the API Key you wish to use for the WooCommerce shipping integration. This will be used by Avarda to communicate with your store to handle the shipping session. You can use this key that has been generated from your store: %s"
+msgstr ""
+
+#: ../includes/aco-form-fields.php:135, ../includes/aco-form-fields.php:152, ../includes/aco-form-fields.php:169, ../includes/aco-form-fields.php:186, ../includes/aco-form-fields.php:203
 msgid "Client ID"
 msgstr ""
 
-#: ../includes/aco-form-fields.php:111, ../includes/aco-form-fields.php:128, ../includes/aco-form-fields.php:145, ../includes/aco-form-fields.php:162, ../includes/aco-form-fields.php:179
+#: ../includes/aco-form-fields.php:141, ../includes/aco-form-fields.php:158, ../includes/aco-form-fields.php:175, ../includes/aco-form-fields.php:192, ../includes/aco-form-fields.php:209
 msgid "Client Secret"
 msgstr ""
 
-#: ../includes/aco-functions.php:278
+#: ../includes/aco-functions.php:279
 msgid "Avarda API Error on confirm Avarda order: "
 msgstr ""
 
+#. translators: %s error message.
+#: ../includes/aco-functions.php:310
+msgid "Failed to set the WooCommerce order number to the Avarda order. Error: %s"
+msgstr ""
+
 #. translators: Avarda purchase ID.
-#: ../includes/aco-functions.php:309
+#: ../includes/aco-functions.php:321
 msgid "Payment via Avarda Checkout. Purchase ID: %s"
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../includes/aco-functions.php:336
+#: ../includes/aco-functions.php:348
 msgid "New recurring token for subscription: %s"
 msgstr ""
 
-#: ../includes/aco-functions.php:518
+#: ../includes/aco-functions.php:530
 msgid "Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:521
+#: ../includes/aco-functions.php:533
 msgid "Loan"
 msgstr ""
 
-#: ../includes/aco-functions.php:524
+#: ../includes/aco-functions.php:536
 msgid "Card"
 msgstr ""
 
-#: ../includes/aco-functions.php:527
+#: ../includes/aco-functions.php:539
 msgid "Direct Payment"
 msgstr ""
 
-#: ../includes/aco-functions.php:530
+#: ../includes/aco-functions.php:542
 msgid "Part Payment"
 msgstr ""
 
-#: ../includes/aco-functions.php:533
+#: ../includes/aco-functions.php:545
 msgid "Swish"
 msgstr ""
 
-#: ../includes/aco-functions.php:536
+#: ../includes/aco-functions.php:548
 msgid "Avarda High Amount Loan"
 msgstr ""
 
-#: ../includes/aco-functions.php:539
+#: ../includes/aco-functions.php:551
 msgid "PayPal"
 msgstr ""
 
-#: ../includes/aco-functions.php:542
+#: ../includes/aco-functions.php:554
 msgid "Pay On Delivery"
 msgstr ""
 
-#: ../includes/aco-functions.php:545
+#: ../includes/aco-functions.php:557
 msgid "B2B Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:548
+#: ../includes/aco-functions.php:560
 msgid "Direct Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:551
+#: ../includes/aco-functions.php:563
 msgid "Masterpass"
 msgstr ""
 
-#: ../includes/aco-functions.php:554
+#: ../includes/aco-functions.php:566
 msgid "MobilePay"
 msgstr ""
 
-#: ../includes/aco-functions.php:557
+#: ../includes/aco-functions.php:569
 msgid "Vipps"
 msgstr ""
 
-#: ../includes/aco-functions.php:560
+#: ../includes/aco-functions.php:572
 msgid "Zero Amount"
 msgstr ""
 
 #. translators: Woo order number, Woo order total, Avarda order total.
-#: ../includes/aco-functions.php:791
+#: ../includes/aco-functions.php:803
 msgid "Order total mismatch in order number: %1$s. Woo order total: %2$s, Avarda order total: %3$s (converted to minor units)."
 msgstr ""
 
@@ -467,13 +521,12 @@ msgstr ""
 msgid "Avarda request error. Request response code: %s"
 msgstr ""
 
-#. translators: %s is the gift card reference.
-#: ../classes/requests/helpers/class-aco-helper-cart.php:73
-msgid "Gift card: %s"
+#: ../classes/api/controllers/class-aco-api-controller-base.php:72
+msgid "Authorization header is missing."
 msgstr ""
 
-#: ../classes/requests/helpers/class-aco-helper-order.php:339
-msgid "Gift card:"
+#: ../classes/api/controllers/class-aco-api-controller-base.php:82, ../classes/api/controllers/class-aco-api-controller-base.php:94
+msgid "Authorization header is invalid."
 msgstr ""
 
 #: ../includes/admin/views/status-report.php:17
@@ -498,4 +551,12 @@ msgstr ""
 
 #: ../includes/admin/views/status-report.php:31
 msgid "Response Message"
+msgstr ""
+
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:116
+msgid "No shipping"
+msgstr ""
+
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:119
+msgid "Please enter your full address to see available shipping methods."
 msgstr ""

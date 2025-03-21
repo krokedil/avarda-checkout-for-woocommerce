@@ -89,6 +89,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			'multiple_subscriptions',
 			// 'subscription_payment_method_change_customer',
 			'subscription_payment_method_change_admin',
+			'upsell',
 		);
 
 		// Actions.
@@ -437,6 +438,56 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		if ( $diff > 3 ) {
 			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Check if the order is available for upsell.
+	 *
+	 * @param int $order_id The WooCommerce order id.
+	 * @return bool
+	 */
+	public function upsell_available( $order_id ) {
+		$order       = wc_get_order( $order_id );
+		$purchase_id = $order->get_transaction_id();
+
+		if ( empty( $purchase_id ) ) {
+			return false;
+		}
+
+		// Maybe get the customer balance from the order meta itself.
+		$customer_balance = $order->get_meta( '_avarda_customer_balance' );
+
+		// If we did not have a customer balance in the order meta, we need to get it from the Avarda API.
+		if ( empty( $customer_balance ) ) {
+			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id, true );
+
+			if ( is_wp_error( $avarda_order ) ) {
+				return false;
+			}
+
+			// Get the customer balance from the avarda order and compare to the orders total amount.
+			$customer_balance = $avarda_order['customerBalance'] ?? 0;
+		}
+
+		// Compare, if the customer_balance is less than the order total, we can't do an upsell.
+		$order_total = $order->get_total();
+		if ( $customer_balance < $order_total ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handles a upsell request.
+	 *
+	 * @param int    $order_id The WooCommerce order id.
+	 * @param string $upsell_uuid The UUID for the Upsell request.
+	 * @return bool|WP_Error
+	 */
+	public function upsell( $order_id, $upsell_uuid ) {
+		// If the upsell is available, then we can just return true. The order lines will be captured in the activation request anyway.
+		return true;
 	}
 
 	/**

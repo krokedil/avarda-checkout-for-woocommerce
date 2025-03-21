@@ -246,6 +246,7 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 	if ( is_wp_error( $avarda_order ) ) {
 		return;
 	}
+
 	$order = wc_get_order( $order_id );
 	$order->update_meta_data( '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	$order->update_meta_data( '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
@@ -284,6 +285,7 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 
 		// Set Avarda payment method title.
 		aco_set_payment_method_title( $order, $avarda_order );
+		aco_set_customer_balance( $order, $avarda_order );
 
 		// Save any shipping module data to the order if available.
 		ACO_Order_Management::maybe_save_shipping_meta( $order, $avarda_order );
@@ -300,7 +302,17 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		}
 
 		if ( 'Completed' === $aco_step ) {
-			ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
+			$response = ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
+
+			if ( is_wp_error( $response ) ) {
+				$note = sprintf(
+					// translators: %s error message.
+					__( 'Failed to set the WooCommerce order number to the Avarda order. Error: %s', 'avarda-checkout-for-woocommerce' ),
+					$response->get_error_message()
+				);
+				do_action( 'aco_wc_update_order_reference_failed', 'api_error', $note, $order );
+				$order->add_order_note( $note );
+			}
 
 			// Check order totals.
 			if ( aco_check_order_totals( $order, $avarda_order ) ) {
@@ -817,4 +829,23 @@ function aco_clear_shipping_package_hashes( $packages ) {
 
 	// Return the packages unchanged.
 	return $packages;
+}
+
+/**
+ * Set the customer balance to the order meta data. To prevent having to make requests to Avarda to get the customer ballance.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @param array    $avarda_order The Avarda order.
+ *
+ * @return void
+ */
+function aco_set_customer_balance( $order, $avarda_order ) {
+	$customer_balance = isset( $avarda_order['customerBalance'] ) ? $avarda_order['customerBalance'] : '';
+
+	if ( empty( $customer_balance ) ) {
+		return;
+	}
+
+	$order->update_meta_data( '_avarda_customer_balance', $customer_balance );
+	$order->save();
 }

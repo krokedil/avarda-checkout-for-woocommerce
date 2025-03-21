@@ -26,10 +26,11 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		$request_args = apply_filters( 'aco_initialize_payment_args', $this->get_request_args( $order_id ) );
 
 		$response = wp_remote_request( $request_url, $request_args );
-		$code     = wp_remote_retrieve_response_code( $response );
+		$code     = ( is_wp_error( $response ) ) ? $response->get_error_code() : wp_remote_retrieve_response_code( $response );
 
 		// Log the request.
-		$log = ACO_Logger::format_log( '', 'POST', 'ACO initialize payment', $request_url, $request_args, json_decode( wp_remote_retrieve_body( $response ), true ), $code );
+		$log_body = ( is_wp_error( $response ) ) ? $response->get_error_messages() : json_decode( wp_remote_retrieve_body( $response ), true );
+		$log      = ACO_Logger::format_log( '', 'POST', 'ACO initialize payment', $request_url, $request_args, $log_body, $code );
 		ACO_Logger::log( $log );
 
 		$formated_response = $this->process_response( $response, $request_args, $request_url );
@@ -58,13 +59,18 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 			$request_body['extraIdentifiers']['orderReference'] = (string) $order->get_order_number();
 			$b2b = ! empty( $order->get_billing_company() );
 		} else { // Set cart specific data.
-			$request_body['items']            = ACO_WC()->cart_items->get_cart_items();
-			$request_body['shippingSettings'] = ACO_WC()->cart_items->get_shipping_settings();
-			$b2b                              = ! empty( WC()->customer->get_billing_company() );
+			$request_body['items']                          = ACO_WC()->cart_items->get_cart_items();
+			$request_body['shippingSettings']               = ACO_WC()->cart_items->get_shipping_settings();
+			$request_body['extraIdentifiers']['attachment'] = ACO_WC()->cart_items->get_cart_attachment();
+
+			$b2b = ! empty( WC()->customer->get_billing_company() );
 		}
 
-		// Add customer details to the request body.
-		$request_body[ $b2b ? 'b2B' : 'b2C' ] = ACO_WC()->customer->get_customer( $order, $b2b );
+		// Add customer details to the request body, but only if its not empty.
+		$customer = ACO_WC()->customer->get_customer( $order, $b2b );
+		if ( ! empty( $customer ) ) {
+			$request_body[ $b2b ? 'b2B' : 'b2C' ] = $customer;
+		}
 
 		return apply_filters( 'aco_create_args', $request_body, $order_id );
 	}
