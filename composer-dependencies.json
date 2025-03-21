@@ -3,7 +3,7 @@
         "php": ">=7.4",
         "krokedil/shipping": "dev-develop-fraktjakt",
         "krokedil/woocommerce": "^1.7.0",
-        "krokedil/settings-page": "dev-develop-fix-system-report-error"
+        "krokedil/settings-page": "^1.2.0"
     },
     "config": {
         "platform": {
