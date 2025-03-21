@@ -283,40 +283,40 @@ jQuery(function($) {
 
     fillForm: function (customerAddress) {
       console.log("fillForm", customerAddress);
-      var billing_first_name = customerAddress.billing.first_name
+      let billing_first_name = customerAddress.billing.first_name
         ? customerAddress.billing.first_name
-        : ".";
-      var billing_last_name = customerAddress.billing.last_name
+        : "";
+      let billing_last_name = customerAddress.billing.last_name
         ? customerAddress.billing.last_name
-        : ".";
-      var billing_company = customerAddress.billing.company
+        : "";
+      let billing_company = customerAddress.billing.company
         ? customerAddress.billing.company
         : "";
-      var billing_address_1 = customerAddress.billing.address1;
-      var billing_address_2 = customerAddress.billing.address2;
-      var billing_city = customerAddress.billing.city
+      let billing_address_1 = customerAddress.billing.address1;
+      let billing_address_2 = customerAddress.billing.address2;
+      let billing_city = customerAddress.billing.city
         ? customerAddress.billing.city
-        : ".";
-      var billing_postcode = customerAddress.billing.zip
+        : "";
+      let billing_postcode = customerAddress.billing.zip
         ? customerAddress.billing.zip.replace(/\s/g, "")
         : "";
-      var billing_phone = customerAddress.billing.phone
+      let billing_phone = customerAddress.billing.phone
         ? customerAddress.billing.phone
-        : ".";
-      var billing_email = customerAddress.billing.email
+        : "";
+      let billing_email = customerAddress.billing.email
         ? customerAddress.billing.email
-        : "krokedil@krokedil.se";
+        : "";
 
-      $("#billing_first_name").val(billing_first_name);
-      $("#billing_last_name").val(billing_last_name);
-      $("#billing_company").val(billing_company);
+      billing_first_name && $("#billing_first_name").val(billing_first_name);
+      billing_last_name && $("#billing_last_name").val(billing_last_name);
+      billing_company && $("#billing_company").val(billing_company);
 
-      $("#billing_address_1").val(billing_address_1);
-      $("#billing_address_2").val(billing_address_2);
-      $("#billing_city").val(billing_city);
-      $("#billing_postcode").val(billing_postcode);
-      $("#billing_phone").val(billing_phone);
-      $("#billing_email").val(billing_email);
+      billing_address_1 && $("#billing_address_1").val(billing_address_1);
+      billing_address_2 && $("#billing_address_2").val(billing_address_2);
+      billing_city && $("#billing_city").val(billing_city);
+      billing_postcode && $("#billing_postcode").val(billing_postcode);
+      billing_phone && $("#billing_phone").val(billing_phone);
+      billing_email && $("#billing_email").val(billing_email);
 
       if ($("form.checkout #ship-to-different-address-checkbox").length > 0) {
         $("form.checkout #ship-to-different-address-checkbox").prop(
@@ -324,41 +324,37 @@ jQuery(function($) {
           true
         );
       }
-      $("#shipping_first_name").val(
-        customerAddress.shipping.first_name
-          ? customerAddress.shipping.first_name
-          : billing_first_name
-      );
-      $("#shipping_last_name").val(
-        customerAddress.shipping.last_name
-          ? customerAddress.shipping.last_name
-          : billing_last_name
-      );
-      $("#shipping_company").val(
-        customerAddress.shipping.company
-          ? customerAddress.shipping.company
-          : billing_company
-      );
-      $("#shipping_address_1").val(
-        customerAddress.shipping.address1
-          ? customerAddress.shipping.address1
-          : billing_address_1
-      );
-      $("#shipping_address_2").val(
-        customerAddress.shipping.address2
-          ? customerAddress.shipping.address2
-          : billing_address_2
-      );
-      $("#shipping_city").val(
-        customerAddress.shipping.city
-          ? customerAddress.shipping.city
-          : billing_city
-      );
-      $("#shipping_postcode").val(
-        customerAddress.shipping.zip
-          ? customerAddress.shipping.zip.replace(/\s/g, "")
-          : billing_postcode
-      );
+
+      let shipping_first_name = customerAddress.shipping.first_name
+        ? customerAddress.shipping.first_name
+        : billing_first_name;
+      let shipping_last_name = customerAddress.shipping.last_name
+        ? customerAddress.shipping.last_name
+        : billing_last_name;
+      let shipping_company = customerAddress.shipping.company
+        ? customerAddress.shipping.company
+        : billing_company;
+      let shipping_address_1 = customerAddress.shipping.address1
+        ? customerAddress.shipping.address1
+        : billing_address_1;
+      let shipping_address_2 = customerAddress.shipping.address2
+        ? customerAddress.shipping.address2
+        : billing_address_2;
+      let shipping_city = customerAddress.shipping.city
+        ? customerAddress.shipping.city
+        : billing_city;
+      let shipping_postcode = customerAddress.shipping.zip
+        ? customerAddress.shipping.zip.replace(/\s/g, "")
+        : billing_postcode;
+
+      shipping_first_name && $("#shipping_first_name").val(shipping_first_name);
+      shipping_last_name && $("#shipping_last_name").val(shipping_last_name);
+      shipping_company && $("#shipping_company").val(shipping_company);
+
+      shipping_address_1 && $("#shipping_address_1").val(shipping_address_1);
+      shipping_address_2 && $("#shipping_address_2").val(shipping_address_2);
+      shipping_city && $("#shipping_city").val(shipping_city);
+      shipping_postcode && $("#shipping_postcode").val(shipping_postcode);
     },
 
     updateAvardaPayment: function () {
