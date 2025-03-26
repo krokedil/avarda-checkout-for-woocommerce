@@ -48,7 +48,7 @@ class ACO_Helper_Create_Refund_Data {
 							break;
 						}
 					}
-					array_push( $item_refund, self::get_refund_item_data( $item ) );
+					array_push( $item_refund, self::get_refund_item_data( $original_order, $item ) );
 				}
 			}
 
@@ -83,7 +83,6 @@ class ACO_Helper_Create_Refund_Data {
 
 			// update_post_meta( $refund_order_id, '_krokedil_refunded', 'true' ); Do we need?
 			return $item_refund;
-
 	}
 
 	/**
@@ -103,24 +102,24 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Gets a refund item object.
 	 *
+	 * @param WC_Order      $order WooCommerce Order.
 	 * @param WC_Order_Item $item WooCommerce Order Item.
 	 * @return array
 	 */
-	private static function get_refund_item_data( $item ) {
-		$product            = $item->get_product();
-		$title              = $item->get_name();
-		$sku                = empty( $product->get_sku() ) ? $product->get_id() : $product->get_sku();
-		$tax_rates          = WC_Tax::get_rates( $item->get_tax_class() );
-		$tax_rate           = reset( $tax_rates );
-		$formatted_tax_rate = $tax_rate['rate'];
-		$total_amount       = $item->get_total() + $item->get_total_tax();
-		$total_tax          = $item->get_total_tax();
+	private static function get_refund_item_data( $order, $item ) {
+		$product      = $item->get_product();
+		$title        = $item->get_name();
+		$sku          = empty( $product->get_sku() ) ? $product->get_id() : $product->get_sku();
+		$tax_rates    = WC_Tax::get_rates( $item->get_tax_class() );
+		$tax_rate     = reset( $tax_rates );
+		$total_amount = $item->get_total() + $item->get_total_tax();
+		$total_tax    = $item->get_total_tax();
 
 		return array(
 			'description' => substr( $title, 0, 34 ),
 			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
-			'taxCode'     => strval( round( $formatted_tax_rate ) ),
+			'taxCode'     => self::get_product_tax_code( $order, $item ),
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
@@ -183,8 +182,26 @@ class ACO_Helper_Create_Refund_Data {
 			'description' => substr( $title, 0, 34 ),
 			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
-			'taxCode'     => strval( round( $formatted_tax_rate ) ),
+			'taxCode'     => (string) ( $fee->tax / $fee->amount * 100 ),
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
+	}
+
+	/**
+	 * Gets the tax code for the product.
+	 *
+	 * @param object $order The order item.
+	 * @param object $order_item The WooCommerce order item.
+	 * @return string
+	 */
+	public static function get_product_tax_code( $order, $order_item ) {
+		$tax_items = $order->get_items( 'tax' );
+
+		foreach ( $tax_items as $tax_item ) {
+			$rate_id = $tax_item->get_rate_id();
+			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
+				return (string) WC_Tax::_get_tax_rate( $rate_id )['tax_rate'];
+			}
+		}
 	}
 }
