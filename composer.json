@@ -10,7 +10,6 @@
     "require": {
         "php": ">=7.4"
     },
-    "repositories": [],
     "license": "GPLv3",
     "authors": [
         {
