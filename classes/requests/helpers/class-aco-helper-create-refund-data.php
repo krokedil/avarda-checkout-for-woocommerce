@@ -48,7 +48,7 @@ class ACO_Helper_Create_Refund_Data {
 							break;
 						}
 					}
-					array_push( $item_refund, self::get_refund_item_data( $original_order, $item ) );
+					array_push( $item_refund, self::get_refund_item_data( $refund_order, $item ) );
 				}
 			}
 
@@ -62,7 +62,7 @@ class ACO_Helper_Create_Refund_Data {
 							break;
 						}
 					}
-					array_push( $item_refund, self::get_refund_shipping_data( $shipping, $original_order_shipping ) );
+					array_push( $item_refund, self::get_refund_shipping_data( $refund_order, $shipping, $original_order_shipping ) );
 				}
 			}
 
@@ -76,7 +76,7 @@ class ACO_Helper_Create_Refund_Data {
 							break;
 						}
 					}
-					array_push( $item_refund, self::get_refund_fee_data( $fee ) );
+					array_push( $item_refund, self::get_refund_fee_data( $refund_order, $fee ) );
 				}
 			}
 		}
@@ -110,8 +110,7 @@ class ACO_Helper_Create_Refund_Data {
 		$product      = $item->get_product();
 		$title        = $item->get_name();
 		$sku          = empty( $product->get_sku() ) ? $product->get_id() : $product->get_sku();
-		$tax_rates    = WC_Tax::get_rates( $item->get_tax_class() );
-		$tax_rate     = reset( $tax_rates );
+		$tax_code     = ACO_Helper_Order::get_product_tax_code( $order, $item );
 		$total_amount = $item->get_total() + $item->get_total_tax();
 		$total_tax    = $item->get_total_tax();
 
@@ -119,7 +118,7 @@ class ACO_Helper_Create_Refund_Data {
 			'description' => substr( $title, 0, 34 ),
 			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
-			'taxCode'     => self::get_product_tax_code( $order, $item ),
+			'taxCode'     => $tax_code,
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
@@ -127,11 +126,12 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Gets a refund shipping object.
 	 *
+	 * @param WC_Order               $order WooCommerce Order.
 	 * @param WC_Order_Item_Shipping $shipping WooCommerce Order shipping.
 	 * @param WC_Order_Item_Shipping $original_order_shipping WooCommerce original order shipping.
 	 * @return array
 	 */
-	private static function get_refund_shipping_data( $shipping, $original_order_shipping ) {
+	private static function get_refund_shipping_data( $order, $shipping, $original_order_shipping ) {
 		$shipping_reference = 'Shipping';
 
 		if ( null !== $shipping->get_instance_id() ) {
@@ -145,7 +145,7 @@ class ACO_Helper_Create_Refund_Data {
 			$free_shipping = true;
 		}
 
-		$tax_rate     = ( $free_shipping ) ? 0 : $original_order_shipping->get_total_tax() / $original_order_shipping->get_total() * 100;
+		$tax_code     = ACO_Helper_Order::get_product_tax_code( $order, $shipping );
 		$total_amount = ( $free_shipping ) ? 0 : $shipping->get_total() + $shipping->get_total_tax();
 		$total_tax    = ( $free_shipping ) ? 0 : $shipping->get_total_tax();
 		$title        = $shipping->get_name();
@@ -153,7 +153,7 @@ class ACO_Helper_Create_Refund_Data {
 			'description' => substr( $title, 0, 34 ),
 			'notes'       => substr( $shipping_reference, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
-			'taxCode'     => strval( round( $tax_rate ) ),
+			'taxCode'     => $tax_code,
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
@@ -161,28 +161,27 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Gets a refund fee object.
 	 *
+	 * @param WC_Order          $order WooCommerce Order.
 	 * @param WC_Order_Item_Fee $fee WooCommerce Order fee.
 	 * @return array
 	 */
-	private static function get_refund_fee_data( $fee ) {
+	private static function get_refund_fee_data( $order, $fee ) {
 		$sku              = 'Fee';
 		$invoice_fee_name = '';
 
 		$fee_name = str_replace( ' ', '-', strtolower( $fee->get_name() ) );
 		$sku      = 'fee|' . $fee_name;
 
-		$title              = $fee->get_name();
-		$tax_rates          = WC_Tax::get_rates( $fee->get_tax_class() );
-		$tax_rate           = reset( $tax_rates );
-		$formatted_tax_rate = $tax_rate['rate'];
-		$total_amount       = $fee->get_total() + $fee->get_total_tax();
-		$total_tax          = $fee->get_total_tax();
+		$title        = $fee->get_name();
+		$tax_code     = ACO_Helper_Order::get_product_tax_code( $order, $fee );
+		$total_amount = $fee->get_total() + $fee->get_total_tax();
+		$total_tax    = $fee->get_total_tax();
 
 		return array(
 			'description' => substr( $title, 0, 34 ),
 			'notes'       => substr( $sku, 0, 34 ),
 			'amount'      => number_format( abs( $total_amount ), 2, '.', '' ),
-			'taxCode'     => (string) ( $fee->tax / $fee->amount * 100 ),
+			'taxCode'     => $tax_code,
 			'taxAmount'   => number_format( abs( $total_tax ), 2, '.', '' ),
 		);
 	}
