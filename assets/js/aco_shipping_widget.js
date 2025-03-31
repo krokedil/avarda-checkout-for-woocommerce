@@ -54,8 +54,7 @@ jQuery(function($) {
 
                 // Update the select shipping option inside the modules object.
                 aco_shipping_widget.modules.selected_option = shippingMethod;
-            }
-            );
+            });
 
             // Register the click event for the pickup point select box.
             $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
@@ -91,24 +90,34 @@ jQuery(function($) {
         },
 
         getShippingOptions: () => {
-            // Read the .aco-shipping-session field and parse the json from the value.
-            const {modules} = JSON.parse($('.aco-shipping-session').val());
+            try {
+                // Read the .aco-shipping-session field and parse the json from the value.
+                const {modules} = JSON.parse($('.aco-shipping-session').val());
 
-            // Set the current selected option so we can check if it has changed when getting them from the server.
-            const previousSelectedOption = aco_shipping_widget.modules.selected_option;
+                // Set the current selected option so we can check if it has changed when getting them from the server.
+                const previousSelectedOption = aco_shipping_widget.modules ? aco_shipping_widget.modules.selected_option : null;
 
-            // Update the modules object with the new shipping options.
-            aco_shipping_widget.modules = JSON.parse(modules);
+                // Update the modules object with the new shipping options.
+                aco_shipping_widget.modules = JSON.parse(modules);
 
-            // Update the options HTML with the new shipping options.
-            const optionsHtml = aco_shipping_widget.getOptionsHtml();
+                // Update the options HTML with the new shipping options.
+                const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
-            // Replace the options HTML in the element.
-            aco_shipping_widget.element.html(optionsHtml);
+                // Replace the options HTML in the element.
+                aco_shipping_widget.element.html(optionsHtml);
 
-            // If the selected option has changed, trigger the shipping_option_changed event.
-            if (aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
-                aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                // If the modules is null, undefined or and empty object, return.
+                if (!aco_shipping_widget.modules || $.isEmptyObject(aco_shipping_widget.modules)) {
+                    aco_shipping_widget.unblockElement("body");
+                    return;
+                }
+
+               // If the selected option has changed, trigger the shipping_option_changed event.
+               if (aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
+                   aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                }
+            } catch (error) {
+                console.error("Error when getting shipping options for Avarda Checkout.", error);
             }
 
             aco_shipping_widget.unblockElement("body");

@@ -59,54 +59,52 @@ class ACO_Templates {
 	 * @return string
 	 */
 	public function override_template( $template, $template_name ) {
-		if ( is_checkout() ) {
-			// Don't display ACO template if we have a cart that doesn't needs payment.
-			if ( ! WC()->cart->needs_payment() ) {
-				return $template;
+		// Don't display ACO template if we have a cart that doesn't needs payment.
+		if ( ! is_checkout() || ! isset( WC()->cart ) || ! WC()->cart->needs_payment() ) {
+			return $template;
+		}
+
+		// Avarda Checkout.
+		if ( 'checkout/form-checkout.php' === $template_name ) {
+			$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+			if ( locate_template( 'woocommerce/avarda-checkout.php' ) ) {
+				$avarda_checkout_template = locate_template( 'woocommerce/avarda-checkout.php' );
+			} else {
+				$avarda_checkout_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php', $template_name );
 			}
 
-			// Avarda Checkout.
-			if ( 'checkout/form-checkout.php' === $template_name ) {
-				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-
-				if ( locate_template( 'woocommerce/avarda-checkout.php' ) ) {
-					$avarda_checkout_template = locate_template( 'woocommerce/avarda-checkout.php' );
-				} else {
-					$avarda_checkout_template = apply_filters( 'aco_locate_template', AVARDA_CHECKOUT_PATH . '/templates/avarda-checkout.php', $template_name );
+			// Avarda checkout page.
+			if ( array_key_exists( 'aco', $available_gateways ) ) {
+				// If chosen payment method exists.
+				if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
+					if ( ! isset( $_GET['confirm'] ) ) {
+						$template = $avarda_checkout_template;
+						ACO_Logger::log( "Loading checkout template for Avarda checkout because ACO is the chosen method: $template", WC_Log_Levels::DEBUG );
+					}
 				}
 
-				// Avarda checkout page.
-				if ( array_key_exists( 'aco', $available_gateways ) ) {
-					// If chosen payment method exists.
-					if ( 'aco' === WC()->session->get( 'chosen_payment_method' ) ) {
+				// If chosen payment method does not exist and ACO is the first gateway.
+				if ( null === WC()->session->get( 'chosen_payment_method' ) || '' === WC()->session->get( 'chosen_payment_method' ) ) {
+					reset( $available_gateways );
+
+					if ( 'aco' === key( $available_gateways ) ) {
 						if ( ! isset( $_GET['confirm'] ) ) {
 							$template = $avarda_checkout_template;
-							ACO_Logger::log( "Loading checkout template for Avarda checkout because ACO is the chosen method: $template", WC_Log_Levels::DEBUG );
+							ACO_Logger::log( "Loading checkout template for Avarda checkout because no method is chosen and ACO is the first option: $template", WC_Log_Levels::DEBUG );
 						}
 					}
+				}
 
-					// If chosen payment method does not exist and ACO is the first gateway.
-					if ( null === WC()->session->get( 'chosen_payment_method' ) || '' === WC()->session->get( 'chosen_payment_method' ) ) {
+				// If another gateway is saved in session, but has since become unavailable.
+				if ( WC()->session->get( 'chosen_payment_method' ) ) {
+					if ( ! array_key_exists( WC()->session->get( 'chosen_payment_method' ), $available_gateways ) ) {
 						reset( $available_gateways );
 
 						if ( 'aco' === key( $available_gateways ) ) {
 							if ( ! isset( $_GET['confirm'] ) ) {
 								$template = $avarda_checkout_template;
-								ACO_Logger::log( "Loading checkout template for Avarda checkout because no method is chosen and ACO is the first option: $template", WC_Log_Levels::DEBUG );
-							}
-						}
-					}
-
-					// If another gateway is saved in session, but has since become unavailable.
-					if ( WC()->session->get( 'chosen_payment_method' ) ) {
-						if ( ! array_key_exists( WC()->session->get( 'chosen_payment_method' ), $available_gateways ) ) {
-							reset( $available_gateways );
-
-							if ( 'aco' === key( $available_gateways ) ) {
-								if ( ! isset( $_GET['confirm'] ) ) {
-									$template = $avarda_checkout_template;
-									ACO_Logger::log( "Loading checkout template for Avarda checkout the chosen method is no longer available, and ACO is the first option: $template", WC_Log_Levels::DEBUG );
-								}
+								ACO_Logger::log( "Loading checkout template for Avarda checkout the chosen method is no longer available, and ACO is the first option: $template", WC_Log_Levels::DEBUG );
 							}
 						}
 					}
