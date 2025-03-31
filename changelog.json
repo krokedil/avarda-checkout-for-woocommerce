@@ -258,5 +258,10 @@
           "description": "<ul><li>Enhancement - Added a spinner to show while shipping methods are being calculated when using the WooCommerce shipping methods inside Avarda Checkout.</li><li>Enhancement - Changed how we get the tax rate of order lines to prevent issues when calculating the rate.</li><li>Fix - Fixed an issue with sending tax rates to Avarda that included decimals. For example for Finish 25.5% VAT rate.</li><li>Fix - Fixed an issue that could cause customer to see an error message saying the purchase id is missing.</li></ul>",
           "requires": "5.0.0",
           "tested": "6.7.2"
+     },
+     "1.16.2": {
+          "description": "<ul><li>Enhancement - Added tabs and a sidebar to the settings page with documentation and support links.</li><li>Enhancement - Defaults to the first shipping method to be the selected shipping method if no selected shipping method was found when getting the shipping session for the Avarda shipping widget.</li><li>Fix - Fixed an issue where the checkout page sometimes appeared blank when using the Woo Subscriptions plugin.</li><li>Fix - Added checks to prevent a JavaScript error if the shipping session JSON could not be parsed.</li><li>Fix - Fixed a potential JavaScript error when trying to get the selected option from the module if no module could be found in the shipping widget.</li><li>Fix - Set the default values of the checkout fields as blank instead of '.'.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "9.7.0"
      }
 }
