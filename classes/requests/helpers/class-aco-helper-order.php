@@ -83,7 +83,7 @@ class ACO_Helper_Order {
 			'description' => substr( self::get_item_name( $order_item ), 0, 34 ), // String.
 			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
 			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
-			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
+			'taxCode'     => self::get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
 			'quantity'    => $order_item->get_quantity(),
 		);
@@ -110,7 +110,7 @@ class ACO_Helper_Order {
 			'description' => substr( 'Refunded: ' . self::get_item_name( $order_item ), 0, 34 ), // String.
 			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
 			'amount'      => $total_refunded_for_item_incl_vat, // string.
-			'taxCode'     => $this->get_product_tax_code( $order, $order_item ), // Float.
+			'taxCode'     => self::get_product_tax_code( $order, $order_item ), // Float.
 			'taxAmount'   => $total_tax_refunded_for_item, // Float.
 			'quantity'    => 1,
 		);
@@ -134,7 +134,7 @@ class ACO_Helper_Order {
 	 * @param object $order_item The WooCommerce order item.
 	 * @return string
 	 */
-	public function get_product_tax_code( $order, $order_item ) {
+	public static function get_product_tax_code( $order, $order_item ) {
 		$tax_items = $order->get_items( 'tax' );
 		foreach ( $tax_items as $tax_item ) {
 			$rate_id = $tax_item->get_rate_id();
