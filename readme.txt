@@ -8,7 +8,7 @@ WC requires at least: 5.6.0
 WC tested up to: 9.7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.16.2
+Stable tag: 1.16.3
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2025.04.15        - version 1.16.3 =
+* Fix               - Fixed an issue where tax rounding for rates with decimals (Finland's 25.5% VAT, for example) did not work correctly for refunds.
+* Fix               - Limit the max size of a log message from the frontend to 1000 characters, to prevent large logs from being created.
+
 = 2025.03.31        - version 1.16.2 =
 * Enhancement       - Added tabs and a sidebar to the settings page with documentation and support links.
 * Enhancement       - Defaults to the first shipping method to be the selected shipping method, if no selected shipping method was found when getting the shipping session for the Avarda shipping widget.
