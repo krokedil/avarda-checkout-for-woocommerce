@@ -265,7 +265,7 @@
           "tested": "9.7.0"
      },
      "1.16.3": {
-          "description": "<ul><li>Fix - Fixed an issue where tax rounding for rates with decimals (Finland's 25.5% VAT, for example) did not work correctly for refunds.</li></ul>",
+          "description": "<ul><li>Fix - Fixed an issue where tax rounding for rates with decimals (Finland's 25.5% VAT, for example) did not work correctly for refunds.</li><li>Limit the max size of a log message from the frontend to 1000 characters, to prevent large logs from being created.</li></ul>",
           "requires": "5.6.0",
           "tested": "9.7.0"
      }
