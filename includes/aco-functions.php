@@ -115,7 +115,8 @@ function aco_wc_initialize_payment() {
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
-	WC()->session->set( 'aco_last_update_hash', WC()->cart->get_cart_hash() );
+	$cart_hash = aco_get_session_cart_hash();
+	WC()->session->set( 'aco_last_update_hash', $cart_hash );
 	return $avarda_payment;
 }
 
@@ -848,4 +849,21 @@ function aco_set_customer_balance( $order, $avarda_order ) {
 
 	$order->update_meta_data( '_avarda_customer_balance', $customer_balance );
 	$order->save();
+}
+
+/**
+ * Creates a hash from the cart data, that we can use to verify that the session needs to be updated.
+ *
+ * @return string
+ */
+function aco_get_session_cart_hash() {
+	$cart_hash        = WC()->cart->get_cart_hash();
+	$billing_address  = WC()->customer->get_billing() ?? array();
+	$shipping_address = WC()->customer->get_shipping() ?? array();
+	$shipping_method  = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
+
+	// Calculate a hash from the values.
+	$hash = md5( wp_json_encode( array( $cart_hash, $billing_address, $shipping_address, $shipping_method ) ) );
+
+	return $hash;
 }

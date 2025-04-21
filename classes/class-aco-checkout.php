@@ -146,7 +146,7 @@ class ACO_Checkout {
 		}
 
 		// Check if the cart hash has been changed since last update.
-		$cart_hash  = WC()->cart->get_cart_hash();
+		$cart_hash  = aco_get_session_cart_hash();
 		$saved_hash = WC()->session->get( 'aco_last_update_hash' );
 
 		// If they are the same, return.
