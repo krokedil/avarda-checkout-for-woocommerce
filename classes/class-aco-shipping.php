@@ -454,6 +454,16 @@ class ACO_Shipping extends WC_Shipping_Method {
 				'desc_tip'    => true,
 				'default'     => '0',
 			),
+			'tax_status'              => array(
+				'title'   => __( 'Tax status', 'woocommerce' ),
+				'type'    => 'select',
+				'class'   => 'wc-enhanced-select',
+				'default' => 'taxable',
+				'options' => array(
+					'taxable' => __( 'Taxable', 'woocommerce' ),
+				// 'none'    => _x( 'None', 'Tax status', 'woocommerce' ), @todo Implement logic for this.
+				),
+			),
 		);
 	}
 }
