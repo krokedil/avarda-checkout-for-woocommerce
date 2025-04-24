@@ -211,15 +211,5 @@ $settings = array(
 		'default'  => '',
 		'desc_tip' => true,
 	),
-	'tax_status'                   => array(
-		'title'   => __( 'Tax status', 'woocommerce' ),
-		'type'    => 'select',
-		'class'   => 'wc-enhanced-select',
-		'default' => 'taxable',
-		'options' => array(
-			'taxable' => __( 'Taxable', 'woocommerce' ),
-			// 'none'    => _x( 'None', 'Tax status', 'woocommerce' ), @todo Implement logic for this.
-		),
-	),
 );
 return apply_filters( 'aco_settings', $settings );
