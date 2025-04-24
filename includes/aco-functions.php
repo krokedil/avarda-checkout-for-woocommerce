@@ -861,9 +861,10 @@ function aco_get_session_cart_hash() {
 	$billing_address  = WC()->customer->get_billing() ?? array();
 	$shipping_address = WC()->customer->get_shipping() ?? array();
 	$shipping_method  = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
+	$coupons          = WC()->cart->applied_coupons ? implode( ',', WC()->cart->applied_coupons ) : '';
 
 	// Calculate a hash from the values.
-	$hash = md5( wp_json_encode( array( $cart_hash, $billing_address, $shipping_address, $shipping_method ) ) );
+	$hash = md5( wp_json_encode( array( $cart_hash, $billing_address, $shipping_address, $shipping_method, $coupons ) ) );
 
 	return $hash;
 }
