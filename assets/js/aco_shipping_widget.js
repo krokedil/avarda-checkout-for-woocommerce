@@ -599,10 +599,16 @@ jQuery(function($) {
          * @returns {string}
          */
         formatPrice: (price) => {
-            const priceFormat = aco_wc_shipping_params.price_format;
-            const format = priceFormat.format;
-            const symbol = priceFormat.symbol;
-            return format.replace("%2$s", price).replace("%1$s", symbol);
+            const { format, symbol, trim_zero_decimals } = aco_wc_shipping_params.price_format;
+
+            // If the price ends with .00, .0, ,00 or ,0, trim it.
+            if (trim_zero_decimals) {
+                price = price.replace(/(\.00|\.0|,00|,0)$/, "");
+            }
+
+            price = format.replace("%2$s", price).replace("%1$s", symbol);
+
+            return price;
         },
 
         /**
