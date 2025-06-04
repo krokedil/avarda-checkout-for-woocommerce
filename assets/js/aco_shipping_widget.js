@@ -23,6 +23,12 @@ jQuery(function($) {
 
         init: (initObject) => {
             const { element, session_id, config } = initObject;
+            // If the config is null, return.
+            if (!config || !config.modules) {
+                console.error("Avarda Checkout Shipping Widget: No config found or modules found.");
+                return;
+            }
+
             const $element = $(element);
             aco_shipping_widget.element = $element;
             aco_shipping_widget.cartNeedsShipping = aco_wc_shipping_params.cart_needs_shipping;
