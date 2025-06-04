@@ -35,7 +35,7 @@ jQuery(function($) {
             const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
             // Append the options HTML to the element.
-            $element.append(optionsHtml);
+            $element.html(optionsHtml);
 
             // Register the change event for the radio buttons.
             $element.on( "change", 'input:radio[name="aco_shipping_method"]:checked', function () {
