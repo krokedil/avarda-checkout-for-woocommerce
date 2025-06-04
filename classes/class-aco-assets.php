@@ -212,6 +212,7 @@ class ACO_Assets {
 			'cart_needs_shipping'             => WC()->cart->needs_shipping(),
 			'spinner_text'                    => apply_filters( 'aco_shipping_widget_spinner_text', __( 'Waiting for shipping options...', 'avarda-checkout-for-woocommerce' ) ),
 			'price_format'                    => array(
+				'trim_zero_decimals' => apply_filters( 'woocommerce_price_trim_zeros', false ),
 				'format' => get_woocommerce_price_format(),
 				'symbol' => get_woocommerce_currency_symbol(),
 			),
