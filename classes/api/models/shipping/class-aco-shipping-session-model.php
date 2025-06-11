@@ -45,7 +45,7 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 	 */
 	public static function from_shipping_rates( $shipping_rates, $chosen_shipping_method, $purchase_id ) {
 		$session            = new self();
-        $default_rate       = is_array( $shipping_rates ) && ! empty( $shipping_rates ) ? array_key_first( $shipping_rates ) : null;
+		$default_rate       = is_array( $shipping_rates ) && ! empty( $shipping_rates ) ? array_key_first( $shipping_rates ) : null;
 		$selected           = $shipping_rates[ $chosen_shipping_method ] ?? $default_rate;
 		$session->id        = $purchase_id;
 		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
