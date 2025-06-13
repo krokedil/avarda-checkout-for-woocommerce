@@ -292,26 +292,28 @@ class ACO_Helper_Cart {
 			 * @var WC_Shipping_Rate $rate Shipping rate.
 			 */
 			foreach ( $package['rates'] as $rate ) {
+				$rate_cost = aco_ensure_numeric( $rate->get_cost() );
+
 				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
 					// If we should not show shipping, send the amount as 0.
-					$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
+					$amount = WC()->cart->show_shipping() ? number_format( $rate_cost + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
 
 					return array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
 						'amount'      => $amount,
-						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
+						'taxCode'     => (string) ( $rate_cost != 0 ? array_sum( $rate->get_taxes() ) / $rate_cost * 100 : 0 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					);
 				}
 
 				$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
 				if ( $chosen_shipping === $rate_id ) {
-					$formatted_shipping = ( $rate->get_cost() > 0 ) ? array(
+					$formatted_shipping = ( $rate_cost > 0 ) ? array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => substr( 'shipping|' . $rate_id, 0, 34 ), // String.
-						'amount'      => number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
-						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 ), // String.
+						'amount'      => number_format( $rate_cost + array_sum( $rate->get_taxes() ), 2, '.', '' ), // String.
+						'taxCode'     => (string) ( array_sum( $rate->get_taxes() ) / $rate_cost * 100 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					) : array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.

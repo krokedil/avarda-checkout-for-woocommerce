@@ -91,7 +91,7 @@ class ACO_Shipping_Option_Model {
 		$option->carrier         = self::get_shipping_method_carrier( $shipping_rate );
 		$option->iconUrl         = self::get_shipping_method_icon( $option->carrier, $shipping_rate );
 		$option->shippingProduct = $shipping_rate->get_label();
-		$option->price           = number_format( $shipping_rate->get_cost() + array_sum( $shipping_rate->get_taxes() ), 2, '.', '' );
+		$option->price           = number_format( aco_ensure_numeric( $shipping_rate->get_cost() ) + array_sum( $shipping_rate->get_taxes() ), 2, '.', '' );
 		$option->currency        = get_woocommerce_currency();
 		$option->description     = self::get_shipping_method_description( $shipping_rate );
 
