@@ -23,6 +23,12 @@ jQuery(function($) {
 
         init: (initObject) => {
             const { element, session_id, config } = initObject;
+            // If the config is null, return.
+            if (!config || !config.modules) {
+                console.error("Avarda Checkout Shipping Widget: No config found or modules found.");
+                return;
+            }
+
             const $element = $(element);
             aco_shipping_widget.element = $element;
             aco_shipping_widget.cartNeedsShipping = aco_wc_shipping_params.cart_needs_shipping;
@@ -35,7 +41,7 @@ jQuery(function($) {
             const optionsHtml = aco_shipping_widget.getOptionsHtml();
 
             // Append the options HTML to the element.
-            $element.append(optionsHtml);
+            $element.html(optionsHtml);
 
             // Register the change event for the radio buttons.
             $element.on( "change", 'input:radio[name="aco_shipping_method"]:checked', function () {
@@ -593,10 +599,16 @@ jQuery(function($) {
          * @returns {string}
          */
         formatPrice: (price) => {
-            const priceFormat = aco_wc_shipping_params.price_format;
-            const format = priceFormat.format;
-            const symbol = priceFormat.symbol;
-            return format.replace("%2$s", price).replace("%1$s", symbol);
+            const { format, symbol, trim_zero_decimals } = aco_wc_shipping_params.price_format;
+
+            // If the price ends with .00, .0, ,00 or ,0, trim it.
+            if (trim_zero_decimals) {
+                price = price.replace(/(\.00|\.0|,00|,0)$/, "");
+            }
+
+            price = format.replace("%2$s", price).replace("%1$s", symbol);
+
+            return price;
         },
 
         /**

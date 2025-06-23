@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5531923bc9483d7fceed2d8cca897070",
+    "content-hash": "0ba901b4d80a2868339f86cfe9a3217b",
     "packages": [
         {
             "name": "krokedil/settings-page",
-            "version": "1.2.0",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/settings-page.git",
-                "reference": "9920eecacfaf34dd556887816790aff00d38b971"
+                "reference": "05e56133014345c577ec97fd2c2681e1bc33e97d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/settings-page/zipball/9920eecacfaf34dd556887816790aff00d38b971",
-                "reference": "9920eecacfaf34dd556887816790aff00d38b971",
+                "url": "https://api.github.com/repos/krokedil/settings-page/zipball/05e56133014345c577ec97fd2c2681e1bc33e97d",
+                "reference": "05e56133014345c577ec97fd2c2681e1bc33e97d",
                 "shasum": ""
             },
             "require-dev": {
@@ -46,23 +46,23 @@
             ],
             "description": "A package to help setup settings pages in WordPress and WooCommerce for Krokedil plugins to add the Addons and Support tabs",
             "support": {
-                "source": "https://github.com/krokedil/settings-page/tree/1.2.0",
+                "source": "https://github.com/krokedil/settings-page/tree/1.2.1",
                 "issues": "https://github.com/krokedil/settings-page/issues"
             },
-            "time": "2024-10-23T11:23:33+00:00"
+            "time": "2025-06-10T09:35:57+00:00"
         },
         {
             "name": "krokedil/shipping",
-            "version": "dev-develop-fraktjakt",
+            "version": "2.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/shipping.git",
-                "reference": "83fad89608e43ec8f94561994cea20bbdfbe0400"
+                "reference": "8cbdc08ce87c22dd6474277ab024b664d96fa4e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/shipping/zipball/83fad89608e43ec8f94561994cea20bbdfbe0400",
-                "reference": "83fad89608e43ec8f94561994cea20bbdfbe0400",
+                "url": "https://api.github.com/repos/krokedil/shipping/zipball/8cbdc08ce87c22dd6474277ab024b664d96fa4e8",
+                "reference": "8cbdc08ce87c22dd6474277ab024b664d96fa4e8",
                 "shasum": ""
             },
             "require": {
@@ -105,23 +105,23 @@
             },
             "description": "Shipping method extensions from Krokedil",
             "support": {
-                "source": "https://github.com/krokedil/shipping/tree/develop-fraktjakt",
+                "source": "https://github.com/krokedil/shipping/tree/2.2.0",
                 "issues": "https://github.com/krokedil/shipping/issues"
             },
-            "time": "2024-03-25T15:01:14+00:00"
+            "time": "2025-06-09T09:17:29+00:00"
         },
         {
             "name": "krokedil/woocommerce",
-            "version": "1.8.0",
+            "version": "1.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/krokedil/woocommerce.git",
-                "reference": "bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5"
+                "reference": "d008878feeba072cb952d95cadd68ad93cbae727"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5",
-                "reference": "bba7b6132b25e4e547aa82246b4d28fc8ebfd8c5",
+                "url": "https://api.github.com/repos/krokedil/woocommerce/zipball/d008878feeba072cb952d95cadd68ad93cbae727",
+                "reference": "d008878feeba072cb952d95cadd68ad93cbae727",
                 "shasum": ""
             },
             "require-dev": {
@@ -152,10 +152,10 @@
             ],
             "description": "A library package for Krokedils plugins that contains helper methods when working with WooCommerce.",
             "support": {
-                "source": "https://github.com/krokedil/woocommerce/tree/1.8.0",
+                "source": "https://github.com/krokedil/woocommerce/tree/1.8.1",
                 "issues": "https://github.com/krokedil/woocommerce/issues"
             },
-            "time": "2025-02-05T14:02:57+00:00"
+            "time": "2025-06-03T09:31:00+00:00"
         },
         {
             "name": "psr/container",
@@ -215,15 +215,13 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "krokedil/shipping": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.4"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "platform-overrides": {
         "php": "7.4"
     },
