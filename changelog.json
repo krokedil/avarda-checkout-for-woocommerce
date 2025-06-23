@@ -273,5 +273,10 @@
           "description": "<ul><li>Fix - Added coupons together with billing/shipping address and method to the cart hash, to update the order on changes of these in the checkout.</li><li>Fix - Added 'Tax status' setting for shipping method to be compatible with WooCommerce 9.7+.</li></ul>",
           "requires": "5.6.0",
           "tested": "9.8.3"
+     },
+     "1.16.5": {
+          "description": "<ul><li>Enhancement - Made the filter woocommerce_price_trim_zeros apply to the display of shipping prices as well, so prices ending in zero decimals will be trimmed if the filter returns a true value.</li><li>Fix - Fixed an issue possibly showing the shipping widget twice before the customer filled in their address.</li><li>Fix - Fixed an issue that could happen if no modules where sent to the shipping widget.</li><li>Fix - Fixed a possible issue with rounding decimals for the shipping options in the shipping widget.</li><li>Fix - Fixed a potential error that could happen when Avarda made a request to get the shipping session, if no shipping methods where calculated.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "9.9.4"
      }
 }
