@@ -282,7 +282,7 @@ class ACO_Helper_Cart {
 	public function get_shipping() {
 		$packages        = WC()->shipping->get_packages();
 		$chosen_methods  = WC()->session->get( 'chosen_shipping_methods' );
-		$chosen_shipping = $chosen_methods[0];
+		$chosen_shipping = $chosen_methods[0] ?? null;
 
 		$formatted_shipping = null;
 		foreach ( $packages as $i => $package ) {
