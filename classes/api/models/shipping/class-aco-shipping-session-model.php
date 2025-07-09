@@ -35,6 +35,38 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 	public $modules;
 
 	/**
+	 * Get a fallback shipping session in case of errors.
+	 *
+	 * @param string $purchase_id The purchase id.
+	 *
+	 * @return ACO_Shipping_Session_Model
+	 */
+	public static function get_fallback_shipping_session( $purchase_id ) {
+		$session                         = new self();
+		$no_shipping                     = ACO_Shipping_Option_Model::no_shipping();
+		$session->id                     = $purchase_id;
+		$session->expiresAt              = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
+		$session->status                 = 'ACTIVE';
+		$session->selectedShippingOption = $no_shipping;
+		$session->modules                = wp_json_encode(
+			array(
+				'options'         => array( $no_shipping ),
+				'selected_option' => 'no_shipping',
+			)
+		);
+
+		/**
+		 * Filter the fallback shipping session to allow others to add or modify data as needed.
+		 *
+		 * @param ACO_Shipping_Session_Model $session The fallback shipping session.
+		 * @param string                     $purchase_id The purchase id for the Avarda order.
+		 *
+		 * @return ACO_Shipping_Session_Model
+		 */
+		return apply_filters( 'aco_fallback_shipping_session', $session, $purchase_id );
+	}
+
+	/**
 	 * Create a instance from a shipping rate.
 	 *
 	 * @param WC_Shipping_Rate[] $shipping_rates The shipping rate.
