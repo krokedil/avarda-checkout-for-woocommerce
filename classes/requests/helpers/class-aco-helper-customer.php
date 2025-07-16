@@ -202,10 +202,10 @@ class ACO_Helper_Customer {
 	 */
 	public static function get_delivery_address( $item ) {
 		$delivery_countries = WC()->countries->get_shipping_countries();
+		$store_country 	    = WC()->countries->get_base_country();
+		$country            = $item->get_shipping_country();
 
-		$country = $item->get_shipping_country();
-
-		( isset( $delivery_countries[ $country ] ) ? $country : $delivery_countries['default'] );
+		( isset( $delivery_countries[ $country ] ) ? $country : $store_country );
 
 		$delivery_address = array_filter(
 			array(
