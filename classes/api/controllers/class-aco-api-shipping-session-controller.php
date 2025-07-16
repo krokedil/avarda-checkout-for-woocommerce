@@ -174,12 +174,14 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
-				$this->send_response( new WP_Error( 400, 'Bad request' ) );
+				$this->send_response( ACO_Shipping_Session_Model::get_fallback_shipping_session( $purchase_id ), 201 );
 			}
 
 			$this->send_response( $session, 201 );
 		} catch ( Exception $e ) {
-			$this->send_response( new WP_Error( 500, 'Server error' ) );
+			$body        = $request->get_json_params();
+			$purchase_id = $body['purchaseId'];
+			$this->send_response( ACO_Shipping_Session_Model::get_fallback_shipping_session( $purchase_id ), 201 );
 		}
 	}
 

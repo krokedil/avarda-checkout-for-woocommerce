@@ -56,6 +56,8 @@ class ACO_Checkout {
 		}
 
 		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
+
+		apply_filters( 'krokedil_shipping_should_verify_shipping', array( $this, 'maybe_verify_shipping' ) );
 	}
 
 	/**
@@ -314,5 +316,27 @@ class ACO_Checkout {
 			</small>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Check if we should verify the shipping rate during checkout, and report errors to the customer instead of WooCommerce silently changing the shipping method.
+	 *
+	 * @param bool $should_verify_shipping If we should verify the shipping rate.
+	 *
+	 * @return bool
+	 */
+	public function maybe_verify_shipping( $should_verify_shipping ) {
+		// If its already true, no need to do anything.
+		if ( $should_verify_shipping ) {
+			return $should_verify_shipping;
+		}
+
+		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+		// If Avarda is the chosen payment method, and we have integrated WC shipping enabled, we should verify the shipping rate.
+		if ( $this->is_integrated_wc_shipping_enabled() && 'aco' === $chosen_payment_method ) {
+			return true;
+		}
+
+		return $should_verify_shipping;
 	}
 }

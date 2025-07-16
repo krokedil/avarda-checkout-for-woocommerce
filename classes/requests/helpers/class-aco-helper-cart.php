@@ -123,10 +123,10 @@ class ACO_Helper_Cart {
 		$height = empty( $height ) ? 0 : $height;
 
 		$shipping_params = array(
-			'weight' => wc_get_weight( $weight, 'g' ),
-			'length' => wc_get_dimension( $length, 'mm' ),
-			'width'  => wc_get_dimension( $width, 'mm' ),
-			'height' => wc_get_dimension( $height, 'mm' ),
+			'weight' => intval( wc_get_weight( $weight, 'g' ) ),
+			'length' => intval( wc_get_dimension( $length, 'mm' ) ),
+			'width'  => intval( wc_get_dimension( $width, 'mm' ) ),
+			'height' => intval( wc_get_dimension( $height, 'mm' ) ),
 		);
 
 		// Only set the attributes if the shipping class is not empty.
@@ -282,7 +282,7 @@ class ACO_Helper_Cart {
 	public function get_shipping() {
 		$packages        = WC()->shipping->get_packages();
 		$chosen_methods  = WC()->session->get( 'chosen_shipping_methods' );
-		$chosen_shipping = $chosen_methods[0];
+		$chosen_shipping = $chosen_methods[0] ?? null;
 
 		$formatted_shipping = null;
 		foreach ( $packages as $i => $package ) {
