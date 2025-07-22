@@ -237,7 +237,8 @@ class ACO_Helper_Order {
 		foreach ( $tax_items as $tax_item ) {
 			$rate_id = $tax_item->get_rate_id();
 			if ( key( $order_item->get_taxes()['total'] ) === $rate_id ) {
-				return (string) round( WC_Tax::_get_tax_rate( $rate_id )['tax_rate'] );
+				// Return the tax rate percent value.
+				return wc_format_decimal( WC_Tax::get_rate_percent_value( $rate_id ), 2 );
 			}
 		}
 		return 0;
