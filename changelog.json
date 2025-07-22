@@ -283,5 +283,10 @@
           "description": "<ul><li>Feature - Added functionality to restore the selected pickup point in the Avarda Checkout widget when the order is placed and the shipping options are updated.</li><li>Enhancement - Improved the handling of the shipping create-session to always return a valid shipping session to Avarda, even when there are errors. This prevents the checkout from not loading the shipping widget when using Partner shipping.</li><li>Fix - Fixed a potential issue when sending shippingParameters to Avarda as decimal values, rather then whole numbers.</li></ul>",
           "requires": "5.6.0",
           "tested": "6.8.2"
+     },
+      "1.17.1": {
+          "description": "<ul><li>Fix - Allow shipping line tax rate with decimals for redirect checkout flow. Could cause issues with FI that now has 25,5% as standard rate.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "6.8.2"
      }
 }
