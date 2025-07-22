@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.8.1
+Tested up to: 6.8.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 9.9.4
+WC tested up to: 10.0.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.0
+Stable tag: 1.17.1
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,7 +31,10 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
-= 2025.06.23        - version 1.17.0 =
+= 2025.07.22        - version 1.17.1 =
+* Fix               - Allow shipping line tax rate with decimals for redirect checkout flow. Could cause issues with FI that now has 25,5% as standard rate.
+
+= 2025.07.16        - version 1.17.0 =
 * Feature           - Added functionality to restore the selected pickup point in the Avarda Checkout widget when the order is placed and the shipping options are updated.
 * Enhancement       - Improved the handling of the shipping create-session to always return a valid shipping session to Avarda, even when there are errors. This prevents the checkout from not loading the shipping widget when using Partner shipping.
 * Fix               - Fixed a potential issue when sending shippingParameters to Avarda as decimal values, rather then whole numbers.
