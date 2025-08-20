@@ -354,6 +354,15 @@ jQuery(function($) {
                     border-radius: 50%;
                     animation: spin 1s linear infinite;
                 }
+                .aco-waiting-for-shipping {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 20px;
+                    flex-direction: column;
+                    background-color: #FFE6D;
+                    border-radius: 5px;
+                }
                 @keyframes spin {
                     to {
                         transform: rotate(360deg);
@@ -364,7 +373,7 @@ jQuery(function($) {
 
             // If the cart needs shipping, but we don't have any options, show a spinner instead.
             if (aco_shipping_widget.cartNeedsShipping && ( options.length === 0 || options[0].shippingMethod === 'no_shipping' )) {
-                html += `<div class='aco-spinner'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.spinner_text}</p></div>`;
+                html += `<div class='aco-waiting-for-shipping'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.waiting_for_shipping_text}</p></div>`;
                 return html;
             }
 

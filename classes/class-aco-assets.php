@@ -211,10 +211,11 @@ class ACO_Assets {
 			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
 			'cart_needs_shipping'             => WC()->cart->needs_shipping(),
 			'spinner_text'                    => apply_filters( 'aco_shipping_widget_spinner_text', __( 'Waiting for shipping options...', 'avarda-checkout-for-woocommerce' ) ),
+			'waiting_for_shipping_text'       => apply_filters( 'aco_shipping_widget_waiting_for_shipping_text', __( 'Please fill in your address information to see available shipping options.', 'avarda-checkout-for-woocommerce' ) ),
 			'price_format'                    => array(
 				'trim_zero_decimals' => apply_filters( 'woocommerce_price_trim_zeros', false ),
-				'format' => get_woocommerce_price_format(),
-				'symbol' => get_woocommerce_currency_symbol(),
+				'format'             => get_woocommerce_price_format(),
+				'symbol'             => get_woocommerce_currency_symbol(),
 			),
 			'ajax'                            => array(
 				'get_shipping_options' => array(
