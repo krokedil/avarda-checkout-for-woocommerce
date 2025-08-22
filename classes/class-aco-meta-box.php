@@ -88,7 +88,7 @@ class ACO_Meta_Box {
 		$title_order_total_mismatch      = __( 'Order total mismatch', 'avarda-checkout-for-woocommerce' );
 		$title_avarda_customer_balance   = __( 'Avarda customer balance', 'avarda-checkout-for-woocommerce' );
 		$title_customer_balance_mismatch = __( 'Customer balance mismatch', 'avarda-checkout-for-woocommerce' );
-		$title_order_synchronization     = __( 'Order synchronization', 'avarda-checkout-for-woocommerce' );
+		$title_order_synchronization     = __( 'Order management', 'avarda-checkout-for-woocommerce' );
 		$title_view_avarda_order         = __( 'View Avarda order object', 'avarda-checkout-for-woocommerce' );
 		$aco_order_sync_status           = ! empty( $order->get_meta( '_wc_avarda_order_sync_status', true ) ) ? $order->get_meta( '_wc_avarda_order_sync_status', true ) : 'enabled';
 
