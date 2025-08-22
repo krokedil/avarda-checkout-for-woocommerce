@@ -46,7 +46,7 @@ class ACO_Checkout {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'update_avarda_order' ), 999999 );
 
 		if ( 'embedded' === $this->checkout_flow ) {
-			add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_jwt_token_field' ), 30 );
+			add_action( 'aco_wc_after_wrapper', array( $this, 'add_hidden_jwt_token_field' ), 10 );
 
 			// If we are using integrated wc shipping, add a hidden field for the shipping information.
 			if ( $this->is_integrated_wc_shipping_enabled() ) {
@@ -214,19 +214,13 @@ class ACO_Checkout {
 	 * the same one currently saved in WC session aco_wc_payment_data.
 	 * We do this to prevent issues if stores have session problems.
 	 *
-	 * @param array $fields WooCommerce checkout form fields.
-	 * @return array
+	 * @return void
 	 */
-	public function add_hidden_jwt_token_field( $fields ) {
+	public function add_hidden_jwt_token_field() {
 		$avarda_jwt_token = aco_get_jwt_token_from_session();
-
-		$fields['billing']['aco_jwt_token'] = array(
-			'type'    => 'hidden',
-			'class'   => array( 'aco_jwt_token' ),
-			'default' => $avarda_jwt_token,
-		);
-
-		return $fields;
+		?>
+		<input type="hidden" class="aco_jwt_token" name="aco_jwt_token" id="aco_jwt_token" value="<?php echo esc_attr( $avarda_jwt_token ); ?>" />
+		<?php
 	}
 
 	/**
