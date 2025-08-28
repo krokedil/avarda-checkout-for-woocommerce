@@ -1,3 +1,4 @@
+// Load the css from ../css/aco_shipping_widget.css as a string.
 jQuery(function($) {
     const aco_shipping_widget = {
         listeners: {},
@@ -171,200 +172,46 @@ jQuery(function($) {
             //aco_shipping_widget.getShippingOptions();
         },
 
+        getStyleCss: () => {
+            const acoShippingWidgetCss = $.ajax({
+                url: aco_wc_shipping_params.style_url,
+                dataType: 'text',
+                async: false
+            }).responseText;
+
+            return acoShippingWidgetCss;
+        },
+
+        getCustomStyleCss: () => {
+            let css = '';
+            const customStyles = aco_wc_shipping_params.custom_widget_style;
+
+            // If its null or empty, return early.
+            if (!customStyles || Object.keys(customStyles).length === 0) {
+                return '';
+            }
+
+            css += 'main {';
+
+            for (const [name, value] of Object.entries(customStyles)) {
+                css += `--${name}: ${value};`;
+            }
+
+            css += '}';
+
+            return css;
+        },
+
         getOptionsHtml: () => {
+            const css = aco_shipping_widget.getStyleCss();
+            const customCss = aco_shipping_widget.getCustomStyleCss();
+
             const {options, selected_option} = aco_shipping_widget.modules;
-            let html = `<style>
-                .radio-group {
-                    display: flex;
-                    flex-direction: column;
-                    font-size: 16px;
-                    color: #000000;
-                    border: 1px solid #ccc;
-                    border-radius: 12px;
-                }
-
-                .radio-input {
-                    display: none;
-                }
-                .radio-control {
-                    padding: 0 20px;
-                }
-
-                .radio-box {
-                    display: block;
-                    padding: 16px 0;
-                    transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                }
-
-                .radio-label {
-                    cursor: pointer;
-                }
-
-                .radio-button-wrapper {
-                    display: flex;
-                    gap: 10px;
-                    align-items: center;
-                }
-
-                .details {
-                    max-height: 0;
-                    overflow: hidden;
-                    transition: max-height 0.3s ease, padding 0.3s ease;
-                }
-
-                .radio-input:checked + .radio-box .details {
-                    max-height: fit-content;
-                }
-
-                .radio-input:checked + .radio-box .outer-circle {
-                    stroke: #000000;
-                }
-
-                .radio-input:checked + .radio-box .inner-circle {
-                    fill: #000000;
-                }
-
-                .outer-circle {
-                    stroke: #b2b2b2;
-                    fill: none;
-                }
-
-                .inner-circle {
-                    fill: transparent;
-                }
-
-                .details p {
-                    margin: 20px 0 0 0;
-                }
-
-                .radio-control:not(:last-child) .radio-box {
-                    border-bottom: 1px solid #ccc;
-                }
-
-                .left-column {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .main-column {
-                    flex: 1;
-                }
-                .right-column {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-                .price {
-                    font-weight: bold;
-                }
-                .aco-carrier-icon {
-                    width: 24px;
-                    height: 24px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                }
-                .pickup-point-select {
-                    border: 1px solid #ccc;
-                    border-radius: 12px;
-                    margin-top: 20px;
-                    overflow: hidden;
-                }
-                .pickup-point-select-header {
-                    padding: 10px;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                }
-                .pickup-point-select-body {
-                    border-top: 1px solid #ccc;
-                    display: none;
-                }
-                .pickup-point-select-item {
-                    padding: 10px;
-                    border-bottom: 1px solid #ccc;
-                    cursor: pointer;
-                }
-                .pickup-point-select-item:hover {
-                    background-color: #f9f9f9;
-                }
-                .pickup-point-select-item.selected {
-                    background-color: #eee;
-                }
-                .pickup-point-select-item:last-child {
-                    border-bottom: none;
-                }
-                .pickup-point-info {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 5px;
-                }
-                .pickup-point-name {
-                    font-weight: bold;
-                    font-size: 13px;
-                    color: #000000;
-                }
-                .pickup-point-address {
-                    font-size: 13px;
-                    color: #4C4C4C;
-                }
-                .pickup-point-select .arrow {
-                    margin-left: auto;
-                    transition: transform 0.1s ease;
-                }
-                .pickup-point-select.open .arrow {
-                    transform: rotate(90deg);
-                }
-                .pickup-point-select.closed .arrow {
-                    transform: rotate(0deg);
-                }
-                p.description {
-                    font-size: 13px;
-                    margin-top: 13px;
-                    color: #4C4C4C;
-                }
-                label.disabled {
-                    position: relative;
-                    cursor: not-allowed;
-                    pointer-events: none;
-                }
-                label.disabled::before {
-                    content: "";
-                    background-color: rgba(255, 255, 255, 0.5);
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
-                .aco-spinner {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 200px;
-                    flex-direction: column;
-                }
-                .aco-spinner::before {
-                    content: "";
-                    width: 40px;
-                    height: 40px;
-                    border: 5px solid #ccc;
-                    border-top-color: #000;
-                    border-radius: 50%;
-                    animation: spin 1s linear infinite;
-                }
-                @keyframes spin {
-                    to {
-                        transform: rotate(360deg);
-                    }
-                }
-            </style>
-            `;
+            let html = `<style>${customCss}\n${css}</style>`;
 
             // If the cart needs shipping, but we don't have any options, show a spinner instead.
             if (aco_shipping_widget.cartNeedsShipping && ( options.length === 0 || options[0].shippingMethod === 'no_shipping' )) {
-                html += `<div class='aco-spinner'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.spinner_text}</p></div>`;
+                html += `<div class='aco-waiting-for-shipping'><p class='aco-no-shipping-methods'>${aco_wc_shipping_params.waiting_for_shipping_text}</p></div>`;
                 return html;
             }
 
