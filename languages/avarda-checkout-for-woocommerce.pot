@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Krokedil <info@krokedil.se>\n"
 "Last-Translator: Krokedil <info@krokedil.se>\n"
-"POT-Creation-Date: 2025-07-31 14:07+0000\n"
+"POT-Creation-Date: 2025-08-22 11:18+0000\n"
 "Report-Msgid-Bugs-To: http://krokedil.se\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -43,10 +43,6 @@ msgstr ""
 
 #: ../classes/class-aco-assets.php:213
 msgid "Waiting for shipping options..."
-msgstr ""
-
-#: ../classes/class-aco-assets.php:214
-msgid "Please fill in your address information to see available shipping options."
 msgstr ""
 
 #. translators: Avarda purchase ID.
@@ -99,7 +95,7 @@ msgid "Customer balance mismatch"
 msgstr ""
 
 #: ../classes/class-aco-meta-box.php:91
-msgid "Order synchronization"
+msgid "Order management"
 msgstr ""
 
 #: ../classes/class-aco-meta-box.php:92
