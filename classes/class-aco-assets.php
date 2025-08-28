@@ -207,11 +207,23 @@ class ACO_Assets {
 		);
 		wp_enqueue_script( 'aco_wc' );
 
+		/**
+		 * Hook: aco_shipping_widget_custom_style.
+	 	 *
+	 	 * Allows developers to override the style for the shipping widget by
+		 * passing a array of CSS variable names without the leading -- and the value they wish to use instead of the default.
+		 *
+		 * @see avarda-checkout-for-woocommerce/assets/css/aco_shipping_widgets for variables that can be used for custom styling.
+	 	 */
+		$custom_widget_style = apply_filters( 'aco_shipping_widget_custom_style', array() );
+
 		$shipping_widget = array(
 			'integrated_shipping_woocommerce' => $integrated_shipping_woocommerce ? 'yes' : 'no',
 			'cart_needs_shipping'             => WC()->cart->needs_shipping(),
 			'spinner_text'                    => apply_filters( 'aco_shipping_widget_spinner_text', __( 'Waiting for shipping options...', 'avarda-checkout-for-woocommerce' ) ),
 			'waiting_for_shipping_text'       => apply_filters( 'aco_shipping_widget_waiting_for_shipping_text', __( 'Please fill in your address information to see available shipping options.', 'avarda-checkout-for-woocommerce' ) ),
+			'style_url'                       => AVARDA_CHECKOUT_URL . '/assets/css/aco_shipping_widget.css',
+			'custom_widget_style'             => $custom_widget_style,
 			'price_format'                    => array(
 				'trim_zero_decimals' => apply_filters( 'woocommerce_price_trim_zeros', false ),
 				'format'             => get_woocommerce_price_format(),
