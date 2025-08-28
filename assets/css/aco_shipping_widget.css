@@ -1,0 +1,196 @@
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    color: var(--text-base-color, #000);
+    border: 1px solid var(--border-color, #ccc );
+    border-radius: 12px;
+}
+
+.radio-input {
+    display: none;
+}
+.radio-control {
+    padding: 0 20px;
+}
+
+.radio-box {
+    display: block;
+    padding: 16px 0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.radio-label {
+    cursor: pointer;
+}
+
+.radio-button-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.details {
+    max-height: 0;
+    overflow: hidden;
+    transition:
+        max-height 0.3s ease,
+        padding 0.3s ease;
+}
+
+.radio-input:checked + .radio-box .details {
+    max-height: fit-content;
+}
+
+.radio-input:checked + .radio-box .outer-circle {
+    stroke: var(--radio-checked-color, #000);
+}
+
+.radio-input:checked + .radio-box .inner-circle {
+    fill: var(--radio-checked-color, #000);
+}
+
+.outer-circle {
+    stroke: var(--radio-unchecked-color, #b2b2b2);
+    fill: none;
+}
+
+.inner-circle {
+    fill: transparent;
+}
+
+.details p {
+    margin: 20px 0 0 0;
+}
+
+.radio-control:not(:last-child) .radio-box {
+    border-bottom: 1px solid var(--border-color, #ccc );
+}
+
+.left-column {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.main-column {
+    flex: 1;
+}
+.right-column {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.price {
+    font-weight: bold;
+}
+.aco-carrier-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.pickup-point-select {
+    border: 1px solid var(--border-color, #ccc );
+    border-radius: 12px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+.pickup-point-select-header {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+.pickup-point-select-body {
+    border-top: 1px solid var(--border-color, #ccc );
+    display: none;
+}
+.pickup-point-select-item {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color, #ccc );
+    cursor: pointer;
+}
+.pickup-point-select-item:hover {
+    background-color: var(--pickup-point-hover-color, #f9f9f9);
+}
+.pickup-point-select-item.selected {
+    background-color: var(--pickup-point-selected-color, #eee);
+}
+.pickup-point-select-item:last-child {
+    border-bottom: none;
+}
+.pickup-point-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.pickup-point-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: var(--text-base-color, #000);
+}
+.pickup-point-address {
+    font-size: 13px;
+    color: var(--text-secondary-color, #4c4c4c);
+}
+.pickup-point-select .arrow {
+    margin-left: auto;
+    transition: transform 0.1s ease;
+}
+.pickup-point-select.open .arrow {
+    transform: rotate(90deg);
+}
+.pickup-point-select.closed .arrow {
+    transform: rotate(0deg);
+}
+p.description {
+    font-size: 13px;
+    margin-top: 13px;
+    color: var(--text-secondary-color, #4c4c4c);
+}
+label.disabled {
+    position: relative;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+label.disabled::before {
+    content: "";
+    background-color: var(--disabled-label-color, #ffffff80);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.aco-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    flex-direction: column;
+}
+.aco-spinner::before {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 5px solid var(--spinner-background-color, #ccc );
+    border-top-color: var(--spinner-color, #000);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+.aco-waiting-for-shipping {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    flex-direction: column;
+    background-color: var(--notification-background-color, #ffe6dd);
+    border-radius: 5px;
+}
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
