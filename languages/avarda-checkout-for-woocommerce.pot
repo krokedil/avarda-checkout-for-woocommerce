@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Krokedil <info@krokedil.se>\n"
 "Last-Translator: Krokedil <info@krokedil.se>\n"
-"POT-Creation-Date: 2025-08-22 11:18+0000\n"
+"POT-Creation-Date: 2025-09-01 09:42+0000\n"
 "Report-Msgid-Bugs-To: http://krokedil.se\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -41,8 +41,12 @@ msgstr ""
 msgid "Please fill in all required checkout fields."
 msgstr ""
 
-#: ../classes/class-aco-assets.php:213
+#: ../classes/class-aco-assets.php:223
 msgid "Waiting for shipping options..."
+msgstr ""
+
+#: ../classes/class-aco-assets.php:224
+msgid "Please fill in your address information to see available shipping options."
 msgstr ""
 
 #. translators: Avarda purchase ID.
@@ -118,76 +122,76 @@ msgstr ""
 msgid "Payment fetched from Avarda"
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:38
+#: ../classes/class-aco-order-management.php:49
 msgid "Avarda Shipping Information"
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:79
+#: ../classes/class-aco-order-management.php:88
 msgid "Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:87
+#: ../classes/class-aco-order-management.php:96
 msgid "Could not cancel Avarda Checkout reservation, Avarda Checkout reservation is already cancelled."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:108
+#: ../classes/class-aco-order-management.php:117
 msgid "Avarda reservation was successfully cancelled."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:100
+#: ../classes/class-aco-order-management.php:109
 msgid "Avarda API Error on Avarda cancel order: "
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:151
+#: ../classes/class-aco-order-management.php:160
 msgid "Avarda Checkout reservation could not be activated. Missing Avarda purchase id."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:159
+#: ../classes/class-aco-order-management.php:168
 msgid "Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already activated."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:180
+#: ../classes/class-aco-order-management.php:189
 msgid "Avarda reservation was successfully activated."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:172
+#: ../classes/class-aco-order-management.php:181
 msgid "Avarda API Error on Avarda activate order: "
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:209
+#: ../classes/class-aco-order-management.php:218
 msgid "Avarda Checkout order could not be refunded. Missing Avarda purchase id."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:221
+#: ../classes/class-aco-order-management.php:230
 msgid "Avarda API Error on Avarda refund (refund endpoint): "
 msgstr ""
 
 #. translators: Refunded amount.
-#: ../classes/class-aco-order-management.php:229
+#: ../classes/class-aco-order-management.php:238
 msgid "%s successfully refunded via Avarda."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:242
+#: ../classes/class-aco-order-management.php:251
 msgid "Avarda API Error on get avarda order before refund: "
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:264
+#: ../classes/class-aco-order-management.php:273
 msgid "Avarda API Error on Avarda refund: "
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:269
+#: ../classes/class-aco-order-management.php:278
 msgid "Avarda Checkout order was successfully refunded."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:272
+#: ../classes/class-aco-order-management.php:281
 msgid "Avarda Checkout order could not be refunded."
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:298
+#: ../classes/class-aco-order-management.php:307
 msgid "Activate Avarda order"
 msgstr ""
 
-#: ../classes/class-aco-order-management.php:299
+#: ../classes/class-aco-order-management.php:308
 msgid "Cancel Avarda order"
 msgstr ""
 
