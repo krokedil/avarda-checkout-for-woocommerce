@@ -8,6 +8,7 @@ jQuery(function($) {
         hasFullAddress: false,
         changedShippingOption: false,
         cartNeedsShipping: false,
+        initialized: false,
 
         registerEvents: () => {
             // Set the payment method to aco if we have the payment method radio buttons.
@@ -29,6 +30,11 @@ jQuery(function($) {
                 console.error("Avarda Checkout Shipping Widget: No config found or modules found.");
                 return;
             }
+
+            if (aco_shipping_widget.initialized) {
+                return;
+            }
+            aco_shipping_widget.initialized = true;
 
             const $element = $(element);
             aco_shipping_widget.element = $element;
