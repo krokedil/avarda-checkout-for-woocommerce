@@ -8,7 +8,6 @@ jQuery(function($) {
         hasFullAddress: false,
         changedShippingOption: false,
         cartNeedsShipping: false,
-        initialized: false,
 
         registerEvents: () => {
             // Set the payment method to aco if we have the payment method radio buttons.
@@ -30,11 +29,6 @@ jQuery(function($) {
                 console.error("Avarda Checkout Shipping Widget: No config found or modules found.");
                 return;
             }
-
-            if (aco_shipping_widget.initialized) {
-                return;
-            }
-            aco_shipping_widget.initialized = true;
 
             const $element = $(element);
             aco_shipping_widget.element = $element;
@@ -69,6 +63,9 @@ jQuery(function($) {
                 aco_shipping_widget.modules.selected_option = shippingMethod;
             });
 
+            // Deregister previous click events to avoid multiple bindings.
+            $element.off( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
+            $element.off( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
             // Register the click event for the pickup point select box.
             $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
             $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
