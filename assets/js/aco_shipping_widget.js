@@ -31,6 +31,9 @@ jQuery(function($) {
             }
 
             const $element = $(element);
+            // Remove previous event handlers with the namespace to avoid duplicates.
+            $element.off(".aco_shipping_ui");
+
             aco_shipping_widget.element = $element;
             aco_shipping_widget.cartNeedsShipping = aco_wc_shipping_params.cart_needs_shipping;
 
@@ -45,7 +48,7 @@ jQuery(function($) {
             $element.html(optionsHtml);
 
             // Register the change event for the radio buttons.
-            $element.on( "change", 'input:radio[name="aco_shipping_method"]:checked', function () {
+            $element.on("change.aco_shipping_ui", 'input:radio[name="aco_shipping_method"]:checked', function () {
                 aco_shipping_widget.blockElement("body");
                 const shippingMethod = $(this).val();
 
@@ -63,11 +66,10 @@ jQuery(function($) {
                 aco_shipping_widget.modules.selected_option = shippingMethod;
             });
 
-            // Register the click event for the pickup point select box.
-            $element.on( 'click', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick );
-            $element.on( 'click', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint );
+            $element.on('click.aco_shipping_ui', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick);
+            $element.on('click.aco_shipping_ui', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint);
 
-            $(document.body).on('updated_checkout', () => {
+            $(document.body).on('updated_checkout.aco_shipping_ui', () => {
                 if(aco_shipping_widget.changedShippingOption) {
                     aco_shipping_widget.dispatchEvent("shipping_option_changed");
                     aco_shipping_widget.changedShippingOption = false;
