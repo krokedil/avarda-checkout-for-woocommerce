@@ -293,5 +293,10 @@
           "description": "<ul><li>Fix - Resolved an issue with hook priority that could cause an Avarda JWT token error in checkout.</li><li>Fix - Resolved a '_load_textdomain_just_in_time' notice.</li><li>Tweak - The integrated shipping options are now sorted by price (lowest to highest).</li><li>Tweak - Tweaked the design of the shipping widget.</li><li>Tweak - Renamed the Avarda metabox setting 'Order synchronization' to 'Order Management'.</li></ul>",
           "requires": "5.6.0",
           "tested": "6.8.2"
+     },
+     "1.17.3": {
+          "description": "<ul><li>Fix - Resolved an issue where the pickup point dropdown in the shipping widget would sometimes collapse automatically, preventing selection of a pickup location.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "6.8.3"
      }
 }
