@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 6.8.2
+Tested up to: 6.8.3
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 10.1.2
+WC tested up to: 10.2.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.2
+Stable tag: 1.17.3
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2025.10.06        - version 1.17.3 =
+* Fix               - Resolved an issue where the pickup point dropdown in the shipping widget would sometimes collapse automatically, preventing selection of a pickup location.
+
 = 2025.09.01        - version 1.17.2 =
 * Fix               - Resolved an issue with hook priority that could cause an Avarda JWT token error in checkout.
 * Fix               - Resolved a '_load_textdomain_just_in_time' notice.
