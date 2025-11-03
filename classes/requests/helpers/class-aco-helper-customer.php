@@ -23,54 +23,55 @@ class ACO_Helper_Customer {
 	public function get_b2b_customer( $order_id = null ) {
 		$customer = array();
 		$order    = wc_get_order( $order_id );
+
 		// Billing address.
-		if ( $order->get_billing_company() && false === strpos( $order->get_billing_company(), '*' ) ) {
+		if ( $order->get_billing_company() ) {
 			$customer['invoicingAddress']['name'] = $order->get_billing_company();
 		}
-		if ( $order->get_billing_address_1() && false === strpos( $order->get_billing_address_1(), '*' ) ) {
+		if ( $order->get_billing_address_1() ) {
 			$customer['invoicingAddress']['address1'] = $order->get_billing_address_1();
 		}
-		if ( $order->get_billing_address_2() && false === strpos( $order->get_billing_address_2(), '*' ) ) {
+		if ( $order->get_billing_address_2() ) {
 			$customer['invoicingAddress']['address2'] = $order->get_billing_address_2();
 		}
-		if ( $order->get_billing_postcode() && false === strpos( $order->get_billing_postcode(), '*' ) ) {
+		if ( $order->get_billing_postcode() ) {
 			$customer['invoicingAddress']['zip'] = $order->get_billing_postcode();
 		}
-		if ( $order->get_billing_city() && false === strpos( $order->get_billing_city(), '*' ) ) {
+		if ( $order->get_billing_city() ) {
 			$customer['invoicingAddress']['city'] = $order->get_billing_city();
 		}
-		if ( $order->get_billing_country() && false === strpos( $order->get_billing_country(), '*' ) ) {
+		if ( $order->get_billing_country() ) {
 			$customer['invoicingAddress']['country'] = $order->get_billing_country();
 		}
 
 		// Shipping address.
-		if ( $order->get_shipping_first_name() && false === strpos( $order->get_shipping_first_name(), '*' ) ) {
+		if ( $order->get_shipping_first_name() ) {
 			$customer['deliveryAddress']['firstName'] = $order->get_shipping_first_name();
 		}
-		if ( $order->get_shipping_last_name() && false === strpos( $order->get_shipping_last_name(), '*' ) ) {
+		if ( $order->get_shipping_last_name() ) {
 			$customer['deliveryAddress']['lastName'] = $order->get_shipping_last_name();
 		}
-		if ( $order->get_shipping_address_1() && false === strpos( $order->get_shipping_address_1(), '*' ) ) {
+		if ( $order->get_shipping_address_1() ) {
 			$customer['deliveryAddress']['address1'] = $order->get_shipping_address_1();
 		}
-		if ( $order->get_shipping_address_2() && false === strpos( $order->get_shipping_address_2(), '*' ) ) {
+		if ( $order->get_shipping_address_2() ) {
 			$customer['deliveryAddress']['address2'] = $order->get_shipping_address_2();
 		}
-		if ( $order->get_shipping_postcode() && false === strpos( $order->get_shipping_postcode(), '*' ) ) {
+		if ( $order->get_shipping_postcode() ) {
 			$customer['deliveryAddress']['zip'] = $order->get_shipping_postcode();
 		}
-		if ( $order->get_shipping_city() && false === strpos( $order->get_shipping_city(), '*' ) ) {
+		if ( $order->get_shipping_city() ) {
 			$customer['deliveryAddress']['city'] = $order->get_shipping_city();
 		}
-		if ( $order->get_shipping_country() && false === strpos( $order->get_shipping_country(), '*' ) ) {
+		if ( $order->get_shipping_country() ) {
 			$customer['deliveryAddress']['country'] = $order->get_shipping_country();
 		}
 
 		// Phone and email.
-		if ( $order->get_billing_phone() && false === strpos( $order->get_billing_phone(), '*' ) ) {
+		if ( $order->get_billing_phone() ) {
 			$customer['userInputs']['phone'] = $order->get_billing_phone();
 		}
-		if ( $order->get_billing_email() && false === strpos( $order->get_billing_email(), '*' ) ) {
+		if ( $order->get_billing_email() ) {
 			$customer['userInputs']['email'] = $order->get_billing_email();
 		}
 
@@ -89,56 +90,56 @@ class ACO_Helper_Customer {
 		$order    = wc_get_order( $order_id );
 
 		// Billing address.
-		if ( $order->get_billing_first_name() && '*' !== $order->get_billing_first_name() ) {
+		if ( $order->get_billing_first_name() ) {
 			$customer['invoicingAddress']['firstName'] = $order->get_billing_first_name();
 		}
-		if ( $order->get_billing_last_name() && '*' !== $order->get_billing_last_name() ) {
+		if ( $order->get_billing_last_name() ) {
 			$customer['invoicingAddress']['lastName'] = $order->get_billing_last_name();
 		}
-		if ( $order->get_billing_address_1() && '*' !== $order->get_billing_address_1() ) {
+		if ( $order->get_billing_address_1() ) {
 			$customer['invoicingAddress']['address1'] = $order->get_billing_address_1();
 		}
-		if ( $order->get_billing_address_2() && '*' !== $order->get_billing_address_2() ) {
+		if ( $order->get_billing_address_2() ) {
 			$customer['invoicingAddress']['address2'] = $order->get_billing_address_2();
 		}
-		if ( $order->get_billing_postcode() && '*' !== $order->get_billing_postcode() ) {
+		if ( $order->get_billing_postcode() ) {
 			$customer['invoicingAddress']['zip'] = $order->get_billing_postcode();
 		}
-		if ( $order->get_billing_city() && '*' !== $order->get_billing_city() ) {
+		if ( $order->get_billing_city() ) {
 			$customer['invoicingAddress']['city'] = $order->get_billing_city();
 		}
-		if ( $order->get_billing_country() && '*' !== $order->get_billing_country() ) {
+		if ( $order->get_billing_country() ) {
 			$customer['invoicingAddress']['country'] = $order->get_billing_country();
 		}
 
 		// Shipping address.
-		if ( $order->get_shipping_first_name() && '*' !== $order->get_shipping_first_name() ) {
+		if ( $order->get_shipping_first_name() ) {
 			$customer['deliveryAddress']['firstName'] = $order->get_shipping_first_name();
 		}
-		if ( $order->get_shipping_last_name() && '*' !== $order->get_shipping_last_name() ) {
+		if ( $order->get_shipping_last_name() ) {
 			$customer['deliveryAddress']['lastName'] = $order->get_shipping_last_name();
 		}
-		if ( $order->get_shipping_address_1() && '*' !== $order->get_shipping_address_1() ) {
+		if ( $order->get_shipping_address_1() ) {
 			$customer['deliveryAddress']['address1'] = $order->get_shipping_address_1();
 		}
-		if ( $order->get_shipping_address_2() && '*' !== $order->get_shipping_address_2() ) {
+		if ( $order->get_shipping_address_2() ) {
 			$customer['deliveryAddress']['address2'] = $order->get_shipping_address_2();
 		}
-		if ( $order->get_shipping_postcode() && '*' !== $order->get_shipping_postcode() ) {
+		if ( $order->get_shipping_postcode() ) {
 			$customer['deliveryAddress']['zip'] = $order->get_shipping_postcode();
 		}
-		if ( $order->get_shipping_city() && '*' !== $order->get_shipping_city() ) {
+		if ( $order->get_shipping_city() ) {
 			$customer['deliveryAddress']['city'] = $order->get_shipping_city();
 		}
-		if ( $order->get_shipping_country() && '*' !== $order->get_shipping_country() ) {
+		if ( $order->get_shipping_country() ) {
 			$customer['deliveryAddress']['country'] = $order->get_shipping_country();
 		}
 
 		// Phone and email.
-		if ( $order->get_billing_phone() && '*' !== $order->get_billing_phone() ) {
+		if ( $order->get_billing_phone() ) {
 			$customer['userInputs']['phone'] = $order->get_billing_phone();
 		}
-		if ( $order->get_billing_email() && '*' !== $order->get_billing_email() ) {
+		if ( $order->get_billing_email() ) {
 			$customer['userInputs']['email'] = $order->get_billing_email();
 		}
 
@@ -176,17 +177,20 @@ class ACO_Helper_Customer {
 	 * @return array
 	 */
 	public static function get_invoicing_address( $item, $b2b = false ) {
-		$fields = array(
-			'name'      => $b2b ? $item->get_billing_company() : '',
-			'firstName' => $item->get_billing_first_name(),
-			'lastName'  => $item->get_billing_last_name(),
-			'address1'  => $item->get_billing_address_1(),
-			'address2'  => $item->get_billing_address_2(),
-			'zip'       => $item->get_billing_postcode(),
-			'city'      => $item->get_billing_city(),
-			'country'   => $item->get_billing_country(),
+		$invoicing_address = array_filter(
+			array(
+				'name'      => $b2b ? $item->get_billing_company() : '',
+				'firstName' => $item->get_billing_first_name(),
+				'lastName'  => $item->get_billing_last_name(),
+				'address1'  => $item->get_billing_address_1(),
+				'address2'  => $item->get_billing_address_2(),
+				'zip'       => $item->get_billing_postcode(),
+				'city'      => $item->get_billing_city(),
+				'country'   => $item->get_billing_country(),
+			)
 		);
-		return self::filter_fields( $fields );
+
+		return $invoicing_address;
 	}
 
 	/**
@@ -198,21 +202,24 @@ class ACO_Helper_Customer {
 	 */
 	public static function get_delivery_address( $item ) {
 		$delivery_countries = WC()->countries->get_shipping_countries();
-		$store_country      = WC()->countries->get_base_country();
+		$store_country 	    = WC()->countries->get_base_country();
 		$country            = $item->get_shipping_country();
 
 		( isset( $delivery_countries[ $country ] ) ? $country : $store_country );
 
-		$fields = array(
-			'firstName' => $item->get_shipping_first_name(),
-			'lastName'  => $item->get_shipping_last_name(),
-			'address1'  => $item->get_shipping_address_1(),
-			'address2'  => $item->get_shipping_address_2(),
-			'zip'       => $item->get_shipping_postcode(),
-			'city'      => $item->get_shipping_city(),
-			'country'   => $item->get_shipping_country(),
+		$delivery_address = array_filter(
+			array(
+				'firstName' => $item->get_shipping_first_name(),
+				'lastName'  => $item->get_shipping_last_name(),
+				'address1'  => $item->get_shipping_address_1(),
+				'address2'  => $item->get_shipping_address_2(),
+				'zip'       => $item->get_shipping_postcode(),
+				'city'      => $item->get_shipping_city(),
+				'country'   => $item->get_shipping_country(),
+			)
 		);
-		return self::filter_fields( $fields );
+
+		return $delivery_address;
 	}
 
 	/**
@@ -223,25 +230,13 @@ class ACO_Helper_Customer {
 	 * @return array
 	 */
 	public static function get_user_inputs( $item ) {
-		$fields = array(
-			'phone' => $item->get_billing_phone(),
-			'email' => $item->get_billing_email(),
+		$user_input = array_filter(
+			array(
+				'phone' => $item->get_billing_phone(),
+				'email' => $item->get_billing_email(),
+			)
 		);
-		return self::filter_fields( $fields );
-	}
 
-	/**
-	 * Helper to filter fields, removing empty and values containing '*'.
-	 *
-	 * @param array $fields Key-value pairs to filter.
-	 * @return array Filtered array.
-	 */
-	protected static function filter_fields( $fields ) {
-		return array_filter(
-			$fields,
-			function ( $value ) {
-				return ! empty( $value ) && false === strpos( $value, '*' );
-			}
-		);
+		return $user_input;
 	}
 }
