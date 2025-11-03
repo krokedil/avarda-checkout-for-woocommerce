@@ -190,7 +190,7 @@ class ACO_Helper_Customer {
 			)
 		);
 
-		return $invoicing_address;
+		return self::filter_fields( $invoicing_address );
 	}
 
 	/**
