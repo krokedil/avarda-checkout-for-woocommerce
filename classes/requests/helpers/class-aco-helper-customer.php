@@ -190,7 +190,7 @@ class ACO_Helper_Customer {
 			)
 		);
 
-		return $invoicing_address;
+		return self::filter_fields( $invoicing_address );
 	}
 
 	/**
@@ -202,7 +202,7 @@ class ACO_Helper_Customer {
 	 */
 	public static function get_delivery_address( $item ) {
 		$delivery_countries = WC()->countries->get_shipping_countries();
-		$store_country 	    = WC()->countries->get_base_country();
+		$store_country      = WC()->countries->get_base_country();
 		$country            = $item->get_shipping_country();
 
 		( isset( $delivery_countries[ $country ] ) ? $country : $store_country );
@@ -219,7 +219,7 @@ class ACO_Helper_Customer {
 			)
 		);
 
-		return $delivery_address;
+		return self::filter_fields( $delivery_address );
 	}
 
 	/**
@@ -237,6 +237,21 @@ class ACO_Helper_Customer {
 			)
 		);
 
-		return $user_input;
+		return self::filter_fields( $user_input );
+	}
+
+	/**
+	 * Helper to filter fields, removing empty and values containing '*'.
+	 *
+	 * @param array $fields Fields to filter.
+	 * @return array Filtered array.
+	 */
+	protected static function filter_fields( $fields ) {
+		return array_filter(
+			$fields,
+			function ( $value ) {
+				return ! empty( $value ) && false === strpos( $value, '*' );
+			}
+		);
 	}
 }
