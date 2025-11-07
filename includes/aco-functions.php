@@ -773,14 +773,17 @@ function aco_payment_steps_approved_for_update_request() {
 /**
  * Returns if WooCommerce cart contains subscription product or not.
  *
- * @return string The payment state.
+ * @hook aco_wc_cart_contains_subscription
+ * @return bool TRUE if cart contains subscription, otherwise FALSE.
  */
 function aco_get_wc_cart_contains_subscription() {
-	$contains_subscription = false;
+	$contains_subscription = ( class_exists( 'WC_Subscriptions_Cart' ) && WC_Subscriptions_Cart::cart_contains_subscription() ) ||
+		( function_exists( 'wcs_cart_contains_renewal' ) && wcs_cart_contains_renewal() ) ||
+		( function_exists( 'wcs_cart_contains_failed_renewal_order_payment' ) && wcs_cart_contains_failed_renewal_order_payment() ) ||
+		( function_exists( 'wcs_cart_contains_resubscribe' ) && wcs_cart_contains_resubscribe() ) ||
+		( function_exists( 'wcs_cart_contains_early_renewal' ) && wcs_cart_contains_early_renewal() ) ||
+		( function_exists( 'wcs_cart_contains_switches' ) && wcs_cart_contains_switches() );
 
-	if ( ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) ) {
-		$contains_subscription = true;
-	}
 	return apply_filters( 'aco_wc_cart_contains_subscription', $contains_subscription );
 }
 
