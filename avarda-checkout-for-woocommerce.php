@@ -3,7 +3,7 @@
  * Plugin Name:     Avarda Checkout for WooCommerce
  * Plugin URI:      http://krokedil.com/
  * Description:     Provides an Avarda Checkout gateway for WooCommerce.
- * Version:         1.17.3
+ * Version:         1.17.4
  * Author:          Krokedil
  * Author URI:      http://krokedil.com/
  * Developer:       Krokedil
@@ -12,7 +12,7 @@
  * Domain Path:     /languages
  *
  * WC requires at least: 5.6.0
- * WC tested up to: 10.2.2
+ * WC tested up to: 10.3.4
  *
  * Copyright:       © 2020-2025 Krokedil.
  * License:         GNU General Public License v3.0
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'AVARDA_CHECKOUT_VERSION', '1.17.3' );
+define( 'AVARDA_CHECKOUT_VERSION', '1.17.4' );
 define( 'AVARDA_CHECKOUT_URL', untrailingslashit( plugins_url( '/', __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
 define( 'AVARDA_CHECKOUT_LIVE_ENV', 'https://checkout-api.avarda.com' );
