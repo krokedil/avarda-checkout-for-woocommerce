@@ -151,7 +151,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		}
 
 		// Avarda doesn't support 0 value subscriptions.
-		if ( class_exists( 'WC_Subscriptions_Cart' ) && ( WC_Subscriptions_Cart::cart_contains_subscription() || wcs_cart_contains_renewal() ) ) {
+		if ( aco_get_wc_cart_contains_subscription() ) {
 			if ( 0 == round( WC()->cart->total, 2 ) ) { // phpcs:ignore
 				ACO_Logger::log( 'Subscription total is 0. The Avarda Checkout payment gateway is not available.', WC_Log_Levels::DEBUG );
 				return false;
