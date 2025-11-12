@@ -298,5 +298,10 @@
           "description": "<ul><li>Fix - Resolved an issue where the pickup point dropdown in the shipping widget would sometimes collapse automatically, preventing selection of a pickup location.</li></ul>",
           "requires": "5.6.0",
           "tested": "6.8.3"
+     },
+     "1.17.4": {
+          "description": "<ul><li>Masked address fields are now excluded from data sent to Avarda, preventing 'Invalid characters' errors during checkout.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "6.8.3"
      }
 }
