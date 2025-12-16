@@ -152,15 +152,27 @@ class ACO_Shipping extends WC_Shipping_Method {
 			$selected_pickup_point = $this->get_ingrid_selected_pickup_point( $shipping_module['result']['shipping']['location'] );
 		}
 
-		// Get the shipping price without VAT.
-		$shipping_tax = WC_Tax::calc_shipping_tax( $price_inc_vat, WC_Tax::get_shipping_tax_rates() );
-		$price        = $price_inc_vat - array_sum( $shipping_tax );
+
+		// We need to get the shipping price ex vat, since Ingrid only returns the price including vat, and no vat amount we need to calculate it ourselves.
+		$shipping_tax_rates = WC_Tax::get_shipping_tax_rates(); // Get the shipping tax rates from WooCommerce.
+		if ( is_array( $shipping_tax_rates ) && ! empty( $shipping_tax_rates ) ) {
+			// Use the first rate as the shipping tax rate.
+			$shipping_tax_rate = array_shift( $shipping_tax_rates );
+			$vat_percentage    = $shipping_tax_rate['rate'] / 100; // Convert to decimal for calculation.
+
+			$price_ex_vat  = round( $price_inc_vat / ( 1 + $vat_percentage ), 2 ); // Round to 2 decimals.
+			$shipping_tax  = WC_Tax::calc_shipping_tax( $price_ex_vat, array( $shipping_tax_rate ) ); // Use the specific rate for calculation.
+		} else { // If we did not get any valid tax rates, assume no tax.
+			$price_ex_vat = $price_inc_vat;
+			$shipping_tax = WC_Tax::calc_shipping_tax( $price_ex_vat, WC_Tax::get_shipping_tax_rates() );
+		}
+
 
 		$rate = array(
 			'id'          => $this->get_rate_id(),
 			'label'       => $label,
 			'description' => $label,
-			'cost'        => $price,
+			'cost'        => $price_ex_vat,
 			'taxes'       => $shipping_tax,
 			'calc_tax'    => 'per_order',
 			'meta_data'   => array(
@@ -235,22 +247,23 @@ class ACO_Shipping extends WC_Shipping_Method {
 		$selected_option_id   = $selected_option['SelectedOptionId'];
 		$label                = $selected_option['SelectedOptionName'];
 		$price_inc_vat        = $selected_option['Price'];
+		$vat_amount		      = $selected_option['ShippingTaxAmount'];
 		$selected_agent_id    = $selected_option['SelectedAgentId'];
 		$selected_option_data = $this->get_nshift_selected_option_data( $shipping_module, $selected_option_id );
 
 		// Set the pickup points and the selected pickup points if any exists.
 		$pickup_points         = $this->get_nshift_pickup_points( $selected_option_data );
 		$selected_pickup_point = $this->get_nshift_selected_pickup_point( $pickup_points, $selected_agent_id );
+		$price_ex_vat          = $price_inc_vat - $vat_amount;
 
 		// Get the shipping price without VAT.
-		$shipping_tax = WC_Tax::calc_shipping_tax( $price_inc_vat, WC_Tax::get_shipping_tax_rates() );
-		$price        = $price_inc_vat - array_sum( $shipping_tax );
+		$shipping_tax = WC_Tax::calc_shipping_tax( $price_ex_vat, WC_Tax::get_shipping_tax_rates() );
 
 		$rate = array(
 			'id'          => $this->get_rate_id(),
 			'label'       => $label,
 			'description' => $label,
-			'cost'        => $price,
+			'cost'        => $price_ex_vat,
 			'taxes'       => $shipping_tax,
 			'calc_tax'    => 'per_order',
 			'meta_data'   => array(
