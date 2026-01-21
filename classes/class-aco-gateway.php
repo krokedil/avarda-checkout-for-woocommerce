@@ -422,6 +422,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$avarda_order = ACO_WC()->session()->get_avarda_payment();
 
 		if ( is_wp_error( $avarda_order ) || empty( $avarda_order ) ) {
+			ACO_Logger::log( 'Failed to get Avarda order from session during totals validation.', WC_Log_Levels::ERROR );
 			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
 			return;
 		}
@@ -436,6 +437,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		// If the diff is greater than 3, add an error.
 		if ( $diff > 3 ) {
+			ACO_Logger::log( 'Cart total and Avarda order total do not match. Woo total: ' . $wc_total . '. Avarda total: ' . $aco_order_total . '. Difference: ' . $diff, WC_Log_Levels::ERROR );
 			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
 		}
 	}
