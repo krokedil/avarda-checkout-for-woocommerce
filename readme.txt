@@ -5,7 +5,7 @@ Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 10.4.2
+WC tested up to: 10.4.3
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Stable tag: 1.17.5
@@ -320,3 +320,4 @@ More information on how to get started can be found in the [plugin documentation
 
 = 2020.05.08        - version 0.1.0 =
 * Initial release.
+
