@@ -211,7 +211,7 @@ class ACO_Assets {
 		 * Hook: aco_shipping_widget_custom_style.
 		 *
 		 * Allows developers to override the style for the shipping widget by
-		 * passing a array of CSS variable names without the leading -- and the value they wish to use instead of the default.
+		 * passing an array of CSS variable names without the leading -- and the value they wish to use instead of the default.
 		 *
 		 * @see avarda-checkout-for-woocommerce/assets/css/aco_shipping_widgets for variables that can be used for custom styling.
 		 */

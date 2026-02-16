@@ -138,7 +138,7 @@ $settings = array(
 			'autocomplete' => 'off',
 		),
 	),
-	'integrated_shipping_end'    => array(
+	'shipping_end'               => array(
 		'type' => 'krokedil_section_end',
 	),
 	// Credentials settings.

@@ -523,7 +523,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return array|null
 	 */
 	private function get_settings_page_args() {
-		$args = false; // get_transient( 'avarda_checkout_settings_page_config' );
+		$args = get_transient( 'avarda_checkout_settings_page_config' );
 		if ( ! $args ) {
 			$args = wp_remote_get( 'https://krokedil-settings-page-configs.s3.eu-north-1.amazonaws.com/develop/configs/avarda-checkout-for-woocommerce.json' );
 
