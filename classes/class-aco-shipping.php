@@ -257,7 +257,7 @@ class ACO_Shipping extends WC_Shipping_Method {
 		$price_ex_vat          = $price_inc_vat - $vat_amount;
 
 		// Get the shipping price without VAT.
-		$shipping_tax = WC_Tax::calc_shipping_tax( $price_ex_vat, WC_Tax::get_shipping_tax_rates() );
+		$shipping_tax = array( 0 );
 
 		$rate = array(
 			'id'          => $this->get_rate_id(),
