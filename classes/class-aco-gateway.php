@@ -525,7 +525,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	private function get_settings_page_args() {
 		$args = get_transient( 'avarda_checkout_settings_page_config' );
 		if ( ! $args ) {
-			$args = wp_remote_get( 'https://krokedil-settings-page-configs.s3.eu-north-1.amazonaws.com/develop/configs/avarda-checkout-for-woocommerce.json' );
+			$args = wp_remote_get( 'https://krokedil-settings-page-configs.s3.eu-north-1.amazonaws.com/main/configs/avarda-checkout-for-woocommerce.json' );
 
 			if ( is_wp_error( $args ) ) {
 				ACO_Logger::log( 'Failed to fetch Avarda Checkout settings page config from remote source.', WC_Log_Levels::ERROR );
@@ -533,10 +533,16 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 
 			$args = wp_remote_retrieve_body( $args );
-			set_transient( 'avarda_checkout_settings_page_config', $args, 60 * 60 * 24 ); // 24 hours lifetime.
+
+			// Use the styled output and settings navigation sidebar.
+			$decoded_args                        = json_decode( $args, true );
+			$decoded_args['styled_output']       = true;
+			$decoded_args['settings_navigation'] = true;
+
+			set_transient( 'avarda_checkout_settings_page_config', json_encode( $decoded_args ), 60 * 60 * 24 ); // 24 hours lifetime.
 		}
 
-		return json_decode( $args, true );
+		return $decoded_args;
 	}
 }
 
