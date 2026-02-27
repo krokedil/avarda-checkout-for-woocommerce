@@ -533,10 +533,16 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 
 			$args = wp_remote_retrieve_body( $args );
-			set_transient( 'avarda_checkout_settings_page_config', $args, 60 * 60 * 24 ); // 24 hours lifetime.
+
+			// Use the styled output and settings navigation sidebar.
+			$decoded_args                        = json_decode( $args, true );
+			$decoded_args['styled_output']       = true;
+			$decoded_args['settings_navigation'] = true;
+
+			set_transient( 'avarda_checkout_settings_page_config', json_encode( $decoded_args ), 60 * 60 * 24 ); // 24 hours lifetime.
 		}
 
-		return json_decode( $args, true );
+		return $decoded_args;
 	}
 }
 
