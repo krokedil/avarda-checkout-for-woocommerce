@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ACO_Subscription {
 
 	public const RECURRING_TOKEN = '_aco_recurring_token';
+	public const PURCHASE_ID     = '_wc_avarda_purchase_id';
 
 	/**
 	 * Test mode.
@@ -94,7 +95,7 @@ class ACO_Subscription {
 
 		$subscriptions   = wcs_get_subscriptions_for_renewal_order( $renewal_order->get_id() );
 		$recurring_token = $renewal_order->get_meta( self::RECURRING_TOKEN );
-		$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id' );
+		$purchase_id     = $renewal_order->get_meta( self::PURCHASE_ID );
 
 		// Check that we have a recurring token.
 		if ( empty( $recurring_token ) ) {
@@ -121,14 +122,20 @@ class ACO_Subscription {
 		// Check that we have a purchase id. This is also needed in the request to Avarda.
 		if ( empty( $purchase_id ) ) {
 			// Try getting it from parent order.
-			$parent_order_purchase_id = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_wc_avarda_purchase_id', true );
+			$subscription = array_pop( $subscriptions );
+
+			$parent_order_purchase_id = '';
+			if ( false !== $subscription->get_parent_id() ) { // There is no original order
+				$parent_order             = $subscription->get_parent();
+				$parent_order_purchase_id = $parent_order->get_meta( self::PURCHASE_ID );
+			}
 
 			if ( ! empty( $parent_order_purchase_id ) ) {
-				$renewal_order->update_meta_data( '_wc_avarda_purchase_id', $parent_order_purchase_id );
+				$renewal_order->update_meta_data( self::PURCHASE_ID, $parent_order_purchase_id );
 				$renewal_order->save();
 
 				foreach ( $subscriptions as $subscription ) {
-					$subscription->update_meta_data( '_wc_avarda_purchase_id', $parent_order_purchase_id );
+					$subscription->update_meta_data( self::PURCHASE_ID, $parent_order_purchase_id );
 					$subscription->save();
 				}
 			}
