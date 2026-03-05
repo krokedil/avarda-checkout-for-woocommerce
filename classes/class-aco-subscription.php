@@ -15,6 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class that has functions for the subscription.
  */
 class ACO_Subscription {
+
+	public const RECURRING_TOKEN = '_aco_recurring_token';
+
 	/**
 	 * Test mode.
 	 *
@@ -90,20 +93,26 @@ class ACO_Subscription {
 		$order_id = $renewal_order->get_id();
 
 		$subscriptions   = wcs_get_subscriptions_for_renewal_order( $renewal_order->get_id() );
-		$recurring_token = $renewal_order->get_meta( '_aco_recurring_token', true );
-		$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id', true );
+		$recurring_token = $renewal_order->get_meta( self::RECURRING_TOKEN );
+		$purchase_id     = $renewal_order->get_meta( '_wc_avarda_purchase_id' );
 
 		// Check that we have a recurring token.
 		if ( empty( $recurring_token ) ) {
 			// Try getting it from parent order.
-			$parent_order_recurring_token = get_post_meta( WC_Subscriptions_Renewal_Order::get_parent_order_id( $order_id ), '_aco_recurring_token', true );
+			$subscription = array_pop( $subscriptions );
+
+			$parent_order_recurring_token = '';
+			if ( false !== $subscription->get_parent_id() ) { // There is no original order
+				$parent_order                 = $subscription->get_parent();
+				$parent_order_recurring_token = $parent_order->get_meta( self::RECURRING_TOKEN );
+			}
 
 			if ( ! empty( $parent_order_recurring_token ) ) {
-				$renewal_order->update_meta_data( '_aco_recurring_token', $parent_order_recurring_token );
+				$renewal_order->update_meta_data( self::RECURRING_TOKEN, $parent_order_recurring_token );
 				$renewal_order->save();
 
 				foreach ( $subscriptions as $subscription ) {
-					$subscription->update_meta_data( '_aco_recurring_token', $parent_order_recurring_token );
+					$subscription->update_meta_data( self::RECURRING_TOKEN, $parent_order_recurring_token );
 					$subscription->save();
 				}
 			}
