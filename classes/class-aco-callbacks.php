@@ -38,25 +38,25 @@ class ACO_Callbacks {
 
 		if ( ! empty( $aco_sub_payment_change ) ) {
 			aco_confirm_subscription( $aco_sub_payment_change, $purchase_id );
-			ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. Subscription payment method update. WC Subscription ID: ' . $aco_sub_payment_change );
+			ACO_Logger::log( "[CALLBACK]: Notification callback hit for Avarda purchase ID: $purchase_id . Subscription payment method update. WC Subscription ID: $aco_sub_payment_change" );
 			header( 'HTTP/1.1 200 OK' );
 			exit;
 		}
 
 		if ( ! is_object( $order ) ) {
-			ACO_Logger::log( 'Aborting notification callback for Purchase ID ' . $purchase_id . '. No WooCommerce order found.' );
+			ACO_Logger::log( "[CALLBACK]: Aborting notification callback for Purchase ID $purchase_id. No WooCommerce order found." );
 			header( 'HTTP/1.1 404 Not Found' );
 			exit;
 		}
 
-		ACO_Logger::log( 'Notification callback hit for Avarda purchase ID: ' . $purchase_id . '. WC order ID: ' . $order->get_id() );
+		ACO_Logger::log( "[CALLBACK]: Notification callback hit for Avarda purchase ID: $purchase_id . WC order ID: " . $order->get_id() );
 
 		// Maybe abort the callback (if the order already has been processed in Woo).
 		if ( ! empty( $order->get_date_paid() ) ) {
-			ACO_Logger::log( 'Aborting notification callback. Order ' . $order->get_order_number() . ' (order ID ' . $order->get_id() . ') already processed.' );
+			ACO_Logger::log( "[CALLBACK]: Aborting notification callback. Order {$order->get_order_number()} (order ID {$order->get_id()}) already processed." );
 		} else {
 			as_schedule_single_action( time() + 120, 'aco_payment_created_callback', array( $purchase_id, $order->get_id() ) );
-			ACO_Logger::log( 'Scheduling notification callback to be handled in 2 minutes for Purchase ID ' . $purchase_id . '. Order ' . $order->get_order_number() . ' (order ID ' . $order->get_id() . ').' );
+			ACO_Logger::log( "[CALLBACK]: Scheduling notification callback to be handled in 2 minutes for Purchase ID $purchase_id . Order {$order->get_order_number()} (order ID {$order->get_id()})." );
 		}
 		header( 'HTTP/1.1 200 OK' );
 		exit;
@@ -70,15 +70,15 @@ class ACO_Callbacks {
 	 */
 	public function execute_aco_payment_created_callback( $purchase_id, $order_id ) {
 
-		ACO_Logger::log( 'Execute purchase completed API callback. Purchase ID:' . $purchase_id . '. Order ID: ' . $order_id );
+		ACO_Logger::log( "[CALLBACK]: Execute purchase completed API callback. Purchase ID: $purchase_id . Order ID: $order_id" );
 
 		$order = wc_get_order( $order_id );
 
 		// Maybe abort the callback (if the order already has been processed in Woo).
 		if ( ! empty( $order->get_date_paid() ) ) {
-			ACO_Logger::log( 'Aborting purchase completed API callback. Order ' . $order->get_order_number() . '(order ID ' . $order_id . ') already processed.' );
+			ACO_Logger::log( "[CALLBACK]: Aborting purchase completed API callback. Order {$order->get_order_number()} (order ID {$order_id}) already processed." );
 		} else {
-			ACO_Logger::log( 'Order status not set correctly for order ' . $order->get_order_number() . ' during checkout process. Setting order status to Processing/Completed in API callback.' );
+			ACO_Logger::log( "[CALLBACK]: Order status not set correctly for order {$order->get_order_number()} during checkout process. Setting order status to Processing/Completed in API callback." );
 			// translators: Avarda purchase ID.
 			$note = sprintf( __( 'Order status not set correctly during checkout process. Confirming purchase via callback from Avarda.', 'avarda-checkout-for-woocommerce' ), $purchase_id );
 			$order->add_order_note( $note );
