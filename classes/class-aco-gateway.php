@@ -106,7 +106,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		if ( empty( $this->payment_gateway_icon ) ) {
-			return;
+			return parent::get_icon();
 		}
 
 		if ( 'default' === strtolower( $this->payment_gateway_icon ) ) {
