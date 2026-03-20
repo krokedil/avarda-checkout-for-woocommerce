@@ -543,15 +543,20 @@ jQuery(function($) {
               throw "Result failed";
             }
           } catch (err) {
-            if (data.messages) {
-              aco_wc.logToFile("Checkout error | " + data.messages);
-              aco_wc.failOrder("submission", data.messages);
+            if (data.reload) {
+              window.location.reload();
             } else {
-              aco_wc.logToFile("Checkout error | No message");
-              aco_wc.failOrder(
-                "submission",
-                '<div class="woocommerce-error">' + "Checkout error" + "</div>"
-              );
+
+              if (data.messages) {
+                aco_wc.logToFile("Checkout error | " + data.messages);
+                aco_wc.failOrder("submission", data.messages);
+              } else {
+                aco_wc.logToFile("Checkout error | No message");
+                aco_wc.failOrder(
+                  "submission",
+                  '<div class="woocommerce-error">' + "Checkout error" + "</div>"
+                );
+              }
             }
           }
         },

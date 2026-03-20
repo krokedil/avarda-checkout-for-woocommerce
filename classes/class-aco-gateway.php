@@ -106,7 +106,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		if ( empty( $this->payment_gateway_icon ) ) {
-			return;
+			return parent::get_icon();
 		}
 
 		if ( 'default' === strtolower( $this->payment_gateway_icon ) ) {
@@ -217,10 +217,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			$order->set_transaction_id( '' );
 			$order->save();
-			return array(
-				'result' => 'error',
-				'reload' => true,
-			);
+
+			// Flag the frontend to reload the checkout page.
+			WC()->session->set( 'reload_checkout', true );
+
+			$message = __( 'There was an issue processing your payment. Please try again.', 'avarda-checkout-for-woocommerce' );
+			throw new Exception( esc_html( $message ) );
 		}
 	}
 
