@@ -20,8 +20,8 @@ class ACO_Helper_Order {
 	 * @return array Formated order items.
 	 */
 	public function get_order_items( $order_id ) {
-		$formated_order_items = array();
-		$order                = wc_get_order( $order_id );
+		$formatted_order_items = array();
+		$order                 = wc_get_order( $order_id );
 
 		// Get order items.
 		$order_items = $order->get_items();
@@ -29,40 +29,40 @@ class ACO_Helper_Order {
 			// Regular order item.
 			$formatted_order_item = $this->get_order_item( $order, $order_item );
 			if ( is_array( $formatted_order_item ) ) {
-				$formated_order_items[] = $formatted_order_item;
+				$formatted_order_items[] = $formatted_order_item;
 			}
 			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
 			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $order_item );
 			if ( is_array( $formatted_refunded_order_item ) ) {
-				$formated_order_items[] = $formatted_refunded_order_item;
+				$formatted_order_items[] = $formatted_refunded_order_item;
 			}
 		}
 
 		// Get order fees.
 		$order_fees = $order->get_fees();
 		foreach ( $order_fees as $fee ) {
-			$formated_order_items[] = $this->get_fee( $order, $fee );
+			$formatted_order_items[] = $this->get_fee( $order, $fee );
 			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
 			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $fee );
 			if ( is_array( $formatted_refunded_order_item ) ) {
-				$formated_order_items[] = $formatted_refunded_order_item;
+				$formatted_order_items[] = $formatted_refunded_order_item;
 			}
 		}
 
 		// Get order shipping.
 		foreach ( $order->get_items( 'shipping' ) as $order_item ) {
-			$formated_order_items[] = self::process_order_item_shipping( $order, $order_item );
+			$formatted_order_items[] = self::process_order_item_shipping( $order, $order_item );
 			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
 			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $order_item );
 			if ( is_array( $formatted_refunded_order_item ) ) {
-				$formated_order_items[] = $formatted_refunded_order_item;
+				$formatted_order_items[] = $formatted_refunded_order_item;
 			}
 		}
 
 		// Process gift cards.
-		$formated_order_items = self::process_gift_cards( $order_id, $order, $formated_order_items );
+		$formatted_order_items = self::process_gift_cards( $order_id, $order, $formatted_order_items );
 
-		return $formated_order_items;
+		return $formatted_order_items;
 	}
 
 	/**

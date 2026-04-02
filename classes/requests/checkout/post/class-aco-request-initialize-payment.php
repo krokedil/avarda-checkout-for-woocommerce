@@ -33,8 +33,8 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 		$log      = ACO_Logger::format_log( '', 'POST', 'ACO initialize payment', $request_url, $request_args, $log_body, $code );
 		ACO_Logger::log( $log );
 
-		$formated_response = $this->process_response( $response, $request_args, $request_url );
-		return $formated_response;
+		$formatted_response = $this->process_response( $response, $request_args, $request_url );
+		return $formatted_response;
 	}
 
 	/**
