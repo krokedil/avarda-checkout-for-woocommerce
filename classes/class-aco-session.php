@@ -89,11 +89,11 @@ class ACO_Session {
 
 			// If we did not have any purchase id, it means that we don't have a Avarda payment. So return false to indicate that none exists.
 			if ( empty( $purchase_id ) ) {
-				ACO_Logger::log( 'No purchase id found in order or session when getting Avarda Payment.', WC_Log_Levels::DEBUG );
+				ACO_Logger::log( '[GET SESSION] No purchase id found in order or session when getting Avarda Payment.', WC_Log_Levels::DEBUG );
 				return false;
 			}
 
-			ACO_WC()->api->request_get_payment( $purchase_id );
+			$this->avarda_payment = ACO_WC()->api->request_get_payment( $purchase_id );
 		}
 
 		// If the payment is a WP_Error, return it.
