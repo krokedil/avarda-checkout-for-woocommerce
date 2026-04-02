@@ -112,11 +112,13 @@ class ACO_Assets {
 	 * Loads the needed scripts for Avarda_Checkout.
 	 */
 	public function localize_and_enqueue_checkout_script() {
+		$order_pay = absint( get_query_var( 'order-pay', 0 ) );
+		$order_id  = $order_pay;
 
-		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-		$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
-
-		$this->aco_maybe_initialize_payment( $order_id );
+		if ( empty( $order_id ) ) {
+			$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
+		}
 
 		// Instantiate order after we have run aco_maybe_initialize_payment so we
 		// know that we have updated meta data. Needed if this is a redirect flow purchase.
@@ -125,31 +127,35 @@ class ACO_Assets {
 		$is_aco_action    = 'no';
 		$confirmation_url = '';
 
-		// Confirmation url for order pay.
-		if ( is_wc_endpoint_url( 'order-pay' ) ) {
-			$is_aco_action    = 'yes';
-			$confirmation_url = add_query_arg(
-				array(
-					'aco_confirm'     => 'yes',
-					'aco_purchase_id' => $order->get_meta( '_wc_avarda_purchase_id', true ),
-				),
-				$order->get_checkout_order_received_url()
-			);
+		if ( $order_pay ) {
+			$is_aco_action = 'yes';
+
+			$aco_action = filter_input( INPUT_GET, 'aco-action', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			if ( $aco_action === 'change-subs-payment' ) {
+				// Confirmation url for subscription payment change.
+				$confirmation_url = add_query_arg(
+					array(
+						'aco-action'   => 'subs-payment-changed',
+						'aco-order-id' => $order_id,
+					),
+					$order->get_view_order_url()
+				);
+			} else {
+				// Confirmation url for order pay.
+				$confirmation_url = add_query_arg(
+					array(
+						'aco_confirm'     => 'yes',
+						'aco_purchase_id' => $order->get_meta( '_wc_avarda_purchase_id', true ),
+					),
+					$order->get_checkout_order_received_url()
+				);
+			}
+		} else {
+			// Do not initialize for order_pay.
+			$this->aco_maybe_initialize_payment( $order_id );
 		}
 
-		// Confirmation url for subscription payment change.
-		if ( isset( $_GET['aco-action'], $_GET['key'] ) && 'change-subs-payment' === $_GET['aco-action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$is_aco_action    = 'yes';
-			$confirmation_url = add_query_arg(
-				array(
-					'aco-action'   => 'subs-payment-changed',
-					'aco-order-id' => $order_id,
-				),
-				$order->get_view_order_url()
-			);
-		}
-
-		if ( empty( $order_id ) ) {
+		if ( empty( $order ) ) {
 			// If we don't have an order - get JWT from session.
 			$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 			$avarda_jwt_token    = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
