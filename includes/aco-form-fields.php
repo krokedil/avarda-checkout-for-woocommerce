@@ -7,6 +7,7 @@
 
 $token_suggestion = ACO_API_Registry::get_token_suggestion();
 $token_suggestion = "<code>{$token_suggestion}</code>";
+$wc_logs_url = admin_url( 'admin.php?page=wc-status&tab=logs&source=avarda_checkout&paged=1' );
 
 $settings = array(
 	// general.
@@ -80,11 +81,16 @@ $settings = array(
 		'default' => 'yes',
 	),
 	'debug'                      => array(
-		'title'       => __( 'Debug Log', 'avarda-checkout-for-woocommerce' ),
+		'title'       => __( 'Debug', 'avarda-checkout-for-woocommerce' ),
+		'label'       => __( 'Log debug messages', 'avarda-checkout-for-woocommerce' ),
 		'type'        => 'checkbox',
-		'label'       => __( 'Enable logging', 'avarda-checkout-for-woocommerce' ),
+		'description' => sprintf(
+			// translators: %s is the link to the WooCommerce logs.
+			__( 'Save debug messages from the plugin to the WooCommerce logs. Existing plugin logs can be found %s.', 'avarda-checkout-for-woocommerce' ),
+			'<a target="_blank" href="' . esc_url( $wc_logs_url ) . '">' . __( 'here', 'avarda-checkout-for-woocommerce' ) . '</a>'
+		),
 		'default'     => 'no',
-		'description' => __( 'Log ' . $this->method_title . ' events in the WooCommerce status logs', 'avarda-checkout-for-woocommerce' ), // phpcs:ignore
+		'desc_tip'    => false,
 	),
 	'payment_gateway_icon'       => array(
 		'title'       => __( 'Payment gateway icon', 'avarda-checkout-for-woocommerce' ),
