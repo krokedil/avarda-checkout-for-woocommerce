@@ -89,7 +89,7 @@ $settings = array(
 			__( 'Save debug messages from the plugin to the WooCommerce logs. Existing plugin logs can be found %s.', 'avarda-checkout-for-woocommerce' ),
 			'<a target="_blank" href="' . esc_url( $wc_logs_url ) . '">' . __( 'here', 'avarda-checkout-for-woocommerce' ) . '</a>'
 		),
-		'default'     => 'no',
+		'default'     => 'yes',
 		'desc_tip'    => false,
 	),
 	'payment_gateway_icon'       => array(
