@@ -17,8 +17,8 @@ webpack.config.js
 .github/**/*
 node_modules/**/*
 node_modules
-vendor
-vendor/**/*
+/vendor
+/vendor/**/*
 tests/**/*
 tests
 
