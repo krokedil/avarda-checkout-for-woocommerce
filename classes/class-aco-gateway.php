@@ -513,7 +513,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		$args['fallback_content'] = array( $this, 'output_legacy_admin_options' );
 		$args['error_notice']     = __( 'Could not load the enhanced settings page. Showing the standard settings instead.', 'avarda-checkout-for-woocommerce' );
 
-		$settings_page = ( SettingsPage::get_instance() )
+		SettingsPage::get_instance()
 			->set_plugin_name( 'Avarda Checkout' )
 			->register_page( $this->id, $args, $this )
 			->output( $this->id );
@@ -542,7 +542,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		}
 
 		// Use the styled output and settings navigation sidebar.
-		$decoded_args                        = json_decode( $args, true );
+		$decoded_args = json_decode( $args, true );
+
+		if ( ! is_array( $decoded_args ) ) {
+			return null;
+		}
+
 		$decoded_args['styled_output']       = true;
 		$decoded_args['settings_navigation'] = true;
 
@@ -555,7 +560,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	public function output_legacy_admin_options() {
-		delete_transient( 'avarda_checkout_settings_page_config' );
 		parent::admin_options();
 	}
 }
