@@ -509,8 +509,11 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		$gateway_page = new Gateway( $this, $args );
 
-		$args['general_content'] = array( $gateway_page, 'output' );
-		$settings_page           = ( SettingsPage::get_instance() )
+		$args['general_content']  = array( $gateway_page, 'output' );
+		$args['fallback_content'] = array( $this, 'output_legacy_admin_options' );
+		$args['error_notice']     = __( 'Could not load the enhanced settings page. Showing the standard settings instead.', 'klarna-checkout-for-woocommerce' );
+
+		$settings_page = ( SettingsPage::get_instance() )
 			->set_plugin_name( 'Avarda Checkout' )
 			->register_page( $this->id, $args, $this )
 			->output( $this->id );
@@ -535,16 +538,25 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			}
 
 			$args = wp_remote_retrieve_body( $args );
-
-			// Use the styled output and settings navigation sidebar.
-			$decoded_args                        = json_decode( $args, true );
-			$decoded_args['styled_output']       = true;
-			$decoded_args['settings_navigation'] = true;
-
-			set_transient( 'avarda_checkout_settings_page_config', json_encode( $decoded_args ), 60 * 60 * 24 ); // 24 hours lifetime.
+			set_transient( 'avarda_checkout_settings_page_config', $args, 60 * 60 * 24 ); // 24 hours lifetime.
 		}
 
+		// Use the styled output and settings navigation sidebar.
+		$decoded_args                        = json_decode( $args, true );
+		$decoded_args['styled_output']       = true;
+		$decoded_args['settings_navigation'] = true;
+
 		return $decoded_args;
+	}
+
+	/**
+	 * Output the standard WooCommerce admin options with the Kustom sidebar.
+	 *
+	 * @return void
+	 */
+	public function output_legacy_admin_options() {
+		delete_transient( 'avarda_checkout_settings_page_config' );
+		parent::admin_options();
 	}
 }
 
