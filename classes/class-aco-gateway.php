@@ -511,7 +511,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		$args['general_content']  = array( $gateway_page, 'output' );
 		$args['fallback_content'] = array( $this, 'output_legacy_admin_options' );
-		$args['error_notice']     = __( 'Could not load the enhanced settings page. Showing the standard settings instead.', 'klarna-checkout-for-woocommerce' );
+		$args['error_notice']     = __( 'Could not load the enhanced settings page. Showing the standard settings instead.', 'avarda-checkout-for-woocommerce' );
 
 		$settings_page = ( SettingsPage::get_instance() )
 			->set_plugin_name( 'Avarda Checkout' )
