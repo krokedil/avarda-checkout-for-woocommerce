@@ -550,7 +550,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Output the standard WooCommerce admin options with the Kustom sidebar.
+	 * Output the standard WooCommerce admin options.
 	 *
 	 * @return void
 	 */
