@@ -308,5 +308,10 @@
           "description": "<ul><li>Fix - Fixed not supporting some types of Subscription payments.</li><li>Fix - Fixed and issue when calculating shipping prices for shipping broker integrations.</li></ul>",
           "requires": "5.6.0",
           "tested": "6.9"
+     },
+     "1.17.6": {
+          "description": "<ul><li>Enhancement - Updated the settings UI for improved usability.</li><li>Tweak - Logging is now enabled by default.</li><li>Fix - Ensured payment-processing error messages are displayed correctly after recent WooCommerce changes.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "6.9"
      }
 }

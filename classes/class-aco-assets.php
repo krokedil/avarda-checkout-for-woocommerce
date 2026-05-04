@@ -209,12 +209,12 @@ class ACO_Assets {
 
 		/**
 		 * Hook: aco_shipping_widget_custom_style.
-	 	 *
-	 	 * Allows developers to override the style for the shipping widget by
-		 * passing a array of CSS variable names without the leading -- and the value they wish to use instead of the default.
+		 *
+		 * Allows developers to override the style for the shipping widget by
+		 * passing an array of CSS variable names without the leading -- and the value they wish to use instead of the default.
 		 *
 		 * @see avarda-checkout-for-woocommerce/assets/css/aco_shipping_widgets for variables that can be used for custom styling.
-	 	 */
+		 */
 		$custom_widget_style = apply_filters( 'aco_shipping_widget_custom_style', array() );
 
 		$shipping_widget = array(
@@ -330,6 +330,9 @@ class ACO_Assets {
 	public function enqueue_settings_assets() {
 		wp_register_script( 'aco_settings_page', AVARDA_CHECKOUT_URL . '/assets/js/aco_settings_page.js', array( 'jquery' ), AVARDA_CHECKOUT_VERSION, true );
 		wp_enqueue_script( 'aco_settings_page' );
+
+		wp_register_style( 'aco_settings_page_css', AVARDA_CHECKOUT_URL . '/assets/css/aco-admin-settings.css', array(), AVARDA_CHECKOUT_VERSION );
+		wp_enqueue_style( 'aco_settings_page_css' );
 	}
 
 	/**

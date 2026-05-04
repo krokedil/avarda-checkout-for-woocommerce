@@ -106,7 +106,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_icon() {
 		if ( empty( $this->payment_gateway_icon ) ) {
-			return;
+			return parent::get_icon();
 		}
 
 		if ( 'default' === strtolower( $this->payment_gateway_icon ) ) {
@@ -217,10 +217,12 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 			$order->set_transaction_id( '' );
 			$order->save();
-			return array(
-				'result' => 'error',
-				'reload' => true,
-			);
+
+			// Flag the frontend to reload the checkout page.
+			WC()->session->set( 'reload_checkout', true );
+
+			$message = __( 'There was an issue processing your payment. Please try again.', 'avarda-checkout-for-woocommerce' );
+			throw new Exception( esc_html( $message ) );
 		}
 	}
 
@@ -507,8 +509,11 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		$gateway_page = new Gateway( $this, $args );
 
-		$args['general_content'] = array( $gateway_page, 'output' );
-		$settings_page           = ( SettingsPage::get_instance() )
+		$args['general_content']  = array( $gateway_page, 'output' );
+		$args['fallback_content'] = array( $this, 'output_legacy_admin_options' );
+		$args['error_notice']     = __( 'Could not load the enhanced settings page. Showing the standard settings instead.', 'avarda-checkout-for-woocommerce' );
+
+		SettingsPage::get_instance()
 			->set_plugin_name( 'Avarda Checkout' )
 			->register_page( $this->id, $args, $this )
 			->output( $this->id );
@@ -536,7 +541,26 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			set_transient( 'avarda_checkout_settings_page_config', $args, 60 * 60 * 24 ); // 24 hours lifetime.
 		}
 
-		return json_decode( $args, true );
+		// Use the styled output and settings navigation sidebar.
+		$decoded_args = json_decode( $args, true );
+
+		if ( ! is_array( $decoded_args ) ) {
+			return null;
+		}
+
+		$decoded_args['styled_output']       = true;
+		$decoded_args['settings_navigation'] = true;
+
+		return $decoded_args;
+	}
+
+	/**
+	 * Output the standard WooCommerce admin options.
+	 *
+	 * @return void
+	 */
+	public function output_legacy_admin_options() {
+		parent::admin_options();
 	}
 }
 
