@@ -1,0 +1,16 @@
+{
+  "pluginDevZipE2e": {
+    "pages": [
+      {
+        "url": "/wp-admin/admin.php?page=wc-settings&tab=checkout&section=aco",
+        "assertions": [
+          {
+            "selector": "#mainform",
+            "text": "Avarda Checkout",
+            "match": "contains"
+          }
+        ]
+      }
+    ]
+  }
+}
