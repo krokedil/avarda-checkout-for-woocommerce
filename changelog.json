@@ -313,5 +313,10 @@
           "description": "<ul><li>Enhancement - Updated the settings UI for improved usability.</li><li>Tweak - Logging is now enabled by default.</li><li>Fix - Ensured payment-processing error messages are displayed correctly after recent WooCommerce changes.</li></ul>",
           "requires": "5.6.0",
           "tested": "6.9"
+     },
+     "1.17.7": {
+          "description": "<ul><li>Fix - Resolved checkout validation errors with WooCommerce 10.8+ by populating shipping phone and email fields before form submission.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "7.0"
      }
 }
