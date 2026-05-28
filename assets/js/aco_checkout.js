@@ -355,6 +355,16 @@ jQuery(function($) {
       shipping_address_2 && $("#shipping_address_2").val(shipping_address_2);
       shipping_city && $("#shipping_city").val(shipping_city);
       shipping_postcode && $("#shipping_postcode").val(shipping_postcode);
+
+      const $shippingPhone = $("#shipping_phone");
+      if ($shippingPhone.length) {
+        $shippingPhone.val(billing_phone);
+      }
+
+      const $shippingEmail = $("#shipping_email");
+      if ($shippingEmail.length) {
+        $shippingEmail.val(billing_email);
+      }
     },
 
     updateAvardaPayment: function () {
