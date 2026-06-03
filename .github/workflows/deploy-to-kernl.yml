@@ -1,32 +1,53 @@
-name: Deploy release to Kernl.
+# Deploy to Kernl
+#
+# Triggered when a GitHub Release is published.
+# Builds the plugin, deploys to Kernl, and attaches the zip
+# to the release.
+#
+# Required secrets: KERNL_USERNAME, KERNL_PASSWORD, PLUGIN_ID (Kernl credentials).
+
+name: Deploy to Kernl
+
+permissions:
+  contents: write # Required for uploading release assets.
+
 on:
-    release:
-        types: [published]
+  release:
+    types: [published]
+
 jobs:
-  build:
+  deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
-    - name: Composer Install
-      run: composer install
+      - name: Install Composer dependencies if composer.json is present
+        if: hashFiles('composer.json') != ''
+        run: |
+          # Install with dev dependencies first (needed for PHP Scoper or similar tooling).
+          composer install --prefer-dist --no-progress --optimize-autoloader
+          # Re-install without dev dependencies for the release build.
+          composer install --prefer-dist --no-progress --optimize-autoloader --no-dev
 
-    - name: Kernl Deployment
-      id: kernl-deploy
-      uses: krokedil/kernl-release@1.0.0
-      with:
+      - name: Build with npm if package.json is present
+        if: hashFiles('package.json') != ''
+        run: |
+          npm ci
+          # Run the build script if it exists, but don't fail if it's not defined.
+          npm run build --if-present
+
+      - name: Deploy to Kernl
+        id: deploy
+        uses: krokedil/kernl-release@69e624b0cf3b509ab78c94a9c918343f1ec57698 # v1.1.0
+        with:
           plugin-id: ${{ secrets.PLUGIN_ID }}
           plugin-slug: avarda-checkout-for-woocommerce
           kernl-username: ${{ secrets.KERNL_USERNAME }}
           kernl-password: ${{ secrets.KERNL_PASSWORD }}
 
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{ steps.kernl-deploy.outputs.zip-path }}
-        asset_name: ${{ github.event.repository.name }}.zip
-        asset_content_type: application/zip
+      - name: Upload release asset
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          files: ${{ steps.deploy.outputs.zip-path }}
