@@ -318,5 +318,10 @@
           "description": "<ul><li>Fix - Resolved checkout validation errors with WooCommerce 10.8+ by populating shipping phone and email fields before form submission.</li></ul>",
           "requires": "5.6.0",
           "tested": "7.0"
+     },
+     "1.17.8": {
+          "description": "<ul><li>Enhancement - The integrated shipping options now update to reflect free shipping coupons and shipping classes when the cart changes during checkout, not only when the checkout first loads.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "7.0"
      }
 }
