@@ -12,7 +12,7 @@
     "build": "npx gulp makePOT"
   },
   "devDependencies": {
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.0",
     "gulp-sort": "^2.0.0",
     "gulp-wp-pot": "^2.5.0"
   }
