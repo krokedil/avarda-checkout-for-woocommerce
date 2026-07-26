@@ -217,27 +217,6 @@ class ACO_Helper_Order {
 	}
 
 	/**
-	 * Gets the item price including vat.
-	 *
-	 * @param object $order_item The order item.
-	 * @return float
-	 */
-	public static function get_item_price_incl_vat( $order_item ) {
-		$items_subtotal = ( ( $order_item->get_total() + $order_item->get_total_tax() ) / $order_item->get_quantity() );
-		return number_format( $items_subtotal, 2, '.', '' );
-	}
-
-	/**
-	 * Gets the item tax amount.
-	 *
-	 * @param object $order_item The order item.
-	 * @return float
-	 */
-	public static function get_item_tax_amount( $order_item ) {
-		return number_format( $order_item->get_total_tax() / $order_item->get_quantity(), 2, '.', '' );
-	}
-
-	/**
 	 * Get the tax rate.
 	 *
 	 * @param WC_Order                                                       $order The WooCommerce order.

@@ -211,17 +211,6 @@ class ACO_Helper_Cart {
 	}
 
 	/**
-	 * Gets the products price.
-	 *
-	 * @param object $cart_item The cart item.
-	 * @return float
-	 */
-	public function get_product_price( $cart_item ) {
-		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] ) / $cart_item['quantity'];
-		return number_format( $items_subtotal, 2, '.', '' );
-	}
-
-	/**
 	 * Gets the tax rate for the product.
 	 *
 	 * @param object $cart_item The cart item.
