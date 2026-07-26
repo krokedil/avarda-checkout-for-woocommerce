@@ -64,13 +64,22 @@ class ACO_Helper_Cart {
 
 			$retrieved_giftcards = $giftcards->get_cart_giftcards();
 			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
+				// get_total_amount() and get_total_tax_amount() are line totals, so they have to be
+				// converted to per item amounts before they can be paired with a quantity.
+				$giftcard_item = ACO_Helper_Item_Amount::get_item(
+					$retrieved_giftcard->get_name(),
+					$retrieved_giftcard->get_total_amount(),
+					$retrieved_giftcard->get_total_tax_amount(),
+					$retrieved_giftcard->get_quantity()
+				);
+
 				$formatted_cart_items[] = array(
 					'note'        => $retrieved_giftcard->get_sku(),
-					'description' => $retrieved_giftcard->get_name(),
-					'quantity'    => $retrieved_giftcard->get_quantity(),
-					'amount'      => $retrieved_giftcard->get_total_amount(),
+					'description' => $giftcard_item['description'],
+					'quantity'    => $giftcard_item['quantity'],
+					'amount'      => $giftcard_item['amount'],
 					'taxCode'     => $retrieved_giftcard->get_tax_rate(),
-					'taxAmount'   => $retrieved_giftcard->get_total_tax_amount(),
+					'taxAmount'   => $giftcard_item['taxAmount'],
 				);
 			}
 		}
@@ -90,13 +99,20 @@ class ACO_Helper_Cart {
 		} else {
 			$product = wc_get_product( $cart_item['product_id'] );
 		}
+		$item = ACO_Helper_Item_Amount::get_item(
+			$this->get_product_name( $cart_item ),
+			$cart_item['line_total'] + $cart_item['line_tax'],
+			$cart_item['line_tax'],
+			$cart_item['quantity']
+		);
+
 		return array(
-			'description'        => substr( $this->get_product_name( $cart_item ), 0, 34 ), // String.
+			'description'        => $item['description'], // String.
 			'notes'              => substr( $this->get_product_sku( $product ), 0, 34 ), // String.
-			'amount'             => $this->get_product_price( $cart_item ), // Float.
+			'amount'             => $item['amount'], // Float.
 			'taxCode'            => $this->get_product_tax_code( $cart_item ), // String.
-			'taxAmount'          => number_format( $cart_item['line_tax'] / $cart_item['quantity'], 2, '.', '' ), // Float.
-			'quantity'           => $cart_item['quantity'],
+			'taxAmount'          => $item['taxAmount'], // Float.
+			'quantity'           => $item['quantity'],
 			'shippingParameters' => $this->get_product_shipping_params( $product ),
 		);
 	}

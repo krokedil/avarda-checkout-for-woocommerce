@@ -79,13 +79,20 @@ class ACO_Helper_Order {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
 
+		$item = ACO_Helper_Item_Amount::get_item(
+			self::get_item_name( $order_item ),
+			$order_item->get_total() + $order_item->get_total_tax(),
+			$order_item->get_total_tax(),
+			$order_item->get_quantity()
+		);
+
 		return array(
-			'description' => substr( self::get_item_name( $order_item ), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
+			'amount'      => $item['amount'], // Float.
 			'taxCode'     => self::get_product_tax_code( $order, $order_item ), // Float.
-			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
-			'quantity'    => $order_item->get_quantity(),
+			'taxAmount'   => $item['taxAmount'], // Float.
+			'quantity'    => $item['quantity'],
 		);
 	}
 
@@ -167,12 +174,20 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public function get_fee( $order, $fee ) {
+		$item = ACO_Helper_Item_Amount::get_item(
+			$fee->get_name(),
+			$fee->get_total() + $fee->get_total_tax(),
+			$fee->get_total_tax(),
+			$fee->get_quantity()
+		);
+
 		return array(
-			'description' => substr( $fee->get_name(), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( $fee->get_id(), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $fee ), // String.
+			'amount'      => $item['amount'], // String.
 			'taxCode'     => self::get_tax_rate( $order, $fee ), // String.
-			'taxAmount'   => self::get_item_tax_amount( $fee ), // String.
+			'taxAmount'   => $item['taxAmount'], // String.
+			'quantity'    => $item['quantity'],
 		);
 	}
 
@@ -184,12 +199,20 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public static function process_order_item_shipping( $order, $order_item ) {
+		$item = ACO_Helper_Item_Amount::get_item(
+			$order_item->get_name(),
+			$order_item->get_total() + $order_item->get_total_tax(),
+			$order_item->get_total_tax(),
+			$order_item->get_quantity()
+		);
+
 		return array(
-			'description' => substr( $order_item->get_name(), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $order_item ), // String.
+			'amount'      => $item['amount'], // String.
 			'taxCode'     => self::get_tax_rate( $order, $order_item ), // Float.
-			'taxAmount'   => self::get_item_tax_amount( $order_item ),
+			'taxAmount'   => $item['taxAmount'],
+			'quantity'    => $item['quantity'],
 		);
 	}
 
