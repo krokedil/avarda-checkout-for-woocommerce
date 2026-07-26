@@ -77,8 +77,13 @@ class ACO_Helper_Item_Amount {
 	}
 
 	/**
-	 * Truncates a description to the length Avarda accepts for the field, which their API
-	 * reference documents as 35 characters.
+	 * Truncates a description to the length the other Avarda item fields in this plugin use.
+	 *
+	 * Avarda's API reference documents the limit as 35 characters, but every call site cuts at 34.
+	 * That comes from 90da5b5 ("Change from 36 to 35 allowed characters"), which read substr()'s
+	 * third argument as an end index rather than a length - substr( $s, 0, 35 ) already returned at
+	 * most 35 characters. The unused character is left alone here so this helper stays consistent
+	 * with the call sites it does not cover, rather than being corrected in isolation.
 	 *
 	 * Counting characters rather than bytes keeps a multibyte character from being cut in half,
 	 * which would otherwise produce invalid UTF-8 in the request body.
