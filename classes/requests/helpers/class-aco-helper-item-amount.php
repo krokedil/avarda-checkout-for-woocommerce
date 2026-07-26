@@ -68,6 +68,20 @@ class ACO_Helper_Item_Amount {
 	}
 
 	/**
+	 * Truncates a description to the length Avarda accepts for the field, which their API
+	 * reference documents as 35 characters.
+	 *
+	 * Counting characters rather than bytes keeps a multibyte character from being cut in half,
+	 * which would otherwise produce invalid UTF-8 in the request body.
+	 *
+	 * @param string $description The untruncated description.
+	 * @return string
+	 */
+	private static function truncate_description( $description ) {
+		return rtrim( mb_substr( (string) $description, 0, 34 ) );
+	}
+
+	/**
 	 * Converts a price to minor units.
 	 *
 	 * @param float $amount The price in major units.
