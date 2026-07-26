@@ -62,7 +62,9 @@ class ACO_Helper_Item_Amount {
 
 		// The per item amounts would lose money, so send the line as a single exact item. Keep the
 		// quantity visible in the description, since it is no longer carried by the quantity field.
-		if ( $raw_quantity > 1 ) {
+		// This covers fractions below one too, such as 0.5 for goods sold by weight. Quantities that
+		// are zero or negative are left out, as prefixing those would only describe the line wrongly.
+		if ( $raw_quantity > 0 && 1.0 !== $raw_quantity ) {
 			$description = (string) $raw_quantity . ' x ' . $description;
 		}
 
