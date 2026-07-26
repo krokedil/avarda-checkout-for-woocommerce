@@ -30,10 +30,11 @@ class ACO_Helper_Item_Amount {
 	/**
 	 * Builds the description, amount, taxAmount and quantity for an order line.
 	 *
-	 * @param string $description The untruncated item description.
-	 * @param float  $total_incl_tax The line total including tax.
-	 * @param float  $total_tax The line tax total.
-	 * @param int    $quantity The line quantity.
+	 * @param string    $description The untruncated item description.
+	 * @param float     $total_incl_tax The line total including tax.
+	 * @param float     $total_tax The line tax total.
+	 * @param float|int $quantity The line quantity. Fractional quantities are supported, but cannot
+	 *                  be carried by Avarda's quantity field, so such lines are always collapsed.
 	 * @return array
 	 */
 	public static function get_item( $description, $total_incl_tax, $total_tax, $quantity ) {
