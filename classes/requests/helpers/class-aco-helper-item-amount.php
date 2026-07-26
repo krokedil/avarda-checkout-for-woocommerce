@@ -22,7 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * When the per item amounts round trip exactly we keep them together with the quantity. When they
  * do not, the line is sent as a single item carrying the exact line total, which is the same
- * representation the refund endpoint already uses.
+ * representation the refund endpoint already uses. Lines with a fractional quantity always take
+ * that route, since the quantity field cannot express one.
  */
 class ACO_Helper_Item_Amount {
 
@@ -36,18 +37,22 @@ class ACO_Helper_Item_Amount {
 	 * @return array
 	 */
 	public static function get_item( $description, $total_incl_tax, $total_tax, $quantity ) {
-		$quantity    = max( 1, intval( $quantity ) );
-		$total_minor = self::to_minor_units( $total_incl_tax );
-		$tax_minor   = self::to_minor_units( $total_tax );
+		$raw_quantity = floatval( $quantity );
+		$is_whole     = floor( $raw_quantity ) === $raw_quantity;
+		$quantity     = max( 1, intval( $quantity ) );
+		$total_minor  = self::to_minor_units( $total_incl_tax );
+		$tax_minor    = self::to_minor_units( $total_tax );
 
-		if ( $quantity > 1 ) {
+		// A fractional quantity cannot be carried by the quantity field, so such a line has to be
+		// collapsed even when the per item amounts would divide evenly.
+		if ( $quantity > 1 && $is_whole ) {
 			$unit_minor     = intval( round( $total_minor / $quantity ) );
 			$unit_tax_minor = intval( round( $tax_minor / $quantity ) );
 
 			// Only keep the quantity if Avarda can reproduce both line totals from the per item amounts.
 			if ( $unit_minor * $quantity === $total_minor && $unit_tax_minor * $quantity === $tax_minor ) {
 				return array(
-					'description' => substr( $description, 0, 34 ),
+					'description' => self::truncate_description( $description ),
 					'amount'      => self::from_minor_units( $unit_minor ),
 					'taxAmount'   => self::from_minor_units( $unit_tax_minor ),
 					'quantity'    => $quantity,
@@ -57,10 +62,12 @@ class ACO_Helper_Item_Amount {
 
 		// The per item amounts would lose money, so send the line as a single exact item. Keep the
 		// quantity visible in the description, since it is no longer carried by the quantity field.
-		$description = $quantity > 1 ? $quantity . ' x ' . $description : $description;
+		if ( $raw_quantity > 1 ) {
+			$description = (string) $raw_quantity . ' x ' . $description;
+		}
 
 		return array(
-			'description' => substr( $description, 0, 34 ),
+			'description' => self::truncate_description( $description ),
 			'amount'      => self::from_minor_units( $total_minor ),
 			'taxAmount'   => self::from_minor_units( $tax_minor ),
 			'quantity'    => 1,
