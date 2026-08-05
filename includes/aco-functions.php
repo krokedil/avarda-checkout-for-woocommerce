@@ -472,6 +472,8 @@ function aco_format_address_data( $avarda_order ) {
 		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
 		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
 		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+		$customer_address['shipping']['phone']      = $delivery_address['phone'] ?? '';
+		$customer_address['shipping']['email']      = $delivery_address['email'] ?? '';
 
 	} elseif ( 'B2B' === $avarda_order['mode'] ) {
 
@@ -500,6 +502,8 @@ function aco_format_address_data( $avarda_order ) {
 		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
 		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
 		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+		$customer_address['shipping']['phone']      = $delivery_address['phone'] ?? '';
+		$customer_address['shipping']['email']      = $delivery_address['email'] ?? '';
 
 	}
 
