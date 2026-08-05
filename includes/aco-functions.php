@@ -392,9 +392,9 @@ function aco_format_address_data( $avarda_order ) {
 
 	} elseif ( 'B2B' === $avarda_order['mode'] ) {
 
-		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? '';
-		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? '';
-		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? '';
+		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? array();
+		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? array();
+		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? array();
 
 		$customer_address['billing']['first_name'] = $avarda_order['b2B']['customerInfo']['firstName'] ?? '';
 		$customer_address['billing']['last_name']  = $avarda_order['b2B']['customerInfo']['lastName'] ?? '';
