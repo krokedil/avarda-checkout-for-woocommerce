@@ -346,6 +346,12 @@ jQuery(function($) {
       let shipping_postcode = customerAddress.shipping.zip
         ? customerAddress.shipping.zip.replace(/\s/g, "")
         : billing_postcode;
+      let shipping_phone = customerAddress.shipping.phone
+        ? customerAddress.shipping.phone
+        : billing_phone;
+      let shipping_email = customerAddress.shipping.email
+        ? customerAddress.shipping.email
+        : billing_email;
 
       shipping_first_name && $("#shipping_first_name").val(shipping_first_name);
       shipping_last_name && $("#shipping_last_name").val(shipping_last_name);
@@ -358,12 +364,12 @@ jQuery(function($) {
 
       const $shippingPhone = $("#shipping_phone");
       if ($shippingPhone.length) {
-        $shippingPhone.val(billing_phone);
+        $shippingPhone.val(shipping_phone);
       }
 
       const $shippingEmail = $("#shipping_email");
       if ($shippingEmail.length) {
-        $shippingEmail.val(billing_email);
+        $shippingEmail.val(shipping_email);
       }
     },
 
