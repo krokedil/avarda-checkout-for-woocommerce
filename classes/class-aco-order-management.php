@@ -29,7 +29,7 @@ class ACO_Order_Management {
 	/**
 	 * Seconds to wait before each new attempt. One attempt per entry.
 	 */
-	private const RETRY_DELAYS = array( 60, 300, 900 );
+	private const RETRY_DELAYS = array( 60, 300, 900, 1800, 3600 );
 
 	/**
 	 * Avarda's error code for an operation that collided with one already running.
@@ -43,9 +43,9 @@ class ACO_Order_Management {
 
 	/**
 	 * How long after payment Avarda may still be finalizing the purchase, in seconds.
-	 * Has to cover the whole retry ladder.
+	 * Has to cover the whole retry ladder (currently up to ~1h51m out).
 	 */
-	private const SETTLING_WINDOW = 1800;
+	private const SETTLING_WINDOW = 7200;
 
 	/**
 	 * Class constructor.
@@ -311,6 +311,10 @@ class ACO_Order_Management {
 		);
 
 		if ( ! empty( $pending ) ) {
+			// This call (e.g. a manual "Activate Avarda order" click) still reached Avarda above
+			// and got the same transient error; only queuing a redundant retry is skipped here,
+			// so say so instead of returning silently.
+			$order->add_order_note( __( 'Avarda has not finished processing the payment. A retry is already queued for this order, so no new one was scheduled.', 'avarda-checkout-for-woocommerce' ) );
 			return true;
 		}
 
