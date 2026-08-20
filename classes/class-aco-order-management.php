@@ -15,12 +15,45 @@ use KrokedilAvardaDeps\Krokedil\Shipping\Admin\EditOrderPage;
  * Order management class.
  */
 class ACO_Order_Management {
+
+	/**
+	 * Action Scheduler hook for a postponed activation.
+	 */
+	private const ACTIVATION_RETRY_HOOK = 'aco_activate_reservation_retry';
+
+	/**
+	 * Order meta counting the attempts Avarda has rejected as still in progress.
+	 */
+	private const RETRY_ATTEMPT_META = '_aco_om_retry_attempt';
+
+	/**
+	 * Seconds to wait before each new attempt. One attempt per entry.
+	 */
+	private const RETRY_DELAYS = array( 60, 300, 900 );
+
+	/**
+	 * Avarda's error code for an operation that collided with one already running.
+	 */
+	private const PARALLEL_OPERATION_ERROR = 'avarda_123';
+
+	/**
+	 * Avarda's error code for a purchase that is not in a state that can be acted on.
+	 */
+	private const NOT_COMPLETED_ERROR = 'avarda_100';
+
+	/**
+	 * How long after payment Avarda may still be finalizing the purchase, in seconds.
+	 * Has to cover the whole retry ladder.
+	 */
+	private const SETTLING_WINDOW = 1800;
+
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'cancel_reservation' ) );
 		add_action( 'woocommerce_order_status_completed', array( $this, 'activate_reservation' ) );
+		add_action( self::ACTIVATION_RETRY_HOOK, array( $this, 'activate_reservation' ) );
 
 		// Order actions - manually trigger activate & cancel order requests.
 		add_filter( 'woocommerce_order_actions', array( $this, 'add_order_actions' ), 10, 2 );
@@ -111,7 +144,7 @@ class ACO_Order_Management {
 			$order->update_status( 'on-hold', $note );
 			do_action( 'aco_om_failed', 'cancel', $note, $order );
 		} else {
-			// Add time stamp, used to prevent duplicate activations for the same order.
+			// Add time stamp, used to prevent duplicate cancellations for the same order.
 			$order->update_meta_data( '_avarda_reservation_cancelled', current_time( 'mysql' ) );
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully cancelled.', 'avarda-checkout-for-woocommerce' ) );
@@ -126,6 +159,12 @@ class ACO_Order_Management {
 	 */
 	public function activate_reservation( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		// A postponed activation can run after the order is gone.
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
 		// If this order wasn't created using aco payment method, bail.
 		if ( 'aco' !== $order->get_payment_method() ) {
 			return;
@@ -169,6 +208,13 @@ class ACO_Order_Management {
 			return;
 		}
 
+		// There is no reservation left to activate once it has been cancelled. A postponed
+		// activation can reach this after the merchant cancelled the order in the meantime.
+		if ( $order->get_meta( '_avarda_reservation_cancelled', true ) ) {
+			$order->add_order_note( __( 'Could not activate Avarda Checkout reservation, Avarda Checkout reservation is already cancelled.', 'avarda-checkout-for-woocommerce' ) );
+			return;
+		}
+
 		// TODO: Should we do different request if order is subscription?
 		// Activate order.
 		$avarda_order = ( $subscription ) ? ACO_WC()->api->request_activate_order( $order_id ) : ACO_WC()->api->request_activate_order( $order_id );
@@ -180,14 +226,109 @@ class ACO_Order_Management {
 			$message = $avarda_order->get_error_message();
 			$text    = __( 'Avarda API Error on Avarda activate order: ', 'avarda-checkout-for-woocommerce' ) . '%s %s';
 			$note    = sprintf( $text, $code, $message );
+
+			if ( $this->maybe_retry( $order, $avarda_order ) ) {
+				return;
+			}
+
+			// Let a manual retry start over from the first delay.
+			$order->delete_meta_data( self::RETRY_ATTEMPT_META );
 			$order->update_status( 'on-hold', $note );
 			do_action( 'aco_om_failed', 'activate', $note, $order );
 		} else {
 			// Add time stamp, used to prevent duplicate activations for the same order.
 			$order->update_meta_data( '_avarda_reservation_activated', current_time( 'mysql' ) );
+			$order->delete_meta_data( self::RETRY_ATTEMPT_META );
 			$order->save();
 			$order->add_order_note( __( 'Avarda reservation was successfully activated.', 'avarda-checkout-for-woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Whether Avarda rejected the request for a reason that passes on its own.
+	 *
+	 * 123 is always some other operation getting in the way. 100 says the purchase is not in a
+	 * state it can be acted on, which Avarda answers both while it is still finalizing a freshly
+	 * created purchase and for one that is never going to be completed, so it only counts while
+	 * the payment is new enough for the first to be the explanation.
+	 *
+	 * @param WC_Order $order The WooCommerce order.
+	 * @param WP_Error $wp_error The error Avarda responded with.
+	 * @return bool
+	 */
+	private function is_transient_error( $order, $wp_error ) {
+		$codes = $wp_error->get_error_codes();
+
+		if ( in_array( self::PARALLEL_OPERATION_ERROR, $codes, true ) ) {
+			return true;
+		}
+
+		if ( ! in_array( self::NOT_COMPLETED_ERROR, $codes, true ) ) {
+			return false;
+		}
+
+		$paid = $order->get_date_paid();
+
+		return $paid instanceof WC_DateTime && ( time() - $paid->getTimestamp() ) < self::SETTLING_WINDOW;
+	}
+
+	/**
+	 * Try the activation again later if Avarda is still busy with the purchase.
+	 *
+	 * Avarda finalizes a purchase created by a subscription renewal asynchronously, and rejects
+	 * anything else touching it until it is done. That passes on its own, so the order should not
+	 * be put on hold over it.
+	 *
+	 * @param WC_Order $order The WooCommerce order.
+	 * @param WP_Error $wp_error The error Avarda responded with.
+	 * @return bool Whether a new attempt was scheduled.
+	 */
+	private function maybe_retry( $order, $wp_error ) {
+		if ( ! $this->is_transient_error( $order, $wp_error ) ) {
+			return false;
+		}
+
+		$attempt = intval( $order->get_meta( self::RETRY_ATTEMPT_META ) );
+
+		// Out of attempts. Let the caller handle it as a failed request.
+		if ( ! isset( self::RETRY_DELAYS[ $attempt ] ) ) {
+			return false;
+		}
+
+		$delay = self::RETRY_DELAYS[ $attempt ];
+
+		// One attempt at a time, otherwise two of them reach Avarda together and collide over
+		// the same purchase. Only pending actions count: the attempt running right now is in
+		// progress, and still has to be able to queue its successor.
+		$pending = as_get_scheduled_actions(
+			array(
+				'hook'     => self::ACTIVATION_RETRY_HOOK,
+				'args'     => array( $order->get_id() ),
+				'status'   => 'pending',
+				'per_page' => 1,
+			),
+			'ids'
+		);
+
+		if ( ! empty( $pending ) ) {
+			return true;
+		}
+
+		as_schedule_single_action( time() + $delay, self::ACTIVATION_RETRY_HOOK, array( $order->get_id() ) );
+
+		$order->update_meta_data( self::RETRY_ATTEMPT_META, $attempt + 1 );
+		$order->save();
+		$order->add_order_note(
+			sprintf(
+				// translators: %1$d seconds until the next attempt, %2$d attempt number, %3$d total attempts.
+				__( 'Avarda has not finished processing the payment. Trying again in %1$d seconds (attempt %2$d of %3$d).', 'avarda-checkout-for-woocommerce' ),
+				$delay,
+				$attempt + 1,
+				count( self::RETRY_DELAYS )
+			)
+		);
+
+		return true;
 	}
 
 	/**
