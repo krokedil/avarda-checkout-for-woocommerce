@@ -284,6 +284,11 @@ class ACO_Helper_Cart {
 		$chosen_methods  = WC()->session->get( 'chosen_shipping_methods' );
 		$chosen_shipping = $chosen_methods[0] ?? null;
 
+		// When integrated shipping is used, the shipping is sent to Avarda as a single item.
+		if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
+			return $this->get_integrated_shipping( $packages, $chosen_shipping );
+		}
+
 		$formatted_shipping = null;
 		foreach ( $packages as $i => $package ) {
 			/**
@@ -292,23 +297,6 @@ class ACO_Helper_Cart {
 			 * @var WC_Shipping_Rate $rate Shipping rate.
 			 */
 			foreach ( $package['rates'] as $rate ) {
-				if ( ACO_WC()->checkout->is_integrated_shipping_enabled() || ACO_WC()->checkout->is_integrated_wc_shipping_enabled() ) {
-					// If we should not show shipping, send the amount as 0.
-					$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
-
-					$formatted_shipping = array(
-						'description' => substr( $rate->get_label(), 0, 34 ), // String.
-						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
-						'amount'      => $amount,
-						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
-						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
-					);
-
-					$this->log_integrated_shipping_item( $packages, $chosen_shipping, $rate, $formatted_shipping );
-
-					return $formatted_shipping;
-				}
-
 				$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
 				if ( $chosen_shipping === $rate_id ) {
 					$formatted_shipping = ( $rate->get_cost() > 0 ) ? array(
@@ -329,6 +317,76 @@ class ACO_Helper_Cart {
 		}
 
 		return $formatted_shipping;
+	}
+
+	/**
+	 * Formats the shipping for integrated shipping, where a single shipping item is sent to Avarda.
+	 *
+	 * @param array       $packages The shipping packages from WooCommerce.
+	 * @param string|null $chosen_shipping The chosen shipping method rate id.
+	 *
+	 * @return array|null
+	 */
+	private function get_integrated_shipping( $packages, $chosen_shipping ) {
+		$rate = $this->get_integrated_shipping_rate( $packages, $chosen_shipping );
+
+		// If we have no rates at all, there is no shipping to send.
+		if ( null === $rate ) {
+			return null;
+		}
+
+		// If we should not show shipping, send the amount as 0.
+		$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
+
+		$formatted_shipping = array(
+			'description' => substr( $rate->get_label(), 0, 34 ), // String.
+			'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
+			'amount'      => $amount,
+			'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
+			'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
+		);
+
+		$this->log_integrated_shipping_item( $packages, $chosen_shipping, $rate, $formatted_shipping );
+
+		return $formatted_shipping;
+	}
+
+	/**
+	 * Get the shipping rate to send to Avarda when integrated shipping is used.
+	 *
+	 * The rate the customer has chosen is used. If the chosen method can't be found among the
+	 * rates, the first available rate is used as a fallback. With Avarda integrated shipping
+	 * there is only ever a single rate, but with partner shipping all WooCommerce rates for the
+	 * package are available, and we have to pick the chosen one.
+	 *
+	 * @param array       $packages The shipping packages from WooCommerce.
+	 * @param string|null $chosen_shipping The chosen shipping method rate id.
+	 *
+	 * @return WC_Shipping_Rate|null
+	 */
+	private function get_integrated_shipping_rate( $packages, $chosen_shipping ) {
+		$fallback_rate = null;
+
+		foreach ( $packages as $package ) {
+			/**
+			 * Loop each rate to get the chosen one.
+			 *
+			 * @var WC_Shipping_Rate $rate Shipping rate.
+			 */
+			foreach ( $package['rates'] ?? array() as $key => $rate ) {
+				// Keep the first rate we find, in case the chosen method is not available.
+				if ( null === $fallback_rate ) {
+					$fallback_rate = $rate;
+				}
+
+				$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : $key;
+				if ( $chosen_shipping === $rate_id ) {
+					return $rate;
+				}
+			}
+		}
+
+		return $fallback_rate;
 	}
 
 	/**
