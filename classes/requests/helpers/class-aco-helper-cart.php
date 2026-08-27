@@ -296,13 +296,17 @@ class ACO_Helper_Cart {
 					// If we should not show shipping, send the amount as 0.
 					$amount = WC()->cart->show_shipping() ? number_format( $rate->get_cost() + array_sum( $rate->get_taxes() ), 2, '.', '' ) : '0';
 
-					return array(
+					$formatted_shipping = array(
 						'description' => substr( $rate->get_label(), 0, 34 ), // String.
 						'notes'       => 'SHI001', // Has to be a static string for Avarda to recognize it as the fallback shipping method. @see https://docs.avarda.com/checkout-3/overview/shipping-broker/common-integration-guide/default-shipping-item/.
 						'amount'      => $amount,
 						'taxCode'     => (string) ( $rate->get_cost() != 0 ? array_sum( $rate->get_taxes() ) / $rate->get_cost() * 100 : 0 ), // String.
 						'taxAmount'   => number_format( array_sum( $rate->get_taxes() ), 2, '.', '' ), // Float.
 					);
+
+					$this->log_integrated_shipping_item( $packages, $chosen_shipping, $rate, $formatted_shipping );
+
+					return $formatted_shipping;
 				}
 
 				$rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
@@ -325,6 +329,52 @@ class ACO_Helper_Cart {
 		}
 
 		return $formatted_shipping;
+	}
+
+	/**
+	 * Logs the shipping item that is sent to Avarda when integrated shipping is used.
+	 *
+	 * Used to verify that the shipping cost we send to Avarda matches the shipping method
+	 * the customer has selected in WooCommerce.
+	 *
+	 * @param array            $packages The shipping packages from WooCommerce.
+	 * @param string|null      $chosen_shipping The chosen shipping method rate id.
+	 * @param WC_Shipping_Rate $rate The rate the shipping item was created from.
+	 * @param array            $formatted_shipping The shipping item that is sent to Avarda.
+	 *
+	 * @return void
+	 */
+	private function log_integrated_shipping_item( $packages, $chosen_shipping, $rate, $formatted_shipping ) {
+		$available_rates = array();
+		foreach ( $packages as $package_id => $package ) {
+			foreach ( $package['rates'] ?? array() as $rate_id => $package_rate ) {
+				$available_rates[] = array(
+					'package' => $package_id,
+					'rate_id' => $rate_id,
+					'label'   => $package_rate->get_label(),
+					'cost'    => $package_rate->get_cost(),
+					'tax'     => array_sum( $package_rate->get_taxes() ),
+				);
+			}
+		}
+
+		$used_rate_id = method_exists( $rate, 'get_id' ) ? $rate->get_id() : ( $rate->get_method_id() . ':' . $rate->get_instance_id() );
+
+		ACO_Logger::log(
+			array(
+				'title'                   => 'ACO integrated shipping item',
+				'id'                      => aco_get_purchase_id_from_session(),
+				'integrated_shipping'     => ACO_WC()->checkout->is_integrated_shipping_enabled() ? 'avarda' : 'woocommerce',
+				'chosen_shipping_method'  => $chosen_shipping,
+				'used_rate_id'            => $used_rate_id,
+				'rate_matches_chosen'     => $used_rate_id === $chosen_shipping,
+				'show_shipping'           => WC()->cart->show_shipping(),
+				'wc_shipping_total'       => WC()->cart->get_shipping_total(),
+				'wc_shipping_tax'         => WC()->cart->get_shipping_tax(),
+				'available_rates'         => $available_rates,
+				'shipping_item_to_avarda' => $formatted_shipping,
+			)
+		);
 	}
 
 	/**

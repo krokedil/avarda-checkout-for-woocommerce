@@ -153,6 +153,7 @@ class ACO_Checkout {
 
 		// If they are the same, return.
 		if ( $cart_hash === $saved_hash ) {
+			ACO_Logger::log( sprintf( 'Aborting Avarda update of %s. The cart hash (%s) is unchanged since the last update, so no new items are sent to Avarda.', $avarda_purchase_id, $cart_hash ) );
 			return;
 		}
 
@@ -264,6 +265,15 @@ class ACO_Checkout {
 
 		// Add the session as a json object to the fragment.
 		$fragments['.aco-shipping-session'] = '<input type="hidden" value="' . esc_attr( wp_json_encode( $session ) ) . '" class="aco-shipping-session" />';
+
+		ACO_Logger::log(
+			array(
+				'title'                  => 'ACO shipping session fragment',
+				'id'                     => aco_get_purchase_id_from_session(),
+				'chosen_shipping_method' => $chosen_shipping_methods[0] ?? '',
+				'session'                => $session,
+			)
+		);
 
 		return $fragments;
 	}

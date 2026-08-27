@@ -150,7 +150,18 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		$shipping_rates          = WC()->session->get( 'shipping_for_package_0' ) ?? array();
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
 
-		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_rates['rates'], is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '', $purchase_id );
+		$chosen_shipping_method = is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '';
+		$session                = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_rates['rates'], $chosen_shipping_method, $purchase_id );
+
+		ACO_Logger::log(
+			array(
+				'title'                  => 'ACO shipping session response to Avarda',
+				'id'                     => $purchase_id,
+				'customer_id'            => $customer_id,
+				'chosen_shipping_method' => $chosen_shipping_method,
+				'session'                => $session,
+			)
+		);
 
 		return $session;
 	}
