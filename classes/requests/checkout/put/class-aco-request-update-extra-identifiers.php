@@ -18,8 +18,14 @@ class ACO_Request_Update_Extra_Identifiers extends ACO_Request {
 	 * @return array
 	 */
 	public function request( $aco_purchase_id ) {
+		// Never send an empty attachment, since that would clear the one already stored in the session.
+		if ( empty( ACO_WC()->cart_items->get_cart_attachment() ) ) {
+			ACO_Logger::log( sprintf( 'Aborting update of extra identifiers for %s since the cart attachment is empty.', $aco_purchase_id ) );
+			return array();
+		}
+
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/extraidentifiers';
-		$request_args = apply_filters( 'aco_update_order_reference_args', $this->get_request_args() );
+		$request_args = apply_filters( 'aco_update_extra_identifiers_args', $this->get_request_args() );
 		$response     = wp_remote_request( $request_url, $request_args );
 		$code         = wp_remote_retrieve_response_code( $response );
 
@@ -38,7 +44,7 @@ class ACO_Request_Update_Extra_Identifiers extends ACO_Request {
 	 */
 	public function get_body() {
 		return array(
-			'attachments' => ACO_WC()->cart_items->get_cart_attachment(),
+			'attachment' => ACO_WC()->cart_items->get_cart_attachment(),
 		);
 	}
 
