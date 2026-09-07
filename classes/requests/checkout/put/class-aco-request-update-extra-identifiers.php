@@ -38,7 +38,7 @@ class ACO_Request_Update_Extra_Identifiers extends ACO_Request {
 	 */
 	public function get_body() {
 		return array(
-			'attachments' => ACO_WC()->cart_items->get_cart_attachment(),
+			'attachment' => ACO_WC()->cart_items->get_cart_attachment(),
 		);
 	}
 
