@@ -112,6 +112,9 @@ function aco_wc_initialize_payment() {
 	}
 
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
+	if ( ACO_WC()->checkout->is_integrated_wc_shipping_enabled() && ! empty( $avarda_payment['purchaseId'] ) ) {
+		aco_set_shipping_session_customer_id( $avarda_payment['purchaseId'], WC()->session->get_customer_unique_id() );
+	}
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
@@ -658,6 +661,40 @@ function aco_get_jwt_token_from_session() {
 	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 	$jwt                 = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
 	return $jwt;
+}
+
+/**
+ * Remember which WooCommerce customer session belongs to an Avarda purchase.
+ *
+ * The shipping callbacks from Avarda only carry the purchase id, and this lets them find the
+ * customer session without having to ask Avarda for the payment first.
+ *
+ * @param string $purchase_id The Avarda purchase id.
+ * @param string $customer_id The WooCommerce customer unique id.
+ * @return void
+ */
+function aco_set_shipping_session_customer_id( $purchase_id, $customer_id ) {
+	if ( empty( $purchase_id ) || empty( $customer_id ) ) {
+		return;
+	}
+
+	set_transient( 'aco_shipping_customer_' . $purchase_id, $customer_id, 2 * DAY_IN_SECONDS );
+}
+
+/**
+ * Get the WooCommerce customer unique id stored for an Avarda purchase.
+ *
+ * @param string $purchase_id The Avarda purchase id.
+ * @return string The customer unique id, or an empty string if none is stored.
+ */
+function aco_get_shipping_session_customer_id( $purchase_id ) {
+	if ( empty( $purchase_id ) ) {
+		return '';
+	}
+
+	$customer_id = get_transient( 'aco_shipping_customer_' . $purchase_id );
+
+	return is_string( $customer_id ) ? $customer_id : '';
 }
 
 /**
