@@ -636,6 +636,10 @@ function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
  * @return string The purchase id.
  */
 function aco_get_purchase_id_from_session() {
+	if ( empty( WC()->session ) ) {
+		return '';
+	}
+
 	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 	$avarda_purchase_id  = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['purchaseId'] ) ) ? $avarda_payment_data['purchaseId'] : '';
 	return $avarda_purchase_id;
@@ -647,6 +651,10 @@ function aco_get_purchase_id_from_session() {
  * @return string The purchase id.
  */
 function aco_get_jwt_token_from_session() {
+	if ( empty( WC()->session ) ) {
+		return '';
+	}
+
 	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 	$jwt                 = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
 	return $jwt;
