@@ -193,6 +193,11 @@ class ACO_Checkout {
 			return;
 		}
 
+		// Avarda may call our shipping endpoints before this request ends, so persist the session now or they read the previous shipping method.
+		if ( $this->is_integrated_wc_shipping_enabled() && method_exists( WC()->session, 'save_data' ) ) {
+			WC()->session->save_data();
+		}
+
 		// Update order.
 		$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
 
