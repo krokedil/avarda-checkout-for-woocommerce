@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 10.8.1
+WC tested up to: 11.1.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.8
+Stable tag: 1.17.9
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,14 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2026.09.14        - version 1.17.9 =
+* Fix               - Resolved an issue where changing the shipping option could leave the Avarda iframe out of sync with WooCommerce, causing the order total to mismatch and the purchase to fail verification.
+* Fix               - Resolved an issue where the fallback shipping item sent to Avarda was the first available shipping method rather than the one the customer chose, which could apply the wrong shipping cost in the rare case that the shipping broker did not respond.
+* Fix               - The shipping method name is now sent in the property Avarda reads, so integrated shipping options are labelled correctly in the Avarda checkout.
+* Fix               - The phone number and email entered for the delivery address are now saved to the WooCommerce shipping fields, instead of being overwritten by the billing details.
+* Fix               - Resolved an issue where subscription renewal orders using integrated shipping could recreate the shipping line without tax, because the shipping tax rate id was not preserved when calculating the VAT.
+* Fix               - Prevented a fatal error on requests without a WooCommerce customer session, such as REST, cron and WP-CLI requests.
+
 = 2026.06.03        - version 1.17.8 =
 * Enhancement       - The integrated shipping options now update to reflect free shipping coupons and shipping classes when the cart changes during checkout, not only when the checkout first loads.
 
