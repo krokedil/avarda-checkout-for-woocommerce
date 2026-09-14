@@ -69,25 +69,6 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	}
 
 	/**
-	 * Get the customer session from the customer unique id.
-	 *
-	 * @param string $customer_id The customer unique id.
-	 *
-	 * @return array
-	 */
-	private function get_customer_session( $customer_id ) {
-		$this->setup_customer_session( $customer_id );
-
-		$shipping                = WC()->session->get( 'shipping_for_package_0' ) ?? array();
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
-
-		return array(
-			'shipping'               => $shipping,
-			'chosen_shipping_method' => is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '',
-		);
-	}
-
-	/**
 	 * Setup the session data for the customer.
 	 *
 	 * @param string $customer_id The customer unique id.
@@ -110,29 +91,42 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	}
 
 	/**
-	 * Create or update a shipping session.
+	 * Get the customer id from the attachment data in the extraIdentifiers.
 	 *
-	 * @param array $avarda_order The order from Avarda.
+	 * @param array $payment The payment data, either from Avarda or from the request body.
 	 *
-	 * @return ACO_Shipping_Session_Model|null
+	 * @return string The customer unique id, or an empty string if it could not be read.
 	 */
-	private function create_or_update_session( $avarda_order ) {
-		if ( empty( $avarda_order ) ) {
-			return null;
+	private function get_customer_id_from_attachment( $payment ) {
+		$attachment = $payment['extraIdentifiers']['attachment'] ?? '';
+
+		if ( empty( $attachment ) ) {
+			return '';
 		}
 
-		$purchase_id         = $avarda_order['purchaseId'] ?? '';
-		$attachments         = json_decode( $avarda_order['extraIdentifiers']['attachment'], true ) ?? array();
-		$shipping_attachment = $attachments['shipping'] ?? array();
+		$attachment = json_decode( $attachment, true );
 
-		if ( empty( $purchase_id ) || empty( $attachments ) || empty( $shipping_attachment ) || ! isset( $shipping_attachment['customerId'] ) ) {
-			return null;
+		return is_array( $attachment ) ? ( $attachment['shipping']['customerId'] ?? '' ) : '';
+	}
+
+	/**
+	 * Get the customer id for a request body from Avarda, and remember it so get-session can find it without asking Avarda.
+	 *
+	 * @param array  $body The request body.
+	 * @param string $purchase_id The purchase id.
+	 *
+	 * @return string The customer unique id, or an empty string if it could not be resolved.
+	 */
+	private function get_customer_id_from_request( $body, $purchase_id ) {
+		$customer_id = $this->get_customer_id_from_attachment( $body );
+
+		if ( empty( $customer_id ) ) {
+			return aco_get_shipping_session_customer_id( $purchase_id );
 		}
 
-		$wc_session = $this->get_customer_session( $attachments['shipping']['customerId'] );
-		$session    = ACO_Shipping_Session_Model::from_shipping_rates( $wc_session['shipping']['rates'] ?? array(), $wc_session['chosen_shipping_method'], $purchase_id, $attachments['shipping']['customerId'] );
+		aco_set_shipping_session_customer_id( $purchase_id, $customer_id );
 
-		return $session;
+		return $customer_id;
 	}
 
 	/**
@@ -150,7 +144,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 		$shipping_rates          = WC()->session->get( 'shipping_for_package_0' ) ?? array();
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' ) ?? array();
 
-		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_rates['rates'], is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '', $purchase_id );
+		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_rates['rates'] ?? array(), is_array( $chosen_shipping_methods ) ? reset( $chosen_shipping_methods ) : '', $purchase_id );
 
 		return $session;
 	}
@@ -163,24 +157,21 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @return void
 	 */
 	public function create_session( $request ) {
+		$body        = $request->get_json_params();
+		$purchase_id = $body['purchaseId'] ?? '';
+
 		try {
-			$body = $request->get_json_params();
-
-			// Get the customerId from the attachment data in the extraIdentifiers.
-			$purchase_id = $body['purchaseId'];
-			$attachments = json_decode( $body['extraIdentifiers']['attachment'], true );
-			$customer_id = $attachments['shipping']['customerId'];
-
-			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
+			$customer_id = $this->get_customer_id_from_request( $body, $purchase_id );
+			$session     = empty( $customer_id ) ? null : $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
+				ACO_Logger::log( sprintf( 'Shipping create-session for %s could not resolve a customer session. Returning the fallback session.', $purchase_id ) );
 				$this->send_response( ACO_Shipping_Session_Model::get_fallback_shipping_session( $purchase_id ), 201 );
 			}
 
 			$this->send_response( $session, 201 );
-		} catch ( Exception $e ) {
-			$body        = $request->get_json_params();
-			$purchase_id = $body['purchaseId'];
+		} catch ( Throwable $e ) {
+			ACO_Logger::log( sprintf( 'Shipping create-session for %s failed: %s', $purchase_id, $e->getMessage() ) );
 			$this->send_response( ACO_Shipping_Session_Model::get_fallback_shipping_session( $purchase_id ), 201 );
 		}
 	}
@@ -193,22 +184,21 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @return void
 	 */
 	public function update_session( $request ) {
+		$body        = $request->get_json_params();
+		$purchase_id = $body['purchaseId'] ?? $request->get_param( 'id' );
+
 		try {
-			$body = $request->get_json_params();
-
-			// Get the customerId from the attachment data in the extraIdentifiers.
-			$purchase_id = $body['purchaseId'];
-			$attachments = json_decode( $body['extraIdentifiers']['attachment'], true );
-			$customer_id = $attachments['shipping']['customerId'];
-
-			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
+			$customer_id = $this->get_customer_id_from_request( $body, $purchase_id );
+			$session     = empty( $customer_id ) ? null : $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
+				ACO_Logger::log( sprintf( 'Shipping update-session for %s could not resolve a customer session.', $purchase_id ) );
 				$this->send_response( new WP_Error( 400, 'Bad request' ) );
 			}
 
 			$this->send_response( $session, 200 );
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
+			ACO_Logger::log( sprintf( 'Shipping update-session for %s failed: %s', $purchase_id, $e->getMessage() ) );
 			$this->send_response( new WP_Error( 500, 'Server error' ) );
 		}
 	}
@@ -243,29 +233,34 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @return void
 	 */
 	public function get_session( $request ) {
-		try {
-			// Get the purchase id from the request url.
-			$purchase_id = $request->get_param( 'id' );
-			// Get the avarda order.
-			$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id );
+		$purchase_id = $request->get_param( 'id' );
 
-			if ( is_wp_error( $avarda_order ) ) {
-				$this->send_response( new WP_Error( 404, 'Not found' ) );
+		try {
+			$customer_id = aco_get_shipping_session_customer_id( $purchase_id );
+
+			// Purchases started before the local lookup existed can still be resolved by asking Avarda for the attachment.
+			if ( empty( $customer_id ) ) {
+				$avarda_order = ACO_WC()->api->request_get_payment( $purchase_id, true );
+
+				if ( is_wp_error( $avarda_order ) ) {
+					ACO_Logger::log( sprintf( 'Shipping get-session for %s could not get the payment from Avarda.', $purchase_id ) );
+					$this->send_response( new WP_Error( 404, 'Not found' ) );
+				}
+
+				$customer_id = $this->get_customer_id_from_attachment( $avarda_order );
+				aco_set_shipping_session_customer_id( $purchase_id, $customer_id );
 			}
 
-			$purchase_id = $avarda_order['purchaseId'] ?? '';
-			$attachments = json_decode( $avarda_order['extraIdentifiers']['attachment'], true ) ?? array();
-			$customer_id = $attachments['shipping']['customerId'] ?? '';
-
-			// Get the shipping session from the order.
-			$session = $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
+			$session = empty( $customer_id ) ? null : $this->get_shipping_session_for_customer( $customer_id, $purchase_id );
 
 			if ( ! $session ) {
+				ACO_Logger::log( sprintf( 'Shipping get-session for %s could not resolve a customer session.', $purchase_id ) );
 				$this->send_response( new WP_Error( 404, 'Not found' ) );
 			}
 
 			$this->send_response( $session );
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
+			ACO_Logger::log( sprintf( 'Shipping get-session for %s failed: %s', $purchase_id, $e->getMessage() ) );
 			$this->send_response( new WP_Error( 500, 'Server error' ) );
 		}
 	}

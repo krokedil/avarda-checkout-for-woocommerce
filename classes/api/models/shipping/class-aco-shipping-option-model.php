@@ -35,7 +35,14 @@ class ACO_Shipping_Option_Model {
 	public $carrier;
 
 	/**
-	 * The shipping product for the shipping option.
+	 * The name of the shipping product. This is the property name Avarda expects.
+	 *
+	 * @var string
+	 */
+	public $product;
+
+	/**
+	 * The shipping product for the shipping option. Kept for the widget and for filters that already read it.
 	 *
 	 * @var string
 	 */
@@ -90,7 +97,8 @@ class ACO_Shipping_Option_Model {
 		$option->deliveryType    = 'mailbox';
 		$option->carrier         = self::get_shipping_method_carrier( $shipping_rate );
 		$option->iconUrl         = self::get_shipping_method_icon( $option->carrier, $shipping_rate );
-		$option->shippingProduct = $shipping_rate->get_label();
+		$option->product         = $shipping_rate->get_label();
+		$option->shippingProduct = $option->product;
 		$option->price           = number_format( $shipping_rate->get_cost() + array_sum( $shipping_rate->get_taxes() ), 2, '.', '' );
 		$option->currency        = get_woocommerce_currency();
 		$option->description     = self::get_shipping_method_description( $shipping_rate );
@@ -113,7 +121,8 @@ class ACO_Shipping_Option_Model {
 		$option->deliveryType    = 'mailbox';
 		$option->carrier         = 'no_shipping';
 		$option->iconUrl         = AVARDA_CHECKOUT_URL . '/assets/images/shipping/icon-neutral.svg';
-		$option->shippingProduct = __( 'No shipping', 'avarda-checkout-for-woocommerce' );
+		$option->product         = __( 'No shipping', 'avarda-checkout-for-woocommerce' );
+		$option->shippingProduct = $option->product;
 		$option->price           = 0;
 		$option->currency        = get_woocommerce_currency();
 		$option->description     = __( 'Please enter your full address to see available shipping methods.', 'avarda-checkout-for-woocommerce' );

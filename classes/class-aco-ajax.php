@@ -172,6 +172,10 @@ class ACO_AJAX extends WC_AJAX {
 			'shipping_address_1' => $customer_address['shipping']['address1'] ?: $customer_address['billing']['address1'],
 			'billing_address_2'  => $customer_address['billing']['address2'],
 			'shipping_address_2' => $customer_address['shipping']['address2'] ?: $customer_address['billing']['address2'],
+			'billing_phone'      => $customer_address['billing']['phone'],
+			'shipping_phone'     => $customer_address['shipping']['phone'] ?: $customer_address['billing']['phone'],
+			'billing_email'      => $customer_address['billing']['email'],
+			'shipping_email'     => $customer_address['shipping']['email'] ?: $customer_address['billing']['email'],
 		);
 		// phpcs:enable
 

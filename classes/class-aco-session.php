@@ -75,6 +75,12 @@ class ACO_Session {
 
 		// Ensure the current customer session is still valid, but only if we don't have an order.
 		if ( empty( $order ) ) {
+			// WooCommerce has no session on REST, cron and CLI requests, so there is no payment to look up either.
+			if ( empty( WC()->session ) ) {
+				ACO_Logger::log( 'No WooCommerce session available when getting Avarda Payment.', WC_Log_Levels::DEBUG );
+				return false;
+			}
+
 			$verify_session = $this->verify_cart_session();
 
 			if ( is_wp_error( $verify_session ) ) {
@@ -144,6 +150,10 @@ class ACO_Session {
 	 * @return bool|WP_Error
 	 */
 	public function verify_cart_session() {
+		if ( empty( WC()->session ) ) {
+			return true;
+		}
+
 		try {
 			$this->has_currency_changed()
 				->has_language_changed();

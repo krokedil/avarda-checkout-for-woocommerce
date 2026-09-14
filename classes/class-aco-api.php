@@ -175,6 +175,11 @@ class ACO_API {
 	 * @return mixed
 	 */
 	public function request_update_extra_identifiers( $aco_purchase_id ) {
+		// The customer id changes if the customer logs in during checkout, so keep the lookup for the shipping callbacks current.
+		if ( isset( WC()->session ) ) {
+			aco_set_shipping_session_customer_id( $aco_purchase_id, WC()->session->get_customer_unique_id() );
+		}
+
 		$request  = new ACO_Request_Update_Extra_Identifiers();
 		$response = $request->request( $aco_purchase_id );
 

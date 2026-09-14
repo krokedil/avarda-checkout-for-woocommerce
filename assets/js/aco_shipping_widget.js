@@ -31,8 +31,10 @@ jQuery(function($) {
             }
 
             const $element = $(element);
-            // Remove previous event handlers with the namespace to avoid duplicates.
+            // Avarda re-inits the widget on every form refresh and attaches its listeners again, so drop everything from the previous init.
+            aco_shipping_widget.listeners = {};
             $element.off(".aco_shipping_ui");
+            $(document.body).off(".aco_shipping_ui");
 
             aco_shipping_widget.element = $element;
             aco_shipping_widget.cartNeedsShipping = aco_wc_shipping_params.cart_needs_shipping;
@@ -69,13 +71,9 @@ jQuery(function($) {
             $element.on('click.aco_shipping_ui', '.pickup-point-select-header', aco_shipping_widget.onPickupPointSelectClick);
             $element.on('click.aco_shipping_ui', '.pickup-point-select-item', aco_shipping_widget.onChangePickupPoint);
 
-            $(document.body).on('updated_checkout.aco_shipping_ui', () => {
-                if(aco_shipping_widget.changedShippingOption) {
-                    aco_shipping_widget.dispatchEvent("shipping_option_changed");
-                    aco_shipping_widget.changedShippingOption = false;
-                }
-
-                aco_shipping_widget.getShippingOptions();
+            $(document.body).on('updated_checkout.aco_shipping_ui', aco_shipping_widget.onUpdatedCheckout);
+            $(document.body).on('checkout_error.aco_shipping_ui', () => {
+                aco_shipping_widget.changedShippingOption = false;
             });
 
             // Dispatch the loaded event once as soon as it is registered by avarda.
@@ -85,6 +83,44 @@ jQuery(function($) {
                     clearTimeout(loadedTimeout);
                 }
             }, 0);
+        },
+
+        onUpdatedCheckout: () => {
+            const changed = aco_shipping_widget.changedShippingOption;
+
+            if (changed) {
+                aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                // Reset after the other updated_checkout handlers have run, so aco_checkout.js can still see that this update came from the widget.
+                setTimeout(() => {
+                    aco_shipping_widget.changedShippingOption = false;
+                }, 0);
+            }
+
+            // Re-render from the fresh session, but don't dispatch a second time for the change we just sent.
+            aco_shipping_widget.getShippingOptions(!changed);
+        },
+
+        /**
+         * Whether the current checkout update was started by a shipping option change in the widget.
+         *
+         * @returns {boolean}
+         */
+        isChangingShippingOption: () => {
+            return aco_shipping_widget.changedShippingOption;
+        },
+
+        /**
+         * Run the callback once no jQuery AJAX requests are in flight.
+         *
+         * @param {Function} callback
+         */
+        whenAjaxIdle: (callback) => {
+            if ($.active === 0) {
+                callback();
+                return;
+            }
+
+            $(document).one("ajaxStop", callback);
         },
 
         hasFullAddressData: () => {
@@ -98,7 +134,7 @@ jQuery(function($) {
             return country && postcode && city && address;
         },
 
-        getShippingOptions: () => {
+        getShippingOptions: (dispatchIfChanged = true) => {
             try {
                 // Read the .aco-shipping-session field and parse the json from the value.
                 const {modules} = JSON.parse($('.aco-shipping-session').val());
@@ -121,9 +157,9 @@ jQuery(function($) {
                     return;
                 }
 
-               // If the selected option has changed, trigger the shipping_option_changed event.
-               if (aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
-                   aco_shipping_widget.dispatchEvent("shipping_option_changed");
+                // If the selected option has changed, trigger the shipping_option_changed event.
+                if (dispatchIfChanged && aco_shipping_widget.modules.selected_option !== previousSelectedOption) {
+                    aco_shipping_widget.dispatchEvent("shipping_option_changed");
                 }
             } catch (error) {
                 console.error("Error when getting shipping options for Avarda Checkout.", error);
@@ -151,6 +187,18 @@ jQuery(function($) {
             aco_shipping_widget.listeners[type].push(listenerObject);
         },
 
+        addEventListener: (type, listener, options) => {
+            aco_shipping_widget.on(type, listener, options);
+        },
+
+        removeEventListener: (type, listener) => {
+            if (!aco_shipping_widget.listeners[type]) {
+                return;
+            }
+
+            aco_shipping_widget.listeners[type] = aco_shipping_widget.listeners[type].filter((registered) => registered.listener !== listener);
+        },
+
         dispatchEvent: (event) => {
             if (aco_shipping_widget.listeners[event]) {
                 // Loop each listener and trigger them
@@ -161,17 +209,23 @@ jQuery(function($) {
         },
 
         unmount: () => {
+            aco_shipping_widget.listeners = {};
+            $(document.body).off(".aco_shipping_ui");
+            if (aco_shipping_widget.element) {
+                aco_shipping_widget.element.off(".aco_shipping_ui");
+            }
         },
 
         setLanguage: (language) => {
         },
 
         sessionHasUpdated: () => {
-            // Block the body.
-            //aco_shipping_widget.blockElement("body");
+            // Leave things alone while a change from the widget is still on its way through update_checkout.
+            if (aco_shipping_widget.changedShippingOption) {
+                return;
+            }
 
-            // Get the updated shipping options.
-            //aco_shipping_widget.getShippingOptions();
+            aco_shipping_widget.getShippingOptions(false);
         },
 
         getStyleCss: () => {
@@ -342,7 +396,12 @@ jQuery(function($) {
             // Set the selected pickup point in WooCommerce by selecting the option in the form.
             aco_shipping_widget.syncWithKrokedilShippingSelect(merchantReference);
             aco_shipping_widget.maybeSyncWithWebshipper(merchantReference);
-            aco_shipping_widget.dispatchEvent("shipping_option_changed");
+
+            // Wait for the selects' own AJAX calls to save the pickup point, so Avarda reads a session that already has it.
+            aco_shipping_widget.changedShippingOption = true;
+            aco_shipping_widget.whenAjaxIdle(() => {
+                $(document.body).trigger("update_checkout");
+            });
 
             // Copy the selected pickup point to the header.
             $header

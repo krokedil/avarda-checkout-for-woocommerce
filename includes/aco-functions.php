@@ -112,6 +112,9 @@ function aco_wc_initialize_payment() {
 	}
 
 	WC()->session->set( 'aco_wc_payment_data', $avarda_payment );
+	if ( ACO_WC()->checkout->is_integrated_wc_shipping_enabled() && ! empty( $avarda_payment['purchaseId'] ) ) {
+		aco_set_shipping_session_customer_id( $avarda_payment['purchaseId'], WC()->session->get_customer_unique_id() );
+	}
 	WC()->session->set( 'aco_language', ACO_WC()->checkout_setup->get_language() );
 	WC()->session->set( 'aco_currency', get_woocommerce_currency() );
 	WC()->session->set( 'aco_wc_cart_contains_subscription', aco_get_wc_cart_contains_subscription() );
@@ -351,91 +354,6 @@ function aco_confirm_subscription( $subscription_id, $avarda_purchase_id ) {
 }
 
 /**
- * Populates the wc order address.
- *
- * @param WC_Order $order The WC Order.
- * @param array    $avarda_order The Avarda order.
- * @return void
- */
-function aco_populate_wc_order( $order, $avarda_order ) {
-
-	$order_id = $order->get_id();
-
-	$user_inputs       = array();
-	$invoicing_address = array();
-	$delivery_address  = array();
-	$billing_company   = '';
-	if ( 'B2C' === $avarda_order['mode'] ) {
-		$user_inputs         = $avarda_order['b2C']['userInputs'];
-		$invoicing_address   = $avarda_order['b2C']['invoicingAddress'];
-		$delivery_address    = $avarda_order['b2C']['deliveryAddress'];
-		$billing_first_name  = $invoicing_address['firstName'];
-		$billing_last_name   = $invoicing_address['lastName'];
-		$shipping_first_name = isset( $delivery_address['firstName'] ) ? $delivery_address['firstName'] : $invoicing_address['firstName'];
-		$shipping_last_name  = isset( $delivery_address['lastName'] ) ? $delivery_address['lastName'] : $invoicing_address['lastName'];
-	} elseif ( 'B2B' === $avarda_order['mode'] ) {
-		$user_inputs         = $avarda_order['b2B']['userInputs'];
-		$invoicing_address   = $avarda_order['b2B']['invoicingAddress'];
-		$delivery_address    = $avarda_order['b2B']['deliveryAddress'];
-		$billing_company     = $invoicing_address['name'];
-		$shipping_company    = $invoicing_address['name'];
-		$billing_first_name  = isset( $avarda_order['b2B']['customerInfo']['firstName'] ) ? $avarda_order['b2B']['customerInfo']['firstName'] : '';
-		$billing_last_name   = isset( $avarda_order['b2B']['customerInfo']['lastName'] ) ? $avarda_order['b2B']['customerInfo']['lastName'] : '';
-		$shipping_first_name = isset( $avarda_order['b2B']['deliveryAddress']['firstName'] ) ? $avarda_order['b2B']['deliveryAddress']['firstName'] : $avarda_order['b2B']['customerInfo']['firstName'];
-		$shipping_last_name  = isset( $avarda_order['b2B']['deliveryAddress']['lastName'] ) ? $avarda_order['b2B']['deliveryAddress']['lastName'] : $avarda_order['b2B']['customerInfo']['lastName'];
-
-	}
-
-	$shipping_data = array(
-		'first_name' => $shipping_first_name,
-		'last_name'  => $shipping_last_name,
-		'country'    => isset( $delivery_address['country'] ) ? $delivery_address['country'] : $invoicing_address['country'],
-		'address1'   => isset( $delivery_address['address1'] ) ? $delivery_address['address1'] : $invoicing_address['address1'],
-		'address2'   => isset( $delivery_address['address2'] ) ? $delivery_address['address2'] : $invoicing_address['address2'],
-		'city'       => isset( $delivery_address['city'] ) ? $delivery_address['city'] : $invoicing_address['city'],
-		'zip'        => isset( $delivery_address['zip'] ) ? $delivery_address['zip'] : $invoicing_address['zip'],
-	);
-
-	// Set Avarda payment method title.
-	aco_set_payment_method_title( $order, $avarda_order );
-
-	// First name.
-	$order->set_billing_first_name( sanitize_text_field( $billing_first_name ) );
-	$order->set_shipping_first_name( sanitize_text_field( $shipping_data['first_name'] ) );
-	// Last name.
-	$order->set_billing_last_name( sanitize_text_field( $billing_last_name ) );
-	$order->set_shipping_last_name( sanitize_text_field( $shipping_data['last_name'] ) );
-	// Country.
-	$order->set_billing_country( strtoupper( sanitize_text_field( $invoicing_address['country'] ) ) );
-	$order->set_shipping_country( strtoupper( sanitize_text_field( $shipping_data['country'] ) ) );
-	// Street address1.
-	$order->set_billing_address_1( sanitize_text_field( $invoicing_address['address1'] ) );
-	$order->set_shipping_address_1( sanitize_text_field( $shipping_data['address1'] ) );
-	// Street address2.
-	$order->set_billing_address_2( sanitize_text_field( $invoicing_address['address2'] ) );
-	$order->set_shipping_address_2( sanitize_text_field( $shipping_data['address2'] ) );
-	// City.
-	$order->set_billing_city( sanitize_text_field( $invoicing_address['city'] ) );
-	$order->set_shipping_city( sanitize_text_field( $shipping_data['city'] ) );
-	// Postcode.
-	$order->set_billing_postcode( sanitize_text_field( $invoicing_address['zip'] ) );
-	$order->set_shipping_postcode( sanitize_text_field( $shipping_data['zip'] ) );
-	// Phone.
-	$order->set_billing_phone( sanitize_text_field( $user_inputs['phone'] ) );
-	// Email.
-	$order->set_billing_email( sanitize_text_field( $user_inputs['email'] ) );
-
-	// Company name.
-	if ( ! empty( $billing_company ) ) {
-		$order->set_billing_company( sanitize_text_field( $billing_company ) );
-		$order->set_shipping_company( sanitize_text_field( $shipping_company ) );
-	}
-
-	// Save order.
-	$order->save();
-}
-
-/**
  * Format Avarda address data.
  *
  * @param array $avarda_order The Avarda order.
@@ -472,12 +390,14 @@ function aco_format_address_data( $avarda_order ) {
 		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
 		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
 		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+		$customer_address['shipping']['phone']      = $delivery_address['phone'] ?? '';
+		$customer_address['shipping']['email']      = $delivery_address['email'] ?? '';
 
 	} elseif ( 'B2B' === $avarda_order['mode'] ) {
 
-		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? '';
-		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? '';
-		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? '';
+		$user_inputs       = $avarda_order['b2B']['userInputs'] ?? array();
+		$invoicing_address = $avarda_order['b2B']['invoicingAddress'] ?? array();
+		$delivery_address  = $avarda_order['b2B']['deliveryAddress'] ?? array();
 
 		$customer_address['billing']['first_name'] = $avarda_order['b2B']['customerInfo']['firstName'] ?? '';
 		$customer_address['billing']['last_name']  = $avarda_order['b2B']['customerInfo']['lastName'] ?? '';
@@ -500,6 +420,8 @@ function aco_format_address_data( $avarda_order ) {
 		$customer_address['shipping']['zip']        = $delivery_address['zip'] ?? '';
 		$customer_address['shipping']['city']       = $delivery_address['city'] ?? '';
 		$customer_address['shipping']['country']    = $delivery_address['country'] ?? '';
+		$customer_address['shipping']['phone']      = $delivery_address['phone'] ?? '';
+		$customer_address['shipping']['email']      = $delivery_address['email'] ?? '';
 
 	}
 
@@ -717,6 +639,10 @@ function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
  * @return string The purchase id.
  */
 function aco_get_purchase_id_from_session() {
+	if ( empty( WC()->session ) ) {
+		return '';
+	}
+
 	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 	$avarda_purchase_id  = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['purchaseId'] ) ) ? $avarda_payment_data['purchaseId'] : '';
 	return $avarda_purchase_id;
@@ -728,9 +654,47 @@ function aco_get_purchase_id_from_session() {
  * @return string The purchase id.
  */
 function aco_get_jwt_token_from_session() {
+	if ( empty( WC()->session ) ) {
+		return '';
+	}
+
 	$avarda_payment_data = WC()->session->get( 'aco_wc_payment_data' );
 	$jwt                 = ( is_array( $avarda_payment_data ) && isset( $avarda_payment_data['jwt'] ) ) ? $avarda_payment_data['jwt'] : '';
 	return $jwt;
+}
+
+/**
+ * Remember which WooCommerce customer session belongs to an Avarda purchase.
+ *
+ * The shipping callbacks from Avarda only carry the purchase id, and this lets them find the
+ * customer session without having to ask Avarda for the payment first.
+ *
+ * @param string $purchase_id The Avarda purchase id.
+ * @param string $customer_id The WooCommerce customer unique id.
+ * @return void
+ */
+function aco_set_shipping_session_customer_id( $purchase_id, $customer_id ) {
+	if ( empty( $purchase_id ) || empty( $customer_id ) ) {
+		return;
+	}
+
+	set_transient( 'aco_shipping_customer_' . $purchase_id, $customer_id, 2 * DAY_IN_SECONDS );
+}
+
+/**
+ * Get the WooCommerce customer unique id stored for an Avarda purchase.
+ *
+ * @param string $purchase_id The Avarda purchase id.
+ * @return string The customer unique id, or an empty string if none is stored.
+ */
+function aco_get_shipping_session_customer_id( $purchase_id ) {
+	if ( empty( $purchase_id ) ) {
+		return '';
+	}
+
+	$customer_id = get_transient( 'aco_shipping_customer_' . $purchase_id );
+
+	return is_string( $customer_id ) ? $customer_id : '';
 }
 
 /**

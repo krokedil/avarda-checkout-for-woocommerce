@@ -156,12 +156,13 @@ class ACO_Shipping extends WC_Shipping_Method {
 		// We need to get the shipping price ex vat, since Ingrid only returns the price including vat, and no vat amount we need to calculate it ourselves.
 		$shipping_tax_rates = WC_Tax::get_shipping_tax_rates(); // Get the shipping tax rates from WooCommerce.
 		if ( is_array( $shipping_tax_rates ) && ! empty( $shipping_tax_rates ) ) {
-			// Use the first rate as the shipping tax rate.
-			$shipping_tax_rate = array_shift( $shipping_tax_rates );
-			$vat_percentage    = $shipping_tax_rate['rate'] / 100; // Convert to decimal for calculation.
+			// Use the first rate as the shipping tax rate. The tax rate id must be kept as the array key, since WooCommerce stores shipping taxes keyed by it.
+			$rate_id           = array_key_first( $shipping_tax_rates );
+			$shipping_tax_rate = array( $rate_id => $shipping_tax_rates[ $rate_id ] );
+			$vat_percentage    = $shipping_tax_rates[ $rate_id ]['rate'] / 100; // Convert to decimal for calculation.
 
-			$price_ex_vat  = round( $price_inc_vat / ( 1 + $vat_percentage ), 2 ); // Round to 2 decimals.
-			$shipping_tax  = WC_Tax::calc_shipping_tax( $price_ex_vat, array( $shipping_tax_rate ) ); // Use the specific rate for calculation.
+			$price_ex_vat = round( $price_inc_vat / ( 1 + $vat_percentage ), 2 ); // Round to 2 decimals.
+			$shipping_tax = WC_Tax::calc_shipping_tax( $price_ex_vat, $shipping_tax_rate ); // Use the specific rate for calculation.
 		} else { // If we did not get any valid tax rates, assume no tax.
 			$price_ex_vat = $price_inc_vat;
 			$shipping_tax = WC_Tax::calc_shipping_tax( $price_ex_vat, WC_Tax::get_shipping_tax_rates() );

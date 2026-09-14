@@ -346,6 +346,12 @@ jQuery(function($) {
       let shipping_postcode = customerAddress.shipping.zip
         ? customerAddress.shipping.zip.replace(/\s/g, "")
         : billing_postcode;
+      let shipping_phone = customerAddress.shipping.phone
+        ? customerAddress.shipping.phone
+        : billing_phone;
+      let shipping_email = customerAddress.shipping.email
+        ? customerAddress.shipping.email
+        : billing_email;
 
       shipping_first_name && $("#shipping_first_name").val(shipping_first_name);
       shipping_last_name && $("#shipping_last_name").val(shipping_last_name);
@@ -358,19 +364,41 @@ jQuery(function($) {
 
       const $shippingPhone = $("#shipping_phone");
       if ($shippingPhone.length) {
-        $shippingPhone.val(billing_phone);
+        $shippingPhone.val(shipping_phone);
       }
 
       const $shippingEmail = $("#shipping_email");
       if ($shippingEmail.length) {
-        $shippingEmail.val(billing_email);
+        $shippingEmail.val(shipping_email);
       }
     },
 
-    updateAvardaPayment: function () {
-      if (window.avardaCheckout) {
-        window.avardaCheckout.refreshForm();
+    updateAvardaPayment: function (event, data) {
+      if (!window.avardaCheckout) {
+        return;
       }
+
+      if (aco_wc_params.integrated_shipping_woocommerce === "yes") {
+        // The widget dispatches shipping_option_changed for its own changes; refreshing the form at the same time gives Avarda two concurrent updates for one purchase.
+        if (window.avardaShipping && window.avardaShipping.isChangingShippingOption && window.avardaShipping.isChangingShippingOption()) {
+          return;
+        }
+
+        if (aco_wc.itemsWereUpdated(data)) {
+          window.avardaCheckout.refreshForm({ reason: "UpdatedItems" });
+          return;
+        }
+      }
+
+      window.avardaCheckout.refreshForm();
+    },
+
+    /*
+     * Check the update_order_review response for the flag that says an items update was sent to Avarda.
+     */
+    itemsWereUpdated: function (data) {
+      const fragment = data && data.fragments ? data.fragments[".aco-items-updated"] : null;
+      return fragment ? $(fragment).val() === "yes" : false;
     },
 
     /*

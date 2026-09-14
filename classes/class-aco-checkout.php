@@ -33,6 +33,13 @@ class ACO_Checkout {
 	private $integrated_shipping_wc;
 
 	/**
+	 * If an items update was sent to Avarda during the current request.
+	 *
+	 * @var bool
+	 */
+	private $items_updated = false;
+
+	/**
 	 * Class constructor
 	 */
 	public function __construct() {
@@ -193,8 +200,14 @@ class ACO_Checkout {
 			return;
 		}
 
+		// Avarda may call our shipping endpoints before this request ends, so persist the session now or they read the previous shipping method.
+		if ( $this->is_integrated_wc_shipping_enabled() && method_exists( WC()->session, 'save_data' ) ) {
+			WC()->session->save_data();
+		}
+
 		// Update order.
-		$avarda_order = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+		$avarda_order        = ACO_WC()->api->request_update_payment( $avarda_purchase_id );
+		$this->items_updated = ! is_wp_error( $avarda_order ) && 'No update needed' !== $avarda_order;
 
 		// If the update failed - unset sessions and return error.
 		if ( is_wp_error( $avarda_order ) ) {
@@ -264,6 +277,8 @@ class ACO_Checkout {
 
 		// Add the session as a json object to the fragment.
 		$fragments['.aco-shipping-session'] = '<input type="hidden" value="' . esc_attr( wp_json_encode( $session ) ) . '" class="aco-shipping-session" />';
+
+		$fragments['.aco-items-updated'] = '<input type="hidden" value="' . ( $this->items_updated ? 'yes' : 'no' ) . '" class="aco-items-updated" />';
 
 		return $fragments;
 	}
