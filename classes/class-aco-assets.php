@@ -234,6 +234,10 @@ class ACO_Assets {
 					'nonce' => wp_create_nonce( 'aco_shipping_widget_get_options' ),
 					'url'   => WC_AJAX::get_endpoint( 'aco_shipping_widget_get_options' ),
 				),
+				'set_pickup_point'     => array(
+					'nonce' => wp_create_nonce( 'aco_shipping_widget_set_pickup_point' ),
+					'url'   => WC_AJAX::get_endpoint( 'aco_shipping_widget_set_pickup_point' ),
+				),
 			),
 		);
 		wp_localize_script(

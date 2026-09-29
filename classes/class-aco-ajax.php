@@ -31,6 +31,7 @@ class ACO_AJAX extends WC_AJAX {
 			'aco_wc_log_js'                         => true,
 			'aco_iframe_shipping_option_change'     => true,
 			'aco_shipping_widget_get_options'       => true,
+			'aco_shipping_widget_set_pickup_point'  => true,
 		);
 
 		foreach ( $ajax_events as $ajax_event => $nopriv ) {
@@ -321,6 +322,33 @@ class ACO_AJAX extends WC_AJAX {
 		$session = ACO_Shipping_Session_Model::from_shipping_rates( $shipping_package['rates'] ?? array(), $chosen_shipping_methods[0] ?? '', aco_get_purchase_id_from_session() );
 
 		wp_send_json_success( $session );
+	}
+
+	/**
+	 * Save the pickup point the customer selected in the shipping widget.
+	 *
+	 * @return void
+	 */
+	public static function aco_shipping_widget_set_pickup_point() {
+		check_ajax_referer( 'aco_shipping_widget_set_pickup_point', 'nonce' );
+
+		$rate_id         = sanitize_text_field( wp_unslash( $_POST['rate_id'] ?? '' ) );
+		$pickup_point_id = sanitize_text_field( wp_unslash( $_POST['pickup_point_id'] ?? '' ) );
+
+		// The rate has to come from the calculated packages, so saving it updates the rates stored in the session.
+		WC()->cart->calculate_shipping();
+		$pickup_points = ACO_WC()->pickup_points;
+		$rate          = $pickup_points->get_container()->get( 'session-handler' )->get_shipping_rate( $rate_id );
+		$pickup_point  = $rate ? $pickup_points->get_pickup_point_from_rate_by_id( $rate, $pickup_point_id ) : null;
+
+		if ( empty( $pickup_point ) ) {
+			ACO_Logger::log( sprintf( 'Could not set the selected pickup point %s for the shipping rate %s.', $pickup_point_id, $rate_id ) );
+			wp_send_json_error( 'unknown_pickup_point' );
+		}
+
+		$pickup_points->save_selected_pickup_point_to_rate( $rate, $pickup_point );
+
+		wp_send_json_success();
 	}
 
 	/**
