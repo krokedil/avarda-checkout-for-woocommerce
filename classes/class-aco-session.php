@@ -19,11 +19,25 @@ class ACO_Session {
 	protected $avarda_payment;
 
 	/**
+	 * Confirmation URL for a payment Avarda reports as completed but WooCommerce has not confirmed yet.
+	 *
+	 * @var string
+	 */
+	protected $confirmation_url = '';
+
+	/**
 	 * The reference the *Singleton* instance of this class.
 	 *
 	 * @var $instance
 	 */
 	protected static $instance;
+
+	/**
+	 * Class constructor.
+	 */
+	public function __construct() {
+		add_action( 'template_redirect', array( $this, 'maybe_redirect_to_confirmation' ) );
+	}
 
 	/**
 	 * Returns the *Singleton* instance of this class.
@@ -127,6 +141,56 @@ class ACO_Session {
 	 */
 	public function set_avarda_payment( $avarda_payment ) {
 		$this->avarda_payment = $avarda_payment;
+	}
+
+	/**
+	 * Get the confirmation URL for a completed but unconfirmed Avarda payment in the customer session.
+	 *
+	 * @return string Empty if the payment is not completed.
+	 */
+	public function get_confirmation_url() {
+		if ( empty( $this->avarda_payment ) ) {
+			$this->get_avarda_payment();
+		}
+
+		return $this->confirmation_url;
+	}
+
+	/**
+	 * Send the customer to the confirmation page if their Avarda payment is already completed.
+	 *
+	 * Runs before any output, so the redirect never lands on a partially rendered page.
+	 *
+	 * @return void
+	 */
+	public function maybe_redirect_to_confirmation() {
+		if ( ! is_checkout() || is_order_received_page() ) {
+			return;
+		}
+
+		$order = null;
+		if ( is_checkout_pay_page() ) {
+			$order = wc_get_order( absint( get_query_var( 'order-pay' ) ) );
+			if ( ! $order || empty( $order->get_meta( '_wc_avarda_purchase_id' ) ) ) {
+				return;
+			}
+
+			// WooCommerce only checks the order key when rendering the pay page, which is after this hook.
+			if ( ! $order->key_is_valid( sanitize_text_field( wp_unslash( $_GET['key'] ?? '' ) ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The order key is the authorization here, as on WooCommerce's own pay page.
+				return;
+			}
+		} elseif ( empty( aco_get_purchase_id_from_session() ) ) {
+			return;
+		}
+
+		$this->get_avarda_payment( $order );
+
+		if ( empty( $this->confirmation_url ) ) {
+			return;
+		}
+
+		wp_safe_redirect( $this->confirmation_url );
+		exit;
 	}
 
 	/**
@@ -245,7 +309,7 @@ class ACO_Session {
 					return $this;
 				}
 
-				$confirmation_url = add_query_arg(
+				$this->confirmation_url = add_query_arg(
 					array(
 						'aco_confirm'     => 'yes',
 						'aco_purchase_id' => $purchase_id,
@@ -254,8 +318,12 @@ class ACO_Session {
 					$order->get_checkout_order_received_url()
 				);
 
-				wp_safe_redirect( $confirmation_url );
-				exit;
+				// Redirecting here could cut off a page mid-render, so leave it to template_redirect. AJAX reloads the checkout to get there.
+				if ( wp_doing_ajax() && isset( WC()->session ) ) {
+					WC()->session->set( 'reload_checkout', true );
+				}
+
+				return $this;
 			default:
 				return $this; // Default to true to not prevent unknown steps from being valid if Avarda adds new steps.
 		}

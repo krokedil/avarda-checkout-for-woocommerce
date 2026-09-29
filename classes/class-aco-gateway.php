@@ -189,6 +189,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect' => $order->get_checkout_payment_url( true ),
 			);
 		}
+		// The Avarda payment already belongs to a completed order. Fail without a notice so the reload sends the customer to its confirmation.
+		if ( ! empty( ACO_WC()->session()->get_confirmation_url() ) ) {
+			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) aborted, the Avarda payment is already completed. Reloading the checkout page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			WC()->session->set( 'reload_checkout', true );
+
+			return array( 'result' => 'failure' );
+		}
+
 		// Regular purchase.
 		// 1. Process the payment.
 		// 2. Redirect to confirmation page.
