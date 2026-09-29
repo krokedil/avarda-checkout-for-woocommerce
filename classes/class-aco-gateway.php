@@ -189,14 +189,6 @@ class ACO_Gateway extends WC_Payment_Gateway {
 				'redirect' => $order->get_checkout_payment_url( true ),
 			);
 		}
-		// The Avarda payment already belongs to a completed order. Fail without a notice so the reload sends the customer to its confirmation.
-		if ( ! empty( ACO_WC()->session()->get_confirmation_url() ) ) {
-			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) aborted, the Avarda payment is already completed. Reloading the checkout page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
-			WC()->session->set( 'reload_checkout', true );
-
-			return array( 'result' => 'failure' );
-		}
-
 		// Regular purchase.
 		// 1. Process the payment.
 		// 2. Redirect to confirmation page.
@@ -433,6 +425,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 
 		if ( is_wp_error( $avarda_order ) || empty( $avarda_order ) ) {
 			$errors->add( 'avarda_checkout_error', __( 'The order could not be verified, please try again.', 'avarda-checkout-for-woocommerce' ) );
+			return;
+		}
+
+		// The payment already belongs to a completed order. Stop before WooCommerce creates another one, the reload sends the customer to its confirmation.
+		if ( ! empty( ACO_WC()->session()->get_confirmation_url() ) ) {
+			ACO_Logger::log( sprintf( 'Avarda payment %s is already completed. Stopping the checkout and reloading the page.', ACO_WC()->session()->get_purchase_id() ) );
+			WC()->session->set( 'reload_checkout', true );
+			$errors->add( 'avarda_checkout_error', __( 'This payment has already been completed.', 'avarda-checkout-for-woocommerce' ) );
 			return;
 		}
 

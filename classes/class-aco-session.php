@@ -144,15 +144,11 @@ class ACO_Session {
 	}
 
 	/**
-	 * Get the confirmation URL for a completed but unconfirmed Avarda payment in the customer session.
+	 * Get the confirmation URL for a completed but unconfirmed Avarda payment.
 	 *
-	 * @return string Empty if the payment is not completed.
+	 * @return string Empty if the payment is not completed, or has not been read in this request.
 	 */
 	public function get_confirmation_url() {
-		if ( empty( $this->avarda_payment ) ) {
-			$this->get_avarda_payment();
-		}
-
 		return $this->confirmation_url;
 	}
 
@@ -188,6 +184,9 @@ class ACO_Session {
 		if ( empty( $this->confirmation_url ) ) {
 			return;
 		}
+
+		// Anything still queued is from the checkout attempt the customer is leaving, such as the error that stopped it.
+		wc_clear_notices();
 
 		wp_safe_redirect( $this->confirmation_url );
 		exit;
