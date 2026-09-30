@@ -17,7 +17,7 @@ class ACO_Log_Masking {
 	/**
 	 * The address fields that are kept readable in the logs.
 	 */
-	const ADDRESS_KEPT = array( 'zip', 'city', 'country' );
+	const ADDRESS_KEPT = array( 'zip', 'city', 'country', 'type', 'viewType', 'isCityResolvedFromZipCode', 'phoneCountryTwoLetterIso' );
 
 	/**
 	 * The key names that are masked wherever they appear in the logs.
@@ -30,7 +30,6 @@ class ACO_Log_Masking {
 		'address1',
 		'address2',
 		'email',
-		'phone',
 		'dateOfBirth',
 		'identificationNumber',
 		'socialSecurityNumber',
@@ -38,7 +37,6 @@ class ACO_Log_Masking {
 		// The shipping module in Modules/NamedModules uses snake case.
 		'first_name',
 		'last_name',
-		'address_line',
 		'identification_number',
 	);
 
