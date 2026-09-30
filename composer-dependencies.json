@@ -1,6 +1,7 @@
 {
     "require": {
         "php": ">=7.4",
+        "krokedil/wp-api": "dev-develop",
         "krokedil/shipping": "^2.3.0",
         "krokedil/woocommerce": "^1.7.0",
         "krokedil/settings-page": "^1.2.0"
@@ -11,6 +12,10 @@
         }
     },
     "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:krokedil/wp-api.git"
+        },
         {
             "type": "vcs",
             "url": "git@github.com:krokedil/shipping.git"

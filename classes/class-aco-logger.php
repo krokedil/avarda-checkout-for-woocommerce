@@ -9,6 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use KrokedilAvardaDeps\Krokedil\WpApi\KeyMasker;
+
 /**
  * Logger class.
  */
@@ -23,8 +25,8 @@ class ACO_Logger {
 	/**
 	 * Logs an event.
 	 *
-	 * @param string $data The data string.
-	 * @param string $level The log level. Default 'info' from WC_Log_Levels::INFO.
+	 * @param array|string $data The data to log.
+	 * @param string       $level The log level. Default 'info' from WC_Log_Levels::INFO.
 	 *
 	 * @return void
 	 */
@@ -34,9 +36,15 @@ class ACO_Logger {
 		$status_code = isset( $data['response']['code'] ) ? $data['response']['code'] : '';
 		$level       = self::get_log_level( $status_code, $level );
 
-		if ( 'yes' === $avarda_settings['debug'] ) {
-			$message = self::format_data( $data );
+		// Both the file log and the database log get the masked entry. A failure here costs
+		// the entry, it never lets an unmasked one through.
+		try {
+			$message = KeyMasker::mask( self::format_data( $data ) );
+		} catch ( \Throwable $e ) {
+			$message = array( 'error' => KeyMasker::FAILED );
+		}
 
+		if ( 'yes' === $avarda_settings['debug'] ) {
 			if ( empty( self::$log ) ) {
 				self::$log = new WC_Logger();
 			}
@@ -45,18 +53,18 @@ class ACO_Logger {
 		}
 
 		if ( isset( $data['response']['code'] ) && ( $data['response']['code'] < 200 || $data['response']['code'] > 299 ) ) {
-			self::log_to_db( $data );
+			self::log_to_db( $message );
 		}
 	}
 
 	/**
 	 * Formats the log data to prevent json error.
 	 *
-	 * @param string $data Json string of data.
-	 * @return array
+	 * @param array|string $data The data to log.
+	 * @return array|string
 	 */
 	public static function format_data( $data ) {
-		if ( isset( $data['request']['body'] ) ) {
+		if ( isset( $data['request']['body'] ) && is_string( $data['request']['body'] ) ) {
 			$request_body            = json_decode( $data['request']['body'], true );
 			$data['request']['body'] = $request_body;
 		}
@@ -77,20 +85,14 @@ class ACO_Logger {
 	 * @return array
 	 */
 	public static function format_log( $checkout_id, $method, $title, $request_url, $request_args, $response, $code ) {
-		// Unset the snippet to prevent issues in the response.
-		// Add logic to remove any HTML snippets from the response.
-
-		// Unset the snippet to prevent issues in the request body.
-		// Add logic to remove any HTML snippets from the request body.
-
 		return array(
 			'id'             => $checkout_id,
 			'type'           => $method,
 			'title'          => $title,
 			'request_url'    => $request_url,
-			'request'        => $request_args,
+			'request'        => ACO_Log_Masking::mask_request( $request_args ),
 			'response'       => array(
-				'body' => $response,
+				'body' => ACO_Log_Masking::mask_response( $response ),
 				'code' => $code,
 			),
 			'timestamp'      => date( 'Y-m-d H:i:s' ),

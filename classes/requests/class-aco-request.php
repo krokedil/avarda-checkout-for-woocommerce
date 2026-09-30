@@ -215,7 +215,8 @@ class ACO_Request {
 		// Check the status code, if its not between 200 and 299 then its an error.
 		$response_code = wp_remote_retrieve_response_code( $response );
 		if ( $response_code < 200 || $response_code > 299 ) {
-			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
+			// The error data can reach other plugins and their logs, so it gets the same masking as ours.
+			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( ACO_Log_Masking::mask_request( $request_args ) );
 			$error_message = '';
 			// Get the error messages.
 			if ( null !== $response['response'] ) {

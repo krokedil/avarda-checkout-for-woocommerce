@@ -127,7 +127,7 @@ class ACO_Checkout {
 
 		if ( $avarda_jwt_token !== $checkout_jwt_token ) {
 			aco_wc_unset_sessions();
-			ACO_Logger::log( sprintf( 'JWT token used in checkout (%s) not the same as the one stored in WC session (%s). Clearing Avarda session.', $checkout_jwt_token, $avarda_jwt_token ) );
+			ACO_Logger::log( 'JWT token used in checkout not the same as the one stored in WC session. Clearing Avarda session.' );
 			wc_add_notice( 'Avarda JWT token issue. Please reload the page and try again.', 'error' );
 			return;
 		}
