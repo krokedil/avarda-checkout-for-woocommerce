@@ -35,6 +35,11 @@ class ACO_Log_Masking {
 		'identificationNumber',
 		'socialSecurityNumber',
 		'jwt',
+		// The shipping module in Modules/NamedModules uses snake case.
+		'first_name',
+		'last_name',
+		'address_line',
+		'identification_number',
 	);
 
 	/**
@@ -56,6 +61,8 @@ class ACO_Log_Masking {
 			'invoicingAddress' => array( 'keep' => self::ADDRESS_KEPT ),
 			'deliveryAddress'  => array( 'keep' => self::ADDRESS_KEPT ),
 			'userInputs'       => 'mask',
+			'search_address'   => array( 'keep' => array( 'city', 'postal_code', 'country' ) ),
+			'customer'         => 'mask',
 			'customerInfo'     => 'mask',
 			// The attachment carries the WooCommerce session customer id used to restore the cart.
 			'attachment'       => 'mask',
