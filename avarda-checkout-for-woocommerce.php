@@ -224,6 +224,8 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 
 			$this->include_files();
 
+			ACO_Log_Masking::register();
+
 			// Delete transient when aco settings is saved.
 			add_action( 'woocommerce_update_options_checkout_aco', array( $this, 'delete_all_transients' ) );
 
@@ -338,6 +340,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-api.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-gateway.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-logger.php';
+			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-log-masking.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-modules-helper.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-order-management.php';
 			include_once AVARDA_CHECKOUT_PATH . '/classes/class-aco-callbacks.php';
