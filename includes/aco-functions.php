@@ -260,14 +260,24 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 }
 
 /**
- * Hash the customer details the initialize request sends to Avarda for an order.
+ * Whether the customer should get a B2B session in Avarda.
+ *
+ * @param WC_Order|WC_Customer $item The order, or the session customer when using the cart.
+ * @return bool
+ */
+function aco_is_b2b_customer( $item ) {
+	return ! empty( $item->get_billing_company() );
+}
+
+/**
+ * Hash the customer details built for an order's initialize request, before the aco_create_args filter.
  *
  * @param WC_Order $order The WooCommerce order.
  * @return string
  */
 function aco_get_order_customer_hash( $order ) {
-	$b2b = ! empty( $order->get_billing_company() );
-	return md5( wp_json_encode( array( $b2b, ACO_WC()->customer->get_customer( $order, $b2b ) ) ) );
+	$b2b = aco_is_b2b_customer( $order );
+	return wp_hash( wp_json_encode( array( $b2b, ACO_WC()->customer->get_customer( $order, $b2b ) ) ) );
 }
 
 /**
