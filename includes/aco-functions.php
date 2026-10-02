@@ -390,7 +390,12 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 
 		if ( 'Completed' === $aco_step ) {
 			// A dropped session was paid, so point the order back at it for capture and refunds.
-			if ( $order->get_meta( '_wc_avarda_purchase_id' ) !== $avarda_purchase_id && aco_order_has_purchase_id( $order, $avarda_purchase_id ) ) {
+			$current_purchase_id = $order->get_meta( '_wc_avarda_purchase_id' );
+			if ( $current_purchase_id !== $avarda_purchase_id && aco_order_has_purchase_id( $order, $avarda_purchase_id ) ) {
+				// Keep the displaced session findable too, in case the customer pays it as well.
+				if ( ! empty( $current_purchase_id ) ) {
+					$order->add_meta_data( '_wc_avarda_dropped_purchase_id', $current_purchase_id );
+				}
 				$order->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
 				// translators: Avarda purchase ID.
 				$order->add_order_note( sprintf( __( 'The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced after their details changed. The order now uses that purchase.', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
