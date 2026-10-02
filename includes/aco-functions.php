@@ -255,7 +255,52 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 	$order->update_meta_data( '_wc_avarda_purchase_id', sanitize_text_field( $avarda_order['purchaseId'] ) );
 	$order->update_meta_data( '_wc_avarda_jwt', sanitize_text_field( $avarda_order['jwt'] ) );
 	$order->update_meta_data( '_wc_avarda_expiredUtc', sanitize_text_field( $avarda_order['expiredUtc'] ) );
+	$order->update_meta_data( '_wc_avarda_customer_hash', aco_get_order_customer_hash( $order ) );
 	$order->save();
+}
+
+/**
+ * Hash the customer details the initialize request sends to Avarda for an order.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @return string
+ */
+function aco_get_order_customer_hash( $order ) {
+	$b2b = ! empty( $order->get_billing_company() );
+	return md5( wp_json_encode( array( $b2b, ACO_WC()->customer->get_customer( $order, $b2b ) ) ) );
+}
+
+/**
+ * Drop the order's Avarda session if the customer details changed since it was created.
+ *
+ * The update request only carries items, so a reused pending order would otherwise keep the old address in Avarda.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @return void
+ */
+function aco_maybe_reset_session_on_customer_change( $order ) {
+	$saved_hash = $order->get_meta( '_wc_avarda_customer_hash' );
+
+	// Orders whose session predates the hash cannot be compared, so leave them as they are.
+	if ( empty( $saved_hash ) || aco_get_order_customer_hash( $order ) === $saved_hash ) {
+		return;
+	}
+
+	$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
+	if ( ! $avarda_payment || is_wp_error( $avarda_payment ) ) {
+		return;
+	}
+
+	// Never discard a session the customer may be paying in right now.
+	$step = ACO_WC()->session()->get_payment_step();
+	if ( ! in_array( $step, aco_payment_steps_approved_for_update_request(), true ) ) {
+		return;
+	}
+
+	ACO_Logger::log( sprintf( 'Customer details changed for order %s (Avarda ID: %s, step %s). Discarding the Avarda session so a new one is created.', $order->get_id(), ACO_WC()->session()->get_purchase_id(), $step ) );
+
+	aco_delete_avarda_meta_data_from_order( $order );
+	ACO_WC()->session()->set_avarda_payment( null );
 }
 
 /**
@@ -535,6 +580,7 @@ function aco_delete_avarda_meta_data_from_order( $order ) {
 	$order->delete_meta_data( '_wc_avarda_purchase_id' );
 	$order->delete_meta_data( '_wc_avarda_jwt' );
 	$order->delete_meta_data( '_wc_avarda_expiredUtc' );
+	$order->delete_meta_data( '_wc_avarda_customer_hash' );
 	$order->save();
 }
 
