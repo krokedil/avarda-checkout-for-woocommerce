@@ -64,6 +64,10 @@ class ACO_Checkout {
 
 		add_action( 'woocommerce_after_shipping_rate', array( $this, 'print_extra_shipping_info' ), 10 );
 
+		if ( $this->is_integrated_wc_shipping_enabled() ) {
+			add_action( 'woocommerce_checkout_create_order_shipping_item', array( $this, 'save_shipping_rate_id' ), 10, 2 );
+		}
+
 		apply_filters( 'krokedil_shipping_should_verify_shipping', array( $this, 'maybe_verify_shipping' ) );
 	}
 
@@ -277,6 +281,24 @@ class ACO_Checkout {
 		$fragments['.aco-items-updated'] = '<input type="hidden" value="' . ( $this->items_updated ? 'yes' : 'no' ) . '" class="aco-items-updated" />';
 
 		return $fragments;
+	}
+
+	/**
+	 * Store the chosen rate id on the shipping line, since WooCommerce only keeps its method and instance id.
+	 * The shipping broker complete-session response needs the same id that the active session returned.
+	 *
+	 * @param WC_Order_Item_Shipping $item The shipping line being added to the order.
+	 * @param int|string             $package_key The shipping package key.
+	 *
+	 * @return void
+	 */
+	public function save_shipping_rate_id( $item, $package_key ) {
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$rate_id                 = $chosen_shipping_methods[ $package_key ] ?? '';
+
+		if ( ! empty( $rate_id ) ) {
+			$item->add_meta_data( '_aco_shipping_rate_id', $rate_id, true );
+		}
 	}
 
 	/**
