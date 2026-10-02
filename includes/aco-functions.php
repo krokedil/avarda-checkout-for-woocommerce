@@ -260,6 +260,31 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 }
 
 /**
+ * Whether the purchase id is the order's current Avarda session, or one dropped when the customer details changed.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @param string   $purchase_id The Avarda purchase id.
+ * @return bool
+ */
+function aco_order_has_purchase_id( $order, $purchase_id ) {
+	if ( empty( $purchase_id ) ) {
+		return false;
+	}
+
+	if ( $order->get_meta( '_wc_avarda_purchase_id' ) === $purchase_id ) {
+		return true;
+	}
+
+	foreach ( $order->get_meta( '_wc_avarda_dropped_purchase_id', false ) as $meta ) {
+		if ( $meta->value === $purchase_id ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Whether the customer should get a B2B session in Avarda.
  *
  * @param WC_Order|WC_Customer $item The order, or the session customer when using the cart.
@@ -307,10 +332,13 @@ function aco_maybe_reset_session_on_customer_change( $order ) {
 		return;
 	}
 
-	ACO_Logger::log( sprintf( 'Customer details changed for order %s (Avarda ID: %s, step %s). Discarding the Avarda session so a new one is created.', $order->get_id(), ACO_WC()->session()->get_purchase_id(), $step ) );
+	$purchase_id = ACO_WC()->session()->get_purchase_id();
+	ACO_Logger::log( sprintf( 'Customer details changed for order %s (Avarda ID: %s, step %s). Discarding the Avarda session so a new one is created.', $order->get_id(), $purchase_id, $step ) );
 
+	// The old session may still be paid in another tab, so keep it findable for the callback and confirmation.
+	$order->add_meta_data( '_wc_avarda_dropped_purchase_id', $purchase_id );
 	aco_delete_avarda_meta_data_from_order( $order );
-	ACO_WC()->session()->set_avarda_payment( null );
+	ACO_WC()->session()->set_avarda_payment( array() );
 }
 
 /**
@@ -361,6 +389,14 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 		}
 
 		if ( 'Completed' === $aco_step ) {
+			// A dropped session was paid, so point the order back at it for capture and refunds.
+			if ( $order->get_meta( '_wc_avarda_purchase_id' ) !== $avarda_purchase_id && aco_order_has_purchase_id( $order, $avarda_purchase_id ) ) {
+				$order->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
+				// translators: Avarda purchase ID.
+				$order->add_order_note( sprintf( __( 'The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced after their details changed. The order now uses that purchase.', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
+				$order->save();
+			}
+
 			$response = ACO_WC()->api->request_update_order_reference( $avarda_purchase_id, $order_id ); // Update order reference.
 
 			if ( is_wp_error( $response ) ) {
@@ -670,6 +706,12 @@ function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
 
 	$orders = wc_get_orders( $args );
 
+	// Fall back to sessions dropped when the customer details changed.
+	if ( empty( $orders ) ) {
+		$args['meta_key'] = '_wc_avarda_dropped_purchase_id'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Same lookup as above, on the key that holds dropped purchase ids.
+		$orders           = wc_get_orders( $args );
+	}
+
 	// If the orders array is empty, return false.
 	if ( empty( $orders ) ) {
 		return false;
@@ -678,11 +720,8 @@ function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
 	// Get the first order in the array.
 	$order = reset( $orders );
 
-	// Validate that the order actual has the metadata we're looking for, and that it is the same.
-	$meta_value = $order->get_meta( '_wc_avarda_purchase_id', true );
-
-	// If the meta value is not the same as the Avarda purchase id, return false.
-	if ( $meta_value !== $purchase_id ) {
+	// Validate that the order actually holds this purchase id.
+	if ( ! aco_order_has_purchase_id( $order, $purchase_id ) ) {
 		return false;
 	}
 
