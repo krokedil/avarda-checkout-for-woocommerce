@@ -279,6 +279,10 @@ class ACO_Assets {
 		// Get the order if we have an order id.
 		$order = $order_id ? wc_get_order( $order_id ) : null;
 
+		if ( $order ) {
+			aco_maybe_reset_session_on_customer_change( $order );
+		}
+
 		// Get the Avarda payment.
 		$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
 

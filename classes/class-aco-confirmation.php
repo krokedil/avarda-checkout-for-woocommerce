@@ -70,7 +70,7 @@ class ACO_Confirmation {
 		}
 
 		// Verify the meta data after we get an order, to ensure that we don't process a wrong order.
-		if ( $order->get_meta( '_wc_avarda_purchase_id' ) !== $avarda_purchase_id ) {
+		if ( ! aco_order_has_purchase_id( $order, $avarda_purchase_id ) ) {
 			$order = false;
 		}
 
