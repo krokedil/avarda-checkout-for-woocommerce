@@ -215,7 +215,8 @@ class ACO_Request {
 		// Check the status code, if its not between 200 and 299 then its an error.
 		$response_code = wp_remote_retrieve_response_code( $response );
 		if ( $response_code < 200 || $response_code > 299 ) {
-			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( $request_args );
+			// The error data can reach other plugins and their logs, so it gets the same masking as ours.
+			$data          = 'URL: ' . $request_url . ' - ' . wp_json_encode( ACO_Log_Masking::mask_request( $request_args ) );
 			$error_message = '';
 			// Get the error messages.
 			if ( null !== $response['response'] ) {
@@ -224,12 +225,16 @@ class ACO_Request {
 				$error_message     = $aco_error_code . $aco_error_message;
 			}
 
-			if ( isset( $response['body'] ) && is_string( $response['body'] ) ) {
-				$error_message = $response['body'];
+			$body   = isset( $response['body'] ) && is_string( $response['body'] ) ? $response['body'] : '';
+			$errors = json_decode( $body, true );
+
+			if ( '' !== $body && ! is_array( $errors ) ) {
+				$error_message = ACO_Log_Masking::mask_response( $body );
 			}
 
-			if ( null !== json_decode( $response['body'], true ) ) {
-				$errors = json_decode( $response['body'], true );
+			if ( is_array( $errors ) ) {
+				$errors = ACO_Log_Masking::mask_response( $errors );
+				$errors = is_array( $errors ) ? $errors : array( $errors );
 				foreach ( $errors as $error => $aco_error_messages ) {
 					// Ensure the error message is an array so we can loop through it.
 					if ( ! is_array( $aco_error_messages ) ) {

@@ -176,13 +176,13 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// 1. Redirect to receipt page.
 		// 2. Process the payment by displaying the ACO iframe via woocommerce_receipt_aco hook.
 		if ( ! empty( $change_payment_method ) ) {
-			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Changing payment method for subscription.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			ACO_Logger::log( sprintf( 'Processing order %s (Avarda ID: %s) OK. Changing payment method for subscription.', $order_id, $avarda_purchase_id ) );
 			return $this->process_subscription_payment_change_handler( $order );
 		}
 
 		// Order pay.
 		if ( is_wc_endpoint_url( 'order-pay' ) || 'redirect' === $this->checkout_flow ) {
-			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Redirecting to order pay page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			ACO_Logger::log( sprintf( 'Processing order %s (Avarda ID: %s) OK. Redirecting to order pay page.', $order_id, $avarda_purchase_id ) );
 
 			return array(
 				'result'   => 'success',
@@ -193,7 +193,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 		// 1. Process the payment.
 		// 2. Redirect to confirmation page.
 		if ( $this->process_payment_handler( $order_id ) ) {
-			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) OK. Redirecting to confirmation page.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			ACO_Logger::log( sprintf( 'Processing order %s (Avarda ID: %s) OK. Redirecting to confirmation page.', $order_id, $avarda_purchase_id ) );
 
 			$confirmation_url = add_query_arg(
 				array(
@@ -210,7 +210,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			);
 		} else {
 			// Something went wrong. Unset sessions and remove previous purchase id from order.
-			ACO_Logger::log( sprintf( 'Processing order %s|%s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $order->get_order_key(), $avarda_purchase_id ) );
+			ACO_Logger::log( sprintf( 'Processing order %s (Avarda ID: %s) failed for some reason. Clearing session.', $order_id, $avarda_purchase_id ) );
 
 			aco_wc_unset_sessions();
 			aco_delete_avarda_meta_data_from_order( $order );
