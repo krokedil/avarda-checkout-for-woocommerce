@@ -225,12 +225,16 @@ class ACO_Request {
 				$error_message     = $aco_error_code . $aco_error_message;
 			}
 
-			if ( isset( $response['body'] ) && is_string( $response['body'] ) ) {
-				$error_message = $response['body'];
+			$body   = isset( $response['body'] ) && is_string( $response['body'] ) ? $response['body'] : '';
+			$errors = json_decode( $body, true );
+
+			if ( '' !== $body && ! is_array( $errors ) ) {
+				$error_message = ACO_Log_Masking::mask_response( $body );
 			}
 
-			if ( null !== json_decode( $response['body'], true ) ) {
-				$errors = json_decode( $response['body'], true );
+			if ( is_array( $errors ) ) {
+				$errors = ACO_Log_Masking::mask_response( $errors );
+				$errors = is_array( $errors ) ? $errors : array( $errors );
 				foreach ( $errors as $error => $aco_error_messages ) {
 					// Ensure the error message is an array so we can loop through it.
 					if ( ! is_array( $aco_error_messages ) ) {
