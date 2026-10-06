@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 7.1
+Tested up to: 7.1.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 11.1.0
+WC tested up to: 11.1.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.9
+Stable tag: 1.17.10
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,13 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2026.10.06        - version 1.17.10 =
+* Fix               - Resolved an issue where the Avarda checkout could fail to load on themes or page builders that render the checkout before scripts are enqueued, because the checkout script parameters were dropped.
+* Fix               - A completed Avarda payment no longer triggers a redirect in the middle of rendering other pages, such as the cart, mini-carts or Store API requests, which could produce half-rendered pages that a page cache might store. The customer is now redirected to the order confirmation from the checkout and pay-for-order pages only.
+* Fix               - Placing an order after the Avarda payment has already been completed no longer leaves a stray pending order behind.
+* Fix               - When a customer in the redirect flow goes back and changes their address, the updated address is now sent to Avarda by starting a new payment session on the pay-for-order page.
+* Fix               - If a customer still completes a payment in a browser tab holding a replaced Avarda session, the payment is now matched to its order instead of being left without one.
+
 = 2026.09.14        - version 1.17.9 =
 * Fix               - Resolved an issue where changing the shipping option could leave the Avarda iframe out of sync with WooCommerce, causing the order total to mismatch and the purchase to fail verification.
 * Fix               - Resolved an issue where the fallback shipping item sent to Avarda was the first available shipping method rather than the one the customer chose, which could apply the wrong shipping cost in the rare case that the shipping broker did not respond.
