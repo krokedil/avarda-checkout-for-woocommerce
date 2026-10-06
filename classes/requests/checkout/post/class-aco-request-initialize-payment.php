@@ -57,13 +57,13 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 			$order                 = wc_get_order( $order_id );
 			$request_body['items'] = ACO_WC()->order_items->get_order_items( $order_id );
 			$request_body['extraIdentifiers']['orderReference'] = (string) $order->get_order_number();
-			$b2b = ! empty( $order->get_billing_company() );
+			$b2b = aco_is_b2b_customer( $order );
 		} else { // Set cart specific data.
 			$request_body['items']                          = ACO_WC()->cart_items->get_cart_items();
 			$request_body['shippingSettings']               = ACO_WC()->cart_items->get_shipping_settings();
 			$request_body['extraIdentifiers']['attachment'] = ACO_WC()->cart_items->get_cart_attachment();
 
-			$b2b = ! empty( WC()->customer->get_billing_company() );
+			$b2b = aco_is_b2b_customer( WC()->customer );
 		}
 
 		// Add customer details to the request body, but only if its not empty.

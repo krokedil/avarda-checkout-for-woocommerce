@@ -113,6 +113,30 @@ class ACO_Assets {
 	 */
 	public function localize_and_enqueue_checkout_script() {
 
+		// Some themes/plugins render the checkout content before `wp_enqueue_scripts`
+		// runs, so `load_scripts()` may not have registered these yet. Register them
+		// here too (idempotent) so `wp_localize_script` below never targets an
+		// unregistered handle, which would otherwise silently drop the params.
+		if ( ! wp_script_is( 'aco_wc', 'registered' ) ) {
+			wp_register_script(
+				'aco_wc',
+				AVARDA_CHECKOUT_URL . '/assets/js/aco_checkout.js',
+				array( 'jquery' ),
+				AVARDA_CHECKOUT_VERSION,
+				true
+			);
+		}
+
+		if ( ! wp_script_is( 'aco_shipping_widget', 'registered' ) ) {
+			wp_register_script(
+				'aco_shipping_widget',
+				AVARDA_CHECKOUT_URL . '/assets/js/aco_shipping_widget.js',
+				array( 'jquery' ),
+				AVARDA_CHECKOUT_VERSION,
+				true
+			);
+		}
+
 		$key      = filter_input( INPUT_GET, 'key', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 		$order_id = ! empty( $key ) ? wc_get_order_id_by_order_key( $key ) : 0;
 
@@ -254,6 +278,10 @@ class ACO_Assets {
 	public function aco_maybe_initialize_payment( $order_id = null ) {
 		// Get the order if we have an order id.
 		$order = $order_id ? wc_get_order( $order_id ) : null;
+
+		if ( $order ) {
+			aco_maybe_reset_session_on_customer_change( $order );
+		}
 
 		// Get the Avarda payment.
 		$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );

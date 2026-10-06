@@ -428,6 +428,14 @@ class ACO_Gateway extends WC_Payment_Gateway {
 			return;
 		}
 
+		// The payment already belongs to a completed order. Stop before WooCommerce creates another one, the reload sends the customer to its confirmation.
+		if ( ! empty( ACO_WC()->session()->get_confirmation_url() ) ) {
+			ACO_Logger::log( sprintf( 'Avarda payment %s is already completed. Stopping the checkout and reloading the page.', ACO_WC()->session()->get_purchase_id() ) );
+			WC()->session->set( 'reload_checkout', true );
+			$errors->add( 'avarda_checkout_error', __( 'This payment has already been completed.', 'avarda-checkout-for-woocommerce' ) );
+			return;
+		}
+
 		// Get the cart totals for the entire WooCommerce cart.
 		$cart_totals     = WC()->cart->get_totals();
 		$wc_total        = intval( round( $cart_totals['total'] * 100, 2 ) );
