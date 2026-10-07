@@ -149,11 +149,7 @@ class ACO_Checkout {
 			if ( WC()->session->get( 'aco_wc_cart_contains_subscription' ) !== aco_get_wc_cart_contains_subscription() ) {
 				aco_wc_unset_sessions();
 				ACO_Logger::log( 'Subscription product changed in update Avarda function. Clearing Avarda session and reloading the checkout page.' );
-				if ( wp_doing_ajax() ) {
-					WC()->session->reload_checkout = true;
-				} else {
-					wp_safe_redirect( wc_get_checkout_url() );
-				}
+				WC()->session->reload_checkout = true;
 				return;
 			}
 		}
