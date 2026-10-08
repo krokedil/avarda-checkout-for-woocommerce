@@ -220,7 +220,12 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 			$this->send_response( new WP_Error( 404, 'Not found' ) );
 		}
 
-		$session = ACO_Shipping_Session_Model::completed_session( $purchase_id );
+		// Pickup points are read from the session before the rate, so make sure there is one to read from.
+		if ( null === WC()->session ) {
+			WC()->session = new WC_Session_Handler();
+		}
+
+		$session = ACO_Shipping_Session_Model::completed_session( $purchase_id, $order );
 
 		$this->send_response( $session );
 	}
