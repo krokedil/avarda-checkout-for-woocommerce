@@ -103,10 +103,11 @@ class ACO_Checkout {
 			return $checked;
 		}
 
-		// A fresh session has no chosen method yet, and then Avarda is used when it is the first gateway.
+		// Same rule as ACO_Templates: with no chosen method, or one no longer available, Avarda is used when it is first.
 		$chosen_method      = WC()->session->get( 'chosen_payment_method' );
 		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-		if ( 'aco' !== $chosen_method && ! ( empty( $chosen_method ) && 'aco' === array_key_first( $available_gateways ) ) ) {
+		$chosen_missing     = empty( $chosen_method ) || ! array_key_exists( $chosen_method, $available_gateways );
+		if ( 'aco' !== $chosen_method && ! ( $chosen_missing && 'aco' === array_key_first( $available_gateways ) ) ) {
 			return $checked;
 		}
 
@@ -124,7 +125,12 @@ class ACO_Checkout {
 		}
 
 		$delivery_country = empty( $delivery['country'] ) ? $billing['country'] : $delivery['country'];
-		if ( str_replace( ' ', '', $delivery['zip'] ) === str_replace( ' ', '', $billing['zip'] ) && $delivery_country === $billing['country'] && $delivery['address1'] === $billing['address1'] ) {
+		$same_as_billing  = str_replace( ' ', '', $delivery['zip'] ) === str_replace( ' ', '', $billing['zip'] )
+			&& $delivery_country === $billing['country']
+			&& $delivery['address1'] === $billing['address1']
+			&& $delivery['address2'] === $billing['address2']
+			&& $delivery['city'] === $billing['city'];
+		if ( $same_as_billing ) {
 			return $checked;
 		}
 
