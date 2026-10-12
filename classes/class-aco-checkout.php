@@ -99,11 +99,18 @@ class ACO_Checkout {
 	 * @return bool|int
 	 */
 	public function maybe_check_ship_to_different_address( $checked ) {
-		if ( wp_doing_ajax() || 'aco' !== WC()->session->get( 'chosen_payment_method' ) ) {
+		if ( wp_doing_ajax() ) {
 			return $checked;
 		}
 
-		// Already fetched for this page load by aco_wc_show_checkout_form(), so this adds no request.
+		// A fresh session has no chosen method yet, and then Avarda is used when it is the first gateway.
+		$chosen_method      = WC()->session->get( 'chosen_payment_method' );
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		if ( 'aco' !== $chosen_method && ! ( empty( $chosen_method ) && 'aco' === array_key_first( $available_gateways ) ) ) {
+			return $checked;
+		}
+
+		// Cached by ACO_Session::maybe_redirect_to_confirmation() on template_redirect, so this adds no request.
 		$avarda_payment = ACO_WC()->session()->get_avarda_payment();
 		if ( empty( $avarda_payment ) || is_wp_error( $avarda_payment ) ) {
 			return $checked;
