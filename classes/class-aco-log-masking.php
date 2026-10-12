@@ -9,11 +9,17 @@ defined( 'ABSPATH' ) || exit;
 
 use KrokedilAvardaDeps\Krokedil\WpApi\FieldMasker;
 use KrokedilAvardaDeps\Krokedil\WpApi\KeyMasker;
+use KrokedilAvardaDeps\Krokedil\WpApi\Masking;
 
 /**
  * What the plugin masks out of its logs.
  */
 class ACO_Log_Masking {
+	/**
+	 * The slug passed to the krokedil_wp_api_mask_log_data filter.
+	 */
+	const SLUG = 'avarda-checkout-for-woocommerce';
+
 	/**
 	 * The address fields that are kept readable in the logs.
 	 */
@@ -89,12 +95,25 @@ class ACO_Log_Masking {
 	}
 
 	/**
+	 * Whether the logs are masked, see the krokedil_wp_api_mask_log_data filter.
+	 *
+	 * @return bool
+	 */
+	public static function is_enabled() {
+		return Masking::is_enabled( self::SLUG );
+	}
+
+	/**
 	 * Mask a set of request args.
 	 *
 	 * @param array $request_args The request args.
 	 * @return array|string The masked args, or the failure marker.
 	 */
 	public static function mask_request( $request_args ) {
+		if ( ! self::is_enabled() ) {
+			return $request_args;
+		}
+
 		try {
 			if ( isset( $request_args['body'] ) && is_string( $request_args['body'] ) ) {
 				$decoded              = json_decode( $request_args['body'], true );
@@ -114,7 +133,7 @@ class ACO_Log_Masking {
 	 * @return array|string The masked body, or the failure marker.
 	 */
 	public static function mask_response( $body ) {
-		if ( empty( $body ) ) {
+		if ( empty( $body ) || ! self::is_enabled() ) {
 			return $body;
 		}
 

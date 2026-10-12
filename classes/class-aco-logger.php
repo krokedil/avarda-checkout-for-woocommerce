@@ -38,10 +38,13 @@ class ACO_Logger {
 
 		// Both the file log and the database log get the masked entry. A failure here costs
 		// the entry, it never lets an unmasked one through.
-		try {
-			$message = KeyMasker::mask( self::format_data( $data ) );
-		} catch ( \Throwable $e ) {
-			$message = array( 'error' => KeyMasker::FAILED );
+		$message = self::format_data( $data );
+		if ( ACO_Log_Masking::is_enabled() ) {
+			try {
+				$message = KeyMasker::mask( $message );
+			} catch ( \Throwable $e ) {
+				$message = array( 'error' => KeyMasker::FAILED );
+			}
 		}
 
 		if ( 'yes' === $avarda_settings['debug'] ) {
