@@ -59,6 +59,7 @@ class ACO_Checkout {
 			if ( $this->is_integrated_wc_shipping_enabled() ) {
 				add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_shipping_field' ), 30 );
 				add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'update_order_review_fragments' ), 10, 1 );
+				add_filter( 'woocommerce_ship_to_different_address_checked', array( $this, 'maybe_check_ship_to_different_address' ) );
 			}
 		}
 
@@ -87,6 +88,53 @@ class ACO_Checkout {
 	 */
 	public function is_integrated_wc_shipping_enabled() {
 		return $this->integrated_shipping_wc;
+	}
+
+	/**
+	 * When Avarda holds a separate delivery address, copy it to the customer and tick "ship to a different address".
+	 *
+	 * Otherwise WooCommerce's update_order_review on page load calculates shipping for the billing address.
+	 *
+	 * @param bool|int $checked Whether the checkbox is ticked.
+	 * @return bool|int
+	 */
+	public function maybe_check_ship_to_different_address( $checked ) {
+		if ( wp_doing_ajax() || 'aco' !== WC()->session->get( 'chosen_payment_method' ) ) {
+			return $checked;
+		}
+
+		// Already fetched for this page load by aco_wc_show_checkout_form(), so this adds no request.
+		$avarda_payment = ACO_WC()->session()->get_avarda_payment();
+		if ( empty( $avarda_payment ) || is_wp_error( $avarda_payment ) ) {
+			return $checked;
+		}
+
+		$address  = aco_format_address_data( $avarda_payment );
+		$delivery = $address['shipping'] ?? array();
+		$billing  = $address['billing'] ?? array();
+		if ( empty( $delivery['zip'] ) ) {
+			return $checked;
+		}
+
+		$delivery_country = empty( $delivery['country'] ) ? $billing['country'] : $delivery['country'];
+		if ( str_replace( ' ', '', $delivery['zip'] ) === str_replace( ' ', '', $billing['zip'] ) && $delivery_country === $billing['country'] && $delivery['address1'] === $billing['address1'] ) {
+			return $checked;
+		}
+
+		WC()->customer->set_props(
+			array(
+				'shipping_first_name' => $delivery['first_name'],
+				'shipping_last_name'  => $delivery['last_name'],
+				'shipping_address_1'  => $delivery['address1'],
+				'shipping_address_2'  => $delivery['address2'],
+				'shipping_postcode'   => str_replace( ' ', '', $delivery['zip'] ),
+				'shipping_city'       => $delivery['city'],
+				'shipping_country'    => $delivery_country,
+			)
+		);
+		WC()->customer->save();
+
+		return true;
 	}
 
 	/**
