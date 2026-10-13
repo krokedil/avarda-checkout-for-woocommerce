@@ -333,5 +333,10 @@
           "description": "<ul><li>Fix - Resolved an issue where the Avarda checkout could fail to load on themes or page builders that render the checkout before scripts are enqueued, because the checkout script parameters were dropped.</li><li>Fix - A completed Avarda payment no longer triggers a redirect in the middle of rendering other pages, such as the cart, mini-carts or Store API requests, which could produce half-rendered pages that a page cache might store. The customer is now redirected to the order confirmation from the checkout and pay-for-order pages only.</li><li>Fix - Placing an order after the Avarda payment has already been completed no longer leaves a stray pending order behind.</li><li>Fix - When a customer in the redirect flow goes back and changes their address, the updated address is now sent to Avarda by starting a new payment session on the pay-for-order page.</li><li>Fix - If a customer still completes a payment in a browser tab holding a replaced Avarda session, the payment is now matched to its order instead of being left without one.</li></ul>",
           "requires": "5.6.0",
           "tested": "7.1.2"
+     },
+     "1.17.11": {
+          "description": "<ul><li>Enhancement - Sensitive customer data is now masked in the plugin log.</li><li>Fix - Resolved an issue with Partner shipping where choosing a pickup point other than the first one in the shipping widget was not saved, so the order was always created with the first pickup point.</li><li>Fix - The complete-session response to Avarda now includes the selected shipping option and its shipping data when using Partner shipping.</li><li>Fix - Resolved an issue with Partner shipping where reloading the checkout could calculate the shipping options for the billing address instead of the delivery address entered in Avarda.</li></ul>",
+          "requires": "5.6.0",
+          "tested": "7.1.3"
      }
 }
