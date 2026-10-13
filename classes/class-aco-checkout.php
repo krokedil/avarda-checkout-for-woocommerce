@@ -59,6 +59,7 @@ class ACO_Checkout {
 			if ( $this->is_integrated_wc_shipping_enabled() ) {
 				add_filter( 'woocommerce_checkout_fields', array( $this, 'add_hidden_shipping_field' ), 30 );
 				add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'update_order_review_fragments' ), 10, 1 );
+				add_filter( 'woocommerce_ship_to_different_address_checked', array( $this, 'maybe_check_ship_to_different_address' ) );
 			}
 		}
 
@@ -87,6 +88,66 @@ class ACO_Checkout {
 	 */
 	public function is_integrated_wc_shipping_enabled() {
 		return $this->integrated_shipping_wc;
+	}
+
+	/**
+	 * When Avarda holds a separate delivery address, copy it to the customer and tick "ship to a different address".
+	 *
+	 * Otherwise WooCommerce's update_order_review on page load calculates shipping for the billing address.
+	 *
+	 * @param bool|int $checked Whether the checkbox is ticked.
+	 * @return bool|int
+	 */
+	public function maybe_check_ship_to_different_address( $checked ) {
+		if ( wp_doing_ajax() ) {
+			return $checked;
+		}
+
+		// Same rule as ACO_Templates: with no chosen method, or one no longer available, Avarda is used when it is first.
+		$chosen_method      = WC()->session->get( 'chosen_payment_method' );
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+		$chosen_missing     = empty( $chosen_method ) || ! array_key_exists( $chosen_method, $available_gateways );
+		if ( 'aco' !== $chosen_method && ! ( $chosen_missing && 'aco' === array_key_first( $available_gateways ) ) ) {
+			return $checked;
+		}
+
+		// Cached by ACO_Session::maybe_redirect_to_confirmation() on template_redirect, so this adds no request.
+		$avarda_payment = ACO_WC()->session()->get_avarda_payment();
+		if ( empty( $avarda_payment ) || is_wp_error( $avarda_payment ) ) {
+			return $checked;
+		}
+
+		$address  = aco_format_address_data( $avarda_payment );
+		$delivery = $address['shipping'] ?? array();
+		$billing  = $address['billing'] ?? array();
+		if ( empty( $delivery['zip'] ) ) {
+			return $checked;
+		}
+
+		$delivery_country = empty( $delivery['country'] ) ? $billing['country'] : $delivery['country'];
+		$same_as_billing  = str_replace( ' ', '', $delivery['zip'] ) === str_replace( ' ', '', $billing['zip'] )
+			&& $delivery_country === $billing['country']
+			&& $delivery['address1'] === $billing['address1']
+			&& $delivery['address2'] === $billing['address2']
+			&& $delivery['city'] === $billing['city'];
+		if ( $same_as_billing ) {
+			return $checked;
+		}
+
+		WC()->customer->set_props(
+			array(
+				'shipping_first_name' => $delivery['first_name'],
+				'shipping_last_name'  => $delivery['last_name'],
+				'shipping_address_1'  => $delivery['address1'],
+				'shipping_address_2'  => $delivery['address2'],
+				'shipping_postcode'   => str_replace( ' ', '', $delivery['zip'] ),
+				'shipping_city'       => $delivery['city'],
+				'shipping_country'    => $delivery_country,
+			)
+		);
+		WC()->customer->save();
+
+		return true;
 	}
 
 	/**
