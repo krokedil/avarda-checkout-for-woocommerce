@@ -197,7 +197,7 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		$purchase_id = ACO_WC()->session()->get_purchase_id();
 		$step        = ACO_WC()->session()->get_payment_step();
 
-		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $order->get_order_key(), $purchase_id, $step ) );
+		ACO_Logger::log( sprintf( 'Checking session for %s (Avarda ID: %s). Session state: %s. Trying to initialize new or updating existing checkout session.', $order_id, $purchase_id, $step ) );
 
 		// Make sure that payment session step is ok for an update.
 		if ( ! in_array( $step, aco_payment_steps_approved_for_update_request(), true ) ) {
@@ -209,12 +209,12 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		$avarda_order = ACO_WC()->api->request_update_payment( $purchase_id, $order_id, true );
 
 		if ( is_wp_error( $avarda_order ) ) {
-			ACO_Logger::log( sprintf( 'Update session for %s|%s (Avarda ID: %s). Avarda order failed to update, initializing new checkout session.', $order_id, $order->get_order_key(), $purchase_id ) );
+			ACO_Logger::log( sprintf( 'Update session for %s (Avarda ID: %s). Avarda order failed to update, initializing new checkout session.', $order_id, $purchase_id ) );
 
 			// If update order failed try to create new order.
 			$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 			if ( is_wp_error( $avarda_order ) ) {
-				ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $order->get_data_keys(), $purchase_id ) );
+				ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, $purchase_id ) );
 				return;
 			}
 
@@ -225,12 +225,12 @@ function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
 		return $avarda_order;
 
 	} else {
-		ACO_Logger::log( sprintf( 'Checking session for %s|%s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
+		ACO_Logger::log( sprintf( 'Checking session for %s (Avarda ID: %s). Avarda order does not exist, initializing new checkout session.', $order_id, 'None' ) );
 
 		// Create new order, since we don't have one.
 		$avarda_order = ACO_WC()->api->request_initialize_payment( $order_id );
 		if ( is_wp_error( $avarda_order ) || ! $avarda_order ) {
-			ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s|%s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, ( wc_get_order( $order_id ) )->get_order_key(), 'None' ) );
+			ACO_Logger::log( sprintf( 'Checkout session initialization failed for %s (Avarda ID: %s). Check for "ACO initialize payment" error.', $order_id, 'None' ) );
 			return;
 		}
 		aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order );

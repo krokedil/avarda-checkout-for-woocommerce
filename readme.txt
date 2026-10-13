@@ -5,10 +5,10 @@ Requires at least: 5.0
 Tested up to: 7.1.2
 Requires PHP: 7.4
 WC requires at least: 5.6.0
-WC tested up to: 11.1.2
+WC tested up to: 11.2.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.10
+Stable tag: 1.17.11
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,12 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2026.10.13        - version 1.17.11 =
+* Enhancement       - Sensitive customer data is now masked in the plugin log.
+* Fix               - Resolved an issue with Partner shipping where choosing a pickup point other than the first one in the shipping widget was not saved, so the order was always created with the first pickup point.
+* Fix               - The complete-session response to Avarda now includes the selected shipping option and its shipping data when using Partner shipping.
+* Fix               - Resolved an issue with Partner shipping where reloading the checkout could calculate the shipping options for the billing address instead of the delivery address entered in Avarda.
+
 = 2026.10.06        - version 1.17.10 =
 * Fix               - Resolved an issue where the Avarda checkout could fail to load on themes or page builders that render the checkout before scripts are enqueued, because the checkout script parameters were dropped.
 * Fix               - A completed Avarda payment no longer triggers a redirect in the middle of rendering other pages, such as the cart, mini-carts or Store API requests, which could produce half-rendered pages that a page cache might store. The customer is now redirected to the order confirmation from the checkout and pay-for-order pages only.

@@ -8,7 +8,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language-Team: Krokedil <info@krokedil.se>\n"
 "Last-Translator: Krokedil <info@krokedil.se>\n"
-"POT-Creation-Date: 2026-06-03 09:26+0000\n"
+"POT-Creation-Date: 2026-10-13 08:47+0000\n"
 "Report-Msgid-Bugs-To: http://krokedil.se\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
@@ -17,35 +17,35 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../avarda-checkout-for-woocommerce.php:187, ../avarda-checkout-for-woocommerce.php:196, ../classes/class-aco-session.php:47, ../classes/class-aco-session.php:56
+#: ../avarda-checkout-for-woocommerce.php:187, ../avarda-checkout-for-woocommerce.php:196, ../classes/class-aco-session.php:61, ../classes/class-aco-session.php:70
 msgid "Nope"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:292, ../avarda-checkout-for-woocommerce.php:301
+#: ../avarda-checkout-for-woocommerce.php:294, ../avarda-checkout-for-woocommerce.php:303
 msgid "Your installation of Avarda Checkout is not complete. If you installed this plugin directly from Github please refer to the README.DEV.md file in the plugin."
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:396
+#: ../avarda-checkout-for-woocommerce.php:399
 msgid "Settings"
 msgstr ""
 
-#: ../avarda-checkout-for-woocommerce.php:397
+#: ../avarda-checkout-for-woocommerce.php:400
 msgid "Support"
 msgstr ""
 
-#: ../classes/class-aco-assets.php:174, ../includes/aco-functions.php:646
+#: ../classes/class-aco-assets.php:198, ../includes/aco-functions.php:665
 msgid "Select another payment method"
 msgstr ""
 
-#: ../classes/class-aco-assets.php:191
+#: ../classes/class-aco-assets.php:215
 msgid "Please fill in all required checkout fields."
 msgstr ""
 
-#: ../classes/class-aco-assets.php:223
+#: ../classes/class-aco-assets.php:247
 msgid "Waiting for shipping options..."
 msgstr ""
 
-#: ../classes/class-aco-assets.php:224
+#: ../classes/class-aco-assets.php:248
 msgid "Please fill in your address information to see available shipping options."
 msgstr ""
 
@@ -58,7 +58,7 @@ msgstr ""
 msgid "Something went wrong in the checkout process. Please contact the store."
 msgstr ""
 
-#: ../classes/class-aco-gateway.php:59, ../includes/aco-functions.php:576, ../includes/admin/views/status-report.php:17
+#: ../classes/class-aco-gateway.php:59, ../includes/aco-functions.php:594, ../includes/admin/views/status-report.php:17
 msgid "Avarda Checkout"
 msgstr ""
 
@@ -66,11 +66,15 @@ msgstr ""
 msgid "There was an issue processing your payment. Please try again."
 msgstr ""
 
-#: ../classes/class-aco-gateway.php:427, ../classes/class-aco-gateway.php:441
+#: ../classes/class-aco-gateway.php:427, ../classes/class-aco-gateway.php:449
 msgid "The order could not be verified, please try again."
 msgstr ""
 
-#: ../classes/class-aco-gateway.php:514
+#: ../classes/class-aco-gateway.php:435
+msgid "This payment has already been completed."
+msgstr ""
+
+#: ../classes/class-aco-gateway.php:522
 msgid "Could not load the enhanced settings page. Showing the standard settings instead."
 msgstr ""
 
@@ -203,24 +207,24 @@ msgstr ""
 msgid "Cancel Avarda order"
 msgstr ""
 
-#: ../classes/class-aco-session.php:227
+#: ../classes/class-aco-session.php:300
 msgid "Avarda Checkout payment has timed out."
 msgstr ""
 
-#: ../classes/class-aco-session.php:269
+#: ../classes/class-aco-session.php:346
 msgid "Avarda Checkout payment has expired."
 msgstr ""
 
-#: ../classes/class-aco-session.php:292
+#: ../classes/class-aco-session.php:369
 msgid "Avarda Checkout currency has changed."
 msgstr ""
 
-#: ../classes/class-aco-session.php:316
+#: ../classes/class-aco-session.php:393
 msgid "Avarda Checkout language has changed."
 msgstr ""
 
 #. translators: 1: error message, 2: order id
-#: ../classes/class-aco-session.php:339
+#: ../classes/class-aco-session.php:416
 msgid "%1$s Purchase Id: %2$s.%3$s"
 msgstr ""
 
@@ -240,7 +244,7 @@ msgstr ""
 msgid "This sets the URL for the icon the shipping method will get in Avarda Checkout. Use a square icon for best results."
 msgstr ""
 
-#: ../classes/class-aco-shipping.php:24, ../classes/class-aco-shipping.php:25, ../classes/class-aco-shipping.php:461
+#: ../classes/class-aco-shipping.php:24, ../classes/class-aco-shipping.php:25, ../classes/class-aco-shipping.php:462
 msgid "Avarda Checkout Shipping"
 msgstr ""
 
@@ -248,19 +252,19 @@ msgstr ""
 msgid "A dynamic shipping method, that will get its prices set by Avarda Checkout and the integration towards a Shipping Broker. When Avarda Checkout is the selected payment method, the other shipping methods for this region wont be shown to the customer."
 msgstr ""
 
-#: ../classes/class-aco-shipping.php:457
+#: ../classes/class-aco-shipping.php:458
 msgid "Fallback shipping name"
 msgstr ""
 
-#: ../classes/class-aco-shipping.php:459
+#: ../classes/class-aco-shipping.php:460
 msgid "The name of the fallback shipping method, this will be used in cases where Avarda can't get any shipping methods from a third party."
 msgstr ""
 
-#: ../classes/class-aco-shipping.php:464
+#: ../classes/class-aco-shipping.php:465
 msgid "Fallback shipping price"
 msgstr ""
 
-#: ../classes/class-aco-shipping.php:466
+#: ../classes/class-aco-shipping.php:467
 msgid "The price of the fallback shipping method., this will be used in cases where Avarda can't get any shipping methods from a third party."
 msgstr ""
 
@@ -473,92 +477,97 @@ msgstr ""
 msgid "Client Secret"
 msgstr ""
 
-#: ../includes/aco-functions.php:280
+#: ../includes/aco-functions.php:366
 msgid "Avarda API Error on confirm Avarda order: "
 msgstr ""
 
+#. translators: Avarda purchase ID.
+#: ../includes/aco-functions.php:401
+msgid "The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced after their details changed. The order now uses that purchase."
+msgstr ""
+
 #. translators: %s error message.
-#: ../includes/aco-functions.php:311
+#: ../includes/aco-functions.php:410
 msgid "Failed to set the WooCommerce order number to the Avarda order. Error: %s"
 msgstr ""
 
 #. translators: Avarda purchase ID.
-#: ../includes/aco-functions.php:322
+#: ../includes/aco-functions.php:421
 msgid "Payment via Avarda Checkout. Purchase ID: %s"
 msgstr ""
 
 #. translators: %s Avarda recurring token.
-#: ../includes/aco-functions.php:349
+#: ../includes/aco-functions.php:448
 msgid "New recurring token for subscription: %s"
 msgstr ""
 
-#: ../includes/aco-functions.php:531
+#: ../includes/aco-functions.php:549
 msgid "Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:534
+#: ../includes/aco-functions.php:552
 msgid "Loan"
 msgstr ""
 
-#: ../includes/aco-functions.php:537
+#: ../includes/aco-functions.php:555
 msgid "Card"
 msgstr ""
 
-#: ../includes/aco-functions.php:540
+#: ../includes/aco-functions.php:558
 msgid "Direct Payment"
 msgstr ""
 
-#: ../includes/aco-functions.php:543
+#: ../includes/aco-functions.php:561
 msgid "Part Payment"
 msgstr ""
 
-#: ../includes/aco-functions.php:546
+#: ../includes/aco-functions.php:564
 msgid "Swish"
 msgstr ""
 
-#: ../includes/aco-functions.php:549
+#: ../includes/aco-functions.php:567
 msgid "Avarda High Amount Loan"
 msgstr ""
 
-#: ../includes/aco-functions.php:552
+#: ../includes/aco-functions.php:570
 msgid "PayPal"
 msgstr ""
 
-#: ../includes/aco-functions.php:555
+#: ../includes/aco-functions.php:573
 msgid "Pay On Delivery"
 msgstr ""
 
-#: ../includes/aco-functions.php:558
+#: ../includes/aco-functions.php:576
 msgid "B2B Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:561
+#: ../includes/aco-functions.php:579
 msgid "Direct Invoice"
 msgstr ""
 
-#: ../includes/aco-functions.php:564
+#: ../includes/aco-functions.php:582
 msgid "Masterpass"
 msgstr ""
 
-#: ../includes/aco-functions.php:567
+#: ../includes/aco-functions.php:585
 msgid "MobilePay"
 msgstr ""
 
-#: ../includes/aco-functions.php:570
+#: ../includes/aco-functions.php:588
 msgid "Vipps"
 msgstr ""
 
-#: ../includes/aco-functions.php:573
+#: ../includes/aco-functions.php:591
 msgid "Zero Amount"
 msgstr ""
 
 #. translators: Woo order number, Woo order total, Avarda order total.
-#: ../includes/aco-functions.php:807
+#: ../includes/aco-functions.php:871
 msgid "Order total mismatch in order number: %1$s. Woo order total: %2$s, Avarda order total: %3$s (converted to minor units)."
 msgstr ""
 
 #. translators: https request response code.
-#: ../classes/requests/class-aco-request.php:252
+#: ../classes/requests/class-aco-request.php:257
 msgid "Avarda request error. Request response code: %s"
 msgstr ""
 
@@ -594,10 +603,10 @@ msgstr ""
 msgid "Response Message"
 msgstr ""
 
-#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:116
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:124
 msgid "No shipping"
 msgstr ""
 
-#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:119
+#: ../classes/api/models/shipping/class-aco-shipping-option-model.php:128
 msgid "Please enter your full address to see available shipping methods."
 msgstr ""

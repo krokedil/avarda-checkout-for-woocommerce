@@ -35,6 +35,13 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 	public $modules;
 
 	/**
+	 * The transport id for a completed shipping session.
+	 *
+	 * @var string
+	 */
+	public $transportId;
+
+	/**
 	 * Get a fallback shipping session in case of errors.
 	 *
 	 * @param string $purchase_id The purchase id.
@@ -132,16 +139,66 @@ class ACO_Shipping_Session_Model extends ACO_Shipping_Response_Model {
 	/**
 	 * Create a instance for a completed session.
 	 *
-	 * @param string $purchase_id The purchase id.
+	 * @param string        $purchase_id The purchase id.
+	 * @param WC_Order|null $order The order for the purchase, used for the transport id and the selected shipping option.
 	 *
 	 * @return ACO_Shipping_Session_Model
 	 */
-	public static function completed_session( $purchase_id ) {
+	public static function completed_session( $purchase_id, $order = null ) {
 		$session            = new self();
 		$session->id        = $purchase_id;
 		$session->expiresAt = gmdate( 'Y-m-d\TH:i:s\Z', time() + 60 * 60 ); // 1 hour from now same as Avarda.
 		$session->status    = 'COMPLETED';
 
+		if ( ! $order instanceof WC_Order ) {
+			return $session;
+		}
+
+		$session->transportId = (string) $order->get_order_number();
+
+		$rate = self::get_shipping_rate_from_order( $order );
+		if ( $rate ) {
+			$session->selectedShippingOption = ACO_Shipping_Option_Model::from_shipping_rate( $rate );
+			$session->modules                = wp_json_encode(
+				array(
+					'options'         => array( $session->selectedShippingOption ),
+					'selected_option' => $rate->get_id(),
+				)
+			);
+		}
+
 		return $session;
+	}
+
+	/**
+	 * Recreate the shipping rate the customer chose from the order's shipping line.
+	 *
+	 * @param WC_Order $order The order.
+	 *
+	 * @return WC_Shipping_Rate|null
+	 */
+	private static function get_shipping_rate_from_order( $order ) {
+		$shipping_items = $order->get_items( 'shipping' );
+		$item           = reset( $shipping_items );
+
+		if ( ! $item instanceof WC_Order_Item_Shipping ) {
+			return null;
+		}
+
+		// Orders placed before the rate id was stored only have the method and instance id.
+		$rate_id = $item->get_meta( '_aco_shipping_rate_id' );
+		if ( empty( $rate_id ) ) {
+			$rate_id = $item->get_method_id() . ':' . $item->get_instance_id();
+		}
+
+		$taxes = $item->get_taxes();
+		$rate  = new WC_Shipping_Rate( $rate_id, $item->get_name(), $item->get_total(), $taxes['total'] ?? array(), $item->get_method_id(), $item->get_instance_id() );
+
+		// The shipping line keeps the rate's meta data, including the pickup points and the selected one.
+		foreach ( $item->get_meta_data() as $meta ) {
+			$rate->add_meta_data( $meta->key, $meta->value );
+		}
+
+		return $rate;
 	}
 }

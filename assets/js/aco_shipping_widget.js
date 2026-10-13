@@ -393,7 +393,8 @@ jQuery(function($) {
             const $wrapper = $header.parents(".pickup-point-select");
             const merchantReference = $select.data('merchant-reference');
 
-            // Set the selected pickup point in WooCommerce by selecting the option in the form.
+            // Save the pickup point in WooCommerce, and keep any select box or Webshipper field on the page in sync.
+            aco_shipping_widget.savePickupPoint($select.data('rate-id'), merchantReference);
             aco_shipping_widget.syncWithKrokedilShippingSelect(merchantReference);
             aco_shipping_widget.maybeSyncWithWebshipper(merchantReference);
 
@@ -414,6 +415,22 @@ jQuery(function($) {
             $body.slideToggle();
             $wrapper.toggleClass("open");
             $wrapper.toggleClass("closed");
+        },
+
+        savePickupPoint: (rateId, pickupPointId) => {
+            if (!rateId || !pickupPointId) {
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: aco_wc_shipping_params.ajax.set_pickup_point.url,
+                data: {
+                    nonce: aco_wc_shipping_params.ajax.set_pickup_point.nonce,
+                    rate_id: rateId,
+                    pickup_point_id: pickupPointId,
+                },
+            });
         },
 
         syncWithKrokedilShippingSelect: (value) => {
