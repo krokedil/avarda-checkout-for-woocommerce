@@ -228,8 +228,18 @@ class ACO_Request {
 				$error_message = $response['body'];
 			}
 
-			if ( null !== json_decode( $response['body'], true ) ) {
-				$errors = json_decode( $response['body'], true );
+			$avarda_error_codes = array();
+			$errors             = json_decode( $response['body'], true );
+
+			if ( is_array( $errors ) ) {
+				// Avarda describes what went wrong in an Errors array. Keep the codes so the caller
+				// can tell a temporary condition from a permanent failure.
+				foreach ( $errors['Errors'] ?? array() as $avarda_error ) {
+					if ( isset( $avarda_error['errorCode'] ) ) {
+						$avarda_error_codes[] = intval( $avarda_error['errorCode'] );
+					}
+				}
+
 				foreach ( $errors as $error => $aco_error_messages ) {
 					// Ensure the error message is an array so we can loop through it.
 					if ( ! is_array( $aco_error_messages ) ) {
@@ -251,7 +261,15 @@ class ACO_Request {
 				// Translators: https request response code.
 				$error_message = sprintf( __( 'Avarda request error. Request response code: %s', 'avarda-checkout-for-woocommerce' ), wp_remote_retrieve_response_code( $response ) );
 			}
-			return new WP_Error( wp_remote_retrieve_response_code( $response ), $error_message, $data );
+
+			$wp_error = new WP_Error( wp_remote_retrieve_response_code( $response ), $error_message, $data );
+
+			// Added alongside the HTTP status code, which remains the primary error code.
+			foreach ( array_unique( $avarda_error_codes ) as $avarda_error_code ) {
+				$wp_error->add( "avarda_$avarda_error_code", $error_message, $data );
+			}
+
+			return $wp_error;
 		}
 
 		return json_decode( wp_remote_retrieve_body( $response ), true );
