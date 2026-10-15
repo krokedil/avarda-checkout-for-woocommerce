@@ -125,6 +125,11 @@ class ACO_Subscription {
 			}
 		}
 
+		// The Avarda Checkout shipping method is dynamic and gets its tax from the Avarda
+		// session. During a renewal there is no session, so the shipping cost is copied from
+		// the subscription while the tax is reset to 0. Restore it before building the request.
+		$this->maybe_restore_renewal_shipping_tax( $renewal_order, $subscriptions );
+
 		// Create recurring Avarda order.
 		$create_order_response = ACO_WC()->api->create_recurring_order( $order_id );
 
@@ -150,6 +155,108 @@ class ACO_Subscription {
 		}
 	}
 
+
+	/**
+	 * Restores the shipping tax on a renewal order when it has been lost.
+	 *
+	 * The Avarda Checkout shipping method (aco_shipping) is dynamic and gets its tax from the
+	 * Avarda session. During a renewal there is no session, so WooCommerce/Subscriptions copies
+	 * the shipping cost (ex. VAT) from the subscription while the tax is reset to 0. This would
+	 * make the renewal sent to Avarda miss the shipping VAT. We restore it by reusing the tax
+	 * ratio stored on the subscription (or its parent order).
+	 *
+	 * @param WC_Order $renewal_order The WooCommerce renewal order.
+	 * @param array    $subscriptions The subscriptions tied to the renewal order.
+	 * @return void
+	 */
+	private function maybe_restore_renewal_shipping_tax( $renewal_order, $subscriptions ) {
+		if ( ! is_object( $renewal_order ) || empty( $subscriptions ) ) {
+			return;
+		}
+
+		$totals_changed = false;
+
+		foreach ( $renewal_order->get_items( 'shipping' ) as $renewal_shipping ) {
+			// Only act on shipping lines that have a cost but are missing tax.
+			if ( (float) $renewal_shipping->get_total() <= 0 || (float) $renewal_shipping->get_total_tax() > 0 ) {
+				continue;
+			}
+
+			$source_tax = $this->get_source_shipping_tax( $subscriptions, $renewal_shipping );
+			if ( null === $source_tax ) {
+				continue;
+			}
+
+			$restored_tax = wc_round_tax_total( (float) $renewal_shipping->get_total() * $source_tax['ratio'] );
+			if ( $restored_tax <= 0 ) {
+				continue;
+			}
+
+			$renewal_shipping->set_taxes( array( 'total' => array( $source_tax['rate_id'] => $restored_tax ) ) );
+			$renewal_shipping->save();
+			$totals_changed = true;
+
+			// translators: 1: Shipping method name, 2: Restored tax amount.
+			$renewal_order->add_order_note( sprintf( __( 'Restored missing shipping tax for "%1$s" on renewal: %2$s.', 'avarda-checkout-for-woocommerce' ), $renewal_shipping->get_name(), wc_price( $restored_tax, array( 'currency' => $renewal_order->get_currency() ) ) ) );
+		}
+
+		if ( $totals_changed ) {
+			// Recalculate totals without recalculating taxes, so the restored shipping tax is kept.
+			$renewal_order->calculate_totals( false );
+			$renewal_order->save();
+		}
+	}
+
+	/**
+	 * Gets the shipping tax rate id and tax ratio from the subscription (or its parent order).
+	 *
+	 * Prefers a shipping line that uses the same shipping method as the renewal line, and falls
+	 * back to the first taxed shipping line found.
+	 *
+	 * @param array                  $subscriptions The subscriptions tied to the renewal order.
+	 * @param WC_Order_Item_Shipping $renewal_shipping The renewal shipping line item.
+	 * @return array|null Array with 'rate_id' and 'ratio' keys, or null when no taxed shipping line was found.
+	 */
+	private function get_source_shipping_tax( $subscriptions, $renewal_shipping ) {
+		$sources = array();
+		foreach ( $subscriptions as $subscription ) {
+			$sources[] = $subscription;
+			$parent    = $subscription->get_parent();
+			if ( $parent ) {
+				$sources[] = $parent;
+			}
+		}
+
+		$method_key = $renewal_shipping->get_method_id() . ':' . $renewal_shipping->get_instance_id();
+		$fallback   = null;
+
+		foreach ( $sources as $source ) {
+			foreach ( $source->get_items( 'shipping' ) as $source_shipping ) {
+				$total = (float) $source_shipping->get_total();
+				$tax   = (float) $source_shipping->get_total_tax();
+				if ( $total <= 0 || $tax <= 0 ) {
+					continue;
+				}
+
+				$taxes  = $source_shipping->get_taxes();
+				$result = array(
+					'rate_id' => ! empty( $taxes['total'] ) ? key( $taxes['total'] ) : 0,
+					'ratio'   => $tax / $total,
+				);
+
+				// Prefer the shipping line that matches the same shipping method.
+				if ( $source_shipping->get_method_id() . ':' . $source_shipping->get_instance_id() === $method_key ) {
+					return $result;
+				}
+
+				if ( null === $fallback ) {
+					$fallback = $result;
+				}
+			}
+		}
+
+		return $fallback;
+	}
 
 	/**
 	 * Shows the recurring token for the order.
