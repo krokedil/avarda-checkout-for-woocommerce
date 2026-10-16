@@ -34,3 +34,7 @@ scoper.custom.php
 composer-dependencies.json
 composer-dependencies.lock
 tmp*
+phpstan.neon
+phpstan-baseline.neon
+phpstan-bootstrap.php
+phpstan-stubs.php

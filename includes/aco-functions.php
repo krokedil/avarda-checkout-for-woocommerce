@@ -344,8 +344,8 @@ function aco_maybe_reset_session_on_customer_change( $order ) {
 /**
  * Confirms and finishes the Avarda Order for processing.
  *
- * @param int    $order_id The WooCommerce Order id.
- * @param string $avarda_purchase_id The Avarda purchase id.
+ * @param int|string $order_id The WooCommerce Order id.
+ * @param string     $avarda_purchase_id The Avarda purchase id.
  * @return void
  */
 function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {

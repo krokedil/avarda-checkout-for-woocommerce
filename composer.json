@@ -3,7 +3,10 @@
     "description": "Provides an Avarda Checkout gateway for WooCommerce",
     "type": "wordpress-plugin",
     "require-dev": {
-        "php-stubs/woocommerce-stubs": "^8.5",
+        "phpstan/phpstan": "^2.1",
+        "php-stubs/wordpress-stubs": "^6.0",
+        "php-stubs/woocommerce-stubs": "^10.5.0",
+        "php-stubs/woocommerce-subscriptions-stubs": "^9.1",
         "wp-coding-standards/wpcs": "^2.3",
         "wpify/scoper": "3.1.3"
     },
@@ -40,6 +43,12 @@
         }
     },
     "scripts": {
+        "phpstan": "./vendor/bin/phpstan analyse --memory-limit=2G",
+        "phpstan:baseline": "./vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline",
         "wpify-scoper": "wpify-scoper"
+    },
+    "scripts-descriptions": {
+        "phpstan": "Run PHPStan static analysis at the level set in phpstan.neon. Findings that predate the analysis are suppressed by phpstan-baseline.neon, so a failure means new code introduced it.",
+        "phpstan:baseline": "Regenerate phpstan-baseline.neon from the current findings. Only run this when intentionally accepting new suppressions, otherwise fix the reported errors instead."
     }
 }

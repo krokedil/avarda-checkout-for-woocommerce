@@ -44,7 +44,7 @@ class ACO_Request_Token extends ACO_Request {
 	/**
 	 * Gets the request body.
 	 *
-	 * @return array
+	 * @return string|false
 	 */
 	public function get_body() {
 		$request_content = wp_json_encode(

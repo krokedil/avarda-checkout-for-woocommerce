@@ -1,0 +1,409 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \#3 \$autoload of function update_option expects bool\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: avarda-checkout-for-woocommerce.php
+
+		-
+			message: '#^Offset 0 on array\{string, string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: classes/api/controllers/class-aco-api-controller-base.php
+
+		-
+			message: '#^Offset 1 on array\{string, string\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: classes/api/controllers/class-aco-api-controller-base.php
+
+		-
+			message: '#^Static method ACO_API_Shipping_Session_Controller\:\:process_customer_address\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: classes/api/controllers/class-aco-api-shipping-session-controller.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$shipping\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/api/models/shipping/class-aco-shipping-option-model.php
+
+		-
+			message: '#^Binary operation "\+" between string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: classes/api/models/shipping/class-aco-shipping-option-model.php
+
+		-
+			message: '#^Parameter \#3 \$cost of class WC_Shipping_Rate constructor expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/api/models/shipping/class-aco-shipping-session-model.php
+
+		-
+			message: '#^Parameter \#6 \$instance_id of class WC_Shipping_Rate constructor expects int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/api/models/shipping/class-aco-shipping-session-model.php
+
+		-
+			message: '#^Call to function is_wp_error\(\) with mixed will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: classes/class-aco-ajax.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: classes/class-aco-ajax.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: classes/class-aco-ajax.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 3
+			path: classes/class-aco-ajax.php
+
+		-
+			message: '#^Call to an undefined method ACO_Request\:\:request\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/class-aco-api.php
+
+		-
+			message: '#^Call to an undefined method WC_Session\:\:get_customer_unique_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/class-aco-api.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: classes/class-aco-api.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/class-aco-cart-page.php
+
+		-
+			message: '#^Access to an undefined property WC_Session\:\:\$reload_checkout\.$#'
+			identifier: property.notFound
+			count: 5
+			path: classes/class-aco-checkout.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/class-aco-checkout.php
+
+		-
+			message: '#^Call to function method_exists\(\) with WC_Shipping_Rate and ''get_id'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: classes/class-aco-checkout.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: classes/class-aco-checkout.php
+
+		-
+			message: '#^Access to an undefined property WC_Cart\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/class-aco-gateway.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: classes/class-aco-gateway.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_method_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/class-aco-order-management.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 2
+			path: classes/class-aco-order-management.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 2
+			path: classes/class-aco-session.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: classes/class-aco-session.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/class-aco-shipping.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: classes/class-aco-shipping.php
+
+		-
+			message: '#^Variable \$weekday might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: classes/class-aco-shipping.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:get_parent\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/class-aco-subscription.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/class-aco-templates.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: classes/class-aco-templates.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$checkout\.$#'
+			identifier: property.notFound
+			count: 8
+			path: classes/compatibility/class-aco-compatibility-webshipper.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: classes/compatibility/class-aco-compatibility-webshipper.php
+
+		-
+			message: '#^Access to an undefined property ACO_Request_Auth_Recurring_Payment\:\:\$order\.$#'
+			identifier: property.notFound
+			count: 2
+			path: classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php
+
+		-
+			message: '#^Access to an undefined property ACO_Request_Auth_Recurring_Payment\:\:\$purchase_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: classes/requests/checkout/post/class-aco-request-auth-recurring-payment.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$shipping\.$#'
+			identifier: property.notFound
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-cart.php
+
+		-
+			message: '#^Binary operation "\+" between string and \(float\|int\) results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: classes/requests/helpers/class-aco-helper-cart.php
+
+		-
+			message: '#^Binary operation "/" between \(float\|int\) and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: classes/requests/helpers/class-aco-helper-cart.php
+
+		-
+			message: '#^Call to an undefined method WC_Session\:\:get_customer_unique_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-cart.php
+
+		-
+			message: '#^Parameter \#3 \$offset of function strpos expects int, true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-cart.php
+
+		-
+			message: '#^Binary operation "\+" between string and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 2
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_total_tax\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Method ACO_Helper_Create_Refund_Data\:\:get_product_tax_code\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Parameter \#1 \$num of function abs expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Parameter \#2 \$fee of static method ACO_Helper_Create_Refund_Data\:\:get_refund_fee_data\(\) expects WC_Order_Item_Fee, WC_Order_Item given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Parameter \#2 \$shipping of static method ACO_Helper_Create_Refund_Data\:\:get_refund_shipping_data\(\) expects WC_Order_Item_Shipping, WC_Order_Item given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Parameter \#3 \$original_order_shipping of static method ACO_Helper_Create_Refund_Data\:\:get_refund_shipping_data\(\) expects WC_Order_Item_Shipping, WC_Order_Item given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Variable \$item_refund might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Variable \$original_order_shipping might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-create-refund-data.php
+
+		-
+			message: '#^Unused result of ternary operator\.$#'
+			identifier: ternary.resultUnused
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-customer.php
+
+		-
+			message: '#^Binary operation "\+" between float\|int and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Method ACO_Helper_Order\:\:get_product_tax_amount\(\) should return float but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Method ACO_Helper_Order\:\:get_product_tax_amount\(\) should return float but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Method ACO_Helper_Order\:\:get_product_tax_code\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Parameter \#2 \$order_item of static method ACO_Helper_Order\:\:process_order_item_shipping\(\) expects WC_Order_Item_Shipping, WC_Order_Item given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Parameter \#3 \$offset of function strpos expects int, true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: classes/requests/helpers/class-aco-helper-order.php
+
+		-
+			message: '#^Variable \$this might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: includes/aco-form-fields.php
+
+		-
+			message: '#^Call to an undefined method WC_Session\:\:get_customer_unique_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/aco-functions.php
+
+		-
+			message: '#^Parameter \#1 \$order_id of function aco_wc_initialize_or_update_order_from_wc_order expects int, true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/aco-functions.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 2
+			path: includes/aco-functions.php
+
+		-
+			message: '#^Access to an undefined property WooCommerce\:\:\$shipping\.$#'
+			identifier: property.notFound
+			count: 1
+			path: templates/avarda-cart-shipping.php
+
+		-
+			message: '#^Variable \$checkout might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: templates/avarda-checkout.php
+
+		-
+			message: '#^Variable \$keys_for_meta_box might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: templates/avarda-meta-box.php
+
+		-
+			message: '#^Variable \$order_id might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: templates/avarda-order-receipt.php
