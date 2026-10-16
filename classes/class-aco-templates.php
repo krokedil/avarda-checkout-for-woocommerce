@@ -16,14 +16,14 @@ class ACO_Templates {
 	/**
 	 * The reference the *Singleton* instance of this class.
 	 *
-	 * @var $instance
+	 * @var ACO_Templates $instance
 	 */
 	protected static $instance;
 
 	/**
 	 * Returns the *Singleton* instance of this class.
 	 *
-	 * @return self::$instance The *Singleton* instance.
+	 * @return self The *Singleton* instance.
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {

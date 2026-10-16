@@ -14,10 +14,10 @@ class ACO_Helper_Create_Refund_Data {
 	/**
 	 * Creates refund data
 	 *
-	 * @param int    $order_id Order id.
-	 * @param int    $refund_order_id Refund order id.
-	 * @param int    $amount Refund amount.
-	 * @param string $reason Refund reason.
+	 * @param int|string $order_id Order id.
+	 * @param int|null   $refund_order_id Refund order id.
+	 * @param float|null $amount Refund amount.
+	 * @param string     $reason Refund reason.
 	 * @return array
 	 */
 	public static function create_refund_data( $order_id, $refund_order_id, $amount, $reason ) {
@@ -89,7 +89,7 @@ class ACO_Helper_Create_Refund_Data {
 	 * Gets refunded order
 	 *
 	 * @param int $order_id Order id.
-	 * @return string
+	 * @return int
 	 */
 	public static function get_refunded_order( $order_id ) {
 		$order   = wc_get_order( $order_id );

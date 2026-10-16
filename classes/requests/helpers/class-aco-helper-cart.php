@@ -81,7 +81,7 @@ class ACO_Helper_Cart {
 	/**
 	 * Gets formatted cart item.
 	 *
-	 * @param object $cart_item WooCommerce cart item object.
+	 * @param array $cart_item WooCommerce cart item.
 	 * @return array Formatted cart item.
 	 */
 	public function get_cart_item( $cart_item ) {
@@ -184,7 +184,7 @@ class ACO_Helper_Cart {
 	/**
 	 * Gets the product name.
 	 *
-	 * @param object $cart_item The cart item.
+	 * @param array $cart_item The cart item.
 	 * @return string
 	 */
 	public function get_product_name( $cart_item ) {
@@ -197,8 +197,8 @@ class ACO_Helper_Cart {
 	/**
 	 * Gets the products price.
 	 *
-	 * @param object $cart_item The cart item.
-	 * @return float
+	 * @param array $cart_item The cart item.
+	 * @return string
 	 */
 	public function get_product_price( $cart_item ) {
 		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] ) / $cart_item['quantity'];
@@ -208,8 +208,8 @@ class ACO_Helper_Cart {
 	/**
 	 * Gets the tax rate for the product.
 	 *
-	 * @param object $cart_item The cart item.
-	 * @return float
+	 * @param array $cart_item The cart item.
+	 * @return int|string
 	 */
 	public function get_product_tax_rate( $cart_item ) {
 		if ( 0 === intval( $cart_item['line_total'] ) ) {
@@ -221,7 +221,7 @@ class ACO_Helper_Cart {
 	/**
 	 * Gets the tax code for the product.
 	 *
-	 * @param object $cart_item The cart item.
+	 * @param array $cart_item The cart item.
 	 * @return string
 	 */
 	public function get_product_tax_code( $cart_item ) {

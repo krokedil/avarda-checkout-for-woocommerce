@@ -51,7 +51,7 @@ class ACO_Shipping_Option_Model {
 	/**
 	 * The price for the shipping option, including tax.
 	 *
-	 * @var float
+	 * @var int|string
 	 */
 	public $price;
 

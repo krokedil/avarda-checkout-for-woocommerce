@@ -139,7 +139,7 @@ class ACO_Subscription {
 			/**
 			 * An instance of WP_Error
 			 *
-			 * @var $create_order_response WP_Error
+			 * @var WP_Error $create_order_response
 			 */
 			$error_message = $create_order_response->get_error_message();
 			// Translators: Error message.

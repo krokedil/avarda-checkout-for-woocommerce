@@ -79,7 +79,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		/**
 		 * Helper class for order reservation.
 		 *
-		 * @var $order_management ACO_Order_Management
+		 * @var ACO_Order_Management $order_management
 		 */
 		public $order_management;
 
@@ -121,7 +121,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		/**
 		 * The reference the *Singleton* instance of this class.
 		 *
-		 * @var $instance
+		 * @var Avarda_Checkout_For_WooCommerce $instance
 		 */
 		protected static $instance;
 
@@ -168,7 +168,7 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		/**
 		 * Returns the *Singleton* instance of this class.
 		 *
-		 * @return self::$instance The *Singleton* instance.
+		 * @return self The *Singleton* instance.
 		 */
 		public static function get_instance() {
 			if ( null === self::$instance ) {

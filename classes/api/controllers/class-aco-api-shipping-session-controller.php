@@ -135,7 +135,7 @@ class ACO_API_Shipping_Session_Controller extends ACO_API_Controller_Base {
 	 * @param string $customer_id The customer unique id.
 	 * @param string $purchase_id The purchase id.
 	 *
-	 * @return ACO_Shipping_Session_Model|null
+	 * @return ACO_Shipping_Session_Model
 	 */
 	private function get_shipping_session_for_customer( $customer_id, $purchase_id ) {
 		$this->setup_customer_session( $customer_id );

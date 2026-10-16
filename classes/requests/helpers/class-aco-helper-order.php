@@ -94,7 +94,7 @@ class ACO_Helper_Order {
 	 *
 	 * @param WC_Order $order WC order.
 	 * @param object   $order_item WooCommerce order item object.
-	 * @return array Formated order item.
+	 * @return array|false Formated order item, or false if nothing was refunded.
 	 */
 	public function get_refunded_order_item( $order, $order_item ) {
 
@@ -197,7 +197,7 @@ class ACO_Helper_Order {
 	 * Gets the item price including vat.
 	 *
 	 * @param object $order_item The order item.
-	 * @return float
+	 * @return string
 	 */
 	public static function get_item_price_incl_vat( $order_item ) {
 		$items_subtotal = ( ( $order_item->get_total() + $order_item->get_total_tax() ) / $order_item->get_quantity() );
@@ -208,7 +208,7 @@ class ACO_Helper_Order {
 	 * Gets the item tax amount.
 	 *
 	 * @param object $order_item The order item.
-	 * @return float
+	 * @return string
 	 */
 	public static function get_item_tax_amount( $order_item ) {
 		return number_format( $order_item->get_total_tax() / $order_item->get_quantity(), 2, '.', '' );
@@ -220,7 +220,7 @@ class ACO_Helper_Order {
 	 * @param WC_Order                                                       $order The WooCommerce order.
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $order_item The WooCommerce order item.
-	 * @return int
+	 * @return int|string
 	 */
 	public static function get_tax_rate( $order, $order_item ) {
 		// If we don't have any tax, return 0.
@@ -319,9 +319,9 @@ class ACO_Helper_Order {
 	/**
 	 * Process gift cards.
 	 *
-	 * @param string $order_id The WooCommerce order ID.
-	 * @param object $order The WooCommerce order.
-	 * @param array  $items The items about to be sent to Avarda.
+	 * @param int|string $order_id The WooCommerce order ID.
+	 * @param object     $order The WooCommerce order.
+	 * @param array      $items The items about to be sent to Avarda.
 	 * @return array
 	 */
 	public static function process_gift_cards( $order_id, $order, $items ) {

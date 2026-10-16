@@ -20,7 +20,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 * Makes the request.
 	 *
 	 * @param int    $order_id WC order id.
-	 * @param string $amount the refunded amount.
+	 * @param float  $amount the refunded amount.
 	 * @param string $reason the refund message.
 	 * @return array
 	 */
@@ -46,7 +46,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 * Gets the request body.
 	 *
 	 * @param int    $order_id WC order id.
-	 * @param string $amount the refunded amount.
+	 * @param float  $amount the refunded amount.
 	 * @param string $reason the refund message.
 	 * @return array
 	 */
@@ -66,7 +66,7 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 * Gets the request args for the API call.
 	 *
 	 * @param int    $order_id WC order id.
-	 * @param string $amount the refunded amount.
+	 * @param float  $amount the refunded amount.
 	 * @param string $reason the refund message.
 	 * @return array
 	 */
