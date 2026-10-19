@@ -64,8 +64,6 @@ class ACO_Helper_Cart {
 
 			$retrieved_giftcards = $giftcards->get_cart_giftcards();
 			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
-				// get_total_amount() and get_total_tax_amount() are line totals, so they have to be
-				// converted to per item amounts before they can be paired with a quantity.
 				$giftcard_item = ACO_Helper_Item_Amount::get_item(
 					$retrieved_giftcard->get_name(),
 					$retrieved_giftcard->get_total_amount(),
