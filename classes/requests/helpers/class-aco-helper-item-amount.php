@@ -27,25 +27,18 @@ class ACO_Helper_Item_Amount {
 	 */
 	public static function get_item( $description, $total_incl_tax, $total_tax, $quantity ) {
 		$raw_quantity = floatval( $quantity );
-		$is_whole     = floor( $raw_quantity ) === $raw_quantity;
-		$quantity     = max( 1, intval( $quantity ) );
+		$quantity     = intval( $raw_quantity );
 		$total_minor  = self::to_minor_units( $total_incl_tax );
 		$tax_minor    = self::to_minor_units( $total_tax );
 
-		// Avarda's quantity field can't hold a fraction.
-		if ( $quantity > 1 && $is_whole ) {
-			$unit_minor     = intval( round( $total_minor / $quantity ) );
-			$unit_tax_minor = intval( round( $tax_minor / $quantity ) );
-
-			// Keep the quantity only if the per item amounts multiply back to the exact line totals.
-			if ( $unit_minor * $quantity === $total_minor && $unit_tax_minor * $quantity === $tax_minor ) {
-				return array(
-					'description' => self::truncate_description( $description ),
-					'amount'      => self::from_minor_units( $unit_minor ),
-					'taxAmount'   => self::from_minor_units( $unit_tax_minor ),
-					'quantity'    => $quantity,
-				);
-			}
+		// Keep the quantity only for whole quantities whose per item amounts multiply back exactly.
+		if ( $quantity > 1 && floatval( $quantity ) === $raw_quantity && 0 === $total_minor % $quantity && 0 === $tax_minor % $quantity ) {
+			return array(
+				'description' => self::truncate_description( $description ),
+				'amount'      => self::from_minor_units( intdiv( $total_minor, $quantity ) ),
+				'taxAmount'   => self::from_minor_units( intdiv( $tax_minor, $quantity ) ),
+				'quantity'    => $quantity,
+			);
 		}
 
 		// Send a single item with the exact line total, keeping the quantity in the description.
