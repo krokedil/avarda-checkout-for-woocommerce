@@ -334,13 +334,20 @@ class ACO_Helper_Order {
 
 			$retrieved_giftcards = $giftcards->get_order_giftcards( $order );
 			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
+				$giftcard_item = ACO_Helper_Item_Amount::get_item(
+					$retrieved_giftcard->get_name(),
+					$retrieved_giftcard->get_total_amount(),
+					$retrieved_giftcard->get_total_tax_amount(),
+					$retrieved_giftcard->get_quantity()
+				);
+
 				$items[] = array(
 					'note'        => $retrieved_giftcard->get_sku(),
-					'description' => $retrieved_giftcard->get_name(),
-					'quantity'    => $retrieved_giftcard->get_quantity(),
-					'amount'      => $retrieved_giftcard->get_total_amount(),
+					'description' => $giftcard_item['description'],
+					'quantity'    => $giftcard_item['quantity'],
+					'amount'      => $giftcard_item['amount'],
 					'taxCode'     => $retrieved_giftcard->get_tax_rate(),
-					'taxAmount'   => $retrieved_giftcard->get_total_tax_amount(),
+					'taxAmount'   => $giftcard_item['taxAmount'],
 				);
 			}
 		}
