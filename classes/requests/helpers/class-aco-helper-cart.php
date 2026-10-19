@@ -209,6 +209,20 @@ class ACO_Helper_Cart {
 	}
 
 	/**
+	 * Gets the products price.
+	 *
+	 * @deprecated 1.17.12 Use ACO_Helper_Item_Amount::get_item() instead.
+	 *
+	 * @param object $cart_item The cart item.
+	 * @return string
+	 */
+	public function get_product_price( $cart_item ) {
+		_deprecated_function( __METHOD__, '1.17.12', 'ACO_Helper_Item_Amount::get_item' );
+		$items_subtotal = ( $cart_item['line_total'] + $cart_item['line_tax'] ) / $cart_item['quantity'];
+		return number_format( $items_subtotal, 2, '.', '' );
+	}
+
+	/**
 	 * Gets the tax rate for the product.
 	 *
 	 * @param object $cart_item The cart item.
