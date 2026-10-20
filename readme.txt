@@ -2,13 +2,13 @@
 Contributors: krokedil, niklashogefjord
 Tags: ecommerce, e-commerce, woocommerce, avarda
 Requires at least: 5.0
-Tested up to: 7.1.2
+Tested up to: 7.1.3
 Requires PHP: 7.4
 WC requires at least: 5.6.0
 WC tested up to: 11.2.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
-Stable tag: 1.17.11
+Stable tag: 1.17.12
 
 Avarda Checkout for WooCommerce is a plugin that extends WooCommerce, allowing you to take payments via Avarda.
 
@@ -31,6 +31,9 @@ More information on how to get started can be found in the [plugin documentation
 
 
 == CHANGELOG ==
+= 2026.10.20        - version 1.17.12 =
+* Fix               - Resolved a rounding error where the order total in Avarda could differ by a few cents from WooCommerce's when a product's per-unit price including tax could not be represented exactly, which at higher quantities could also block the checkout with "The order could not be verified".
+
 = 2026.10.13        - version 1.17.11 =
 * Enhancement       - Sensitive customer data is now masked in the plugin log.
 * Fix               - Resolved an issue with Partner shipping where choosing a pickup point other than the first one in the shipping widget was not saved, so the order was always created with the first pickup point.
