@@ -13,11 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * If a token failed to be created, false is returned.
  *
  * @param string|null $currency The currency code.
+ * @param string      $client_id The client id the token belongs to.
  *
  * @return string|boolean
  */
-function aco_maybe_create_token( $currency = null ) {
-	$token = aco_get_auth_token( $currency );
+function aco_maybe_create_token( $currency = null, $client_id = '' ) {
+	$token = aco_get_auth_token( $currency, $client_id );
 
 	if ( false === $token ) { // update token if currency is changed.
 		$response = ACO_WC()->api->request_token();
@@ -26,34 +27,43 @@ function aco_maybe_create_token( $currency = null ) {
 		}
 
 		$token = $response['token'];
-		aco_set_auth_token( $token, $currency );
+		aco_set_auth_token( $token, $currency, $client_id );
 	}
 
 	return $token;
 }
 
 /**
- * Get the auth token transient name based on the currency.
+ * Get the auth token transient name based on the currency and client id.
  *
  * @param string|null $currency The currency code.
+ * @param string      $client_id The client id the token belongs to.
  *
  * @return string
  */
-function aco_get_transient_name( $currency = null ) {
+function aco_get_transient_name( $currency = null, $client_id = '' ) {
 	$currency = $currency ? $currency : get_woocommerce_currency(); // Get the currency if it was not passed.
 	$currency = strtolower( $currency ); // Make sure the currency is lowercase.
-	return "aco_{$currency}_auth_token";
+
+	$suffix = '';
+	if ( ! empty( $client_id ) ) {
+		$testmode = get_option( 'woocommerce_aco_settings', array() )['testmode'] ?? '';
+		$suffix   = '_' . substr( md5( $client_id . '|' . $testmode ), 0, 12 );
+	}
+
+	return "aco_{$currency}_auth_token{$suffix}";
 }
 
 /**
  * Get the auth token transient for the currency.
  *
  * @param string|null $currency The currency code.
+ * @param string      $client_id The client id the token belongs to.
  *
  * @return string|boolean
  */
-function aco_get_auth_token( $currency = null ) {
-	$transient_name = aco_get_transient_name( $currency );
+function aco_get_auth_token( $currency = null, $client_id = '' ) {
+	$transient_name = aco_get_transient_name( $currency, $client_id );
 	return get_transient( $transient_name );
 }
 
@@ -61,11 +71,12 @@ function aco_get_auth_token( $currency = null ) {
  * Delete the auth token for the currency.
  *
  * @param string|null $currency The currency code.
+ * @param string      $client_id The client id the token belongs to.
  *
  * @return void
  */
-function aco_delete_auth_token( $currency = null ) {
-	$transient_name = aco_get_transient_name( $currency );
+function aco_delete_auth_token( $currency = null, $client_id = '' ) {
+	$transient_name = aco_get_transient_name( $currency, $client_id );
 	delete_transient( $transient_name );
 }
 
@@ -74,11 +85,12 @@ function aco_delete_auth_token( $currency = null ) {
  *
  * @param string      $token The auth token.
  * @param string|null $currency The currency code.
+ * @param string      $client_id The client id the token belongs to.
  *
  * @return void
  */
-function aco_set_auth_token( $token, $currency ) {
-	$transient_name = aco_get_transient_name( $currency );
+function aco_set_auth_token( $token, $currency, $client_id = '' ) {
+	$transient_name = aco_get_transient_name( $currency, $client_id );
 	set_transient( $transient_name, $token, 55 * MINUTE_IN_SECONDS );
 }
 
