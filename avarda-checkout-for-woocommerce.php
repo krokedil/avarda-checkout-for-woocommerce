@@ -316,10 +316,19 @@ if ( ! class_exists( 'Avarda_Checkout_For_WooCommerce' ) ) {
 		 */
 		public function delete_all_transients() {
 			$currencies = array( 'SEK', 'NOK', 'DKK', 'EUR' );
+			$settings   = get_option( 'woocommerce_aco_settings', array() );
+			$client_ids = array( '' );
+
+			foreach ( array( 'se', 'no', 'dk', 'fi', 'int' ) as $country ) {
+				if ( ! empty( $settings[ 'merchant_id_' . $country ] ) ) {
+					$client_ids[] = $settings[ 'merchant_id_' . $country ];
+				}
+			}
 
 			foreach ( $currencies as $currency ) {
-				$name = aco_get_transient_name( $currency );
-				delete_transient( $name );
+				foreach ( $client_ids as $client_id ) {
+					aco_delete_auth_token( $currency, $client_id );
+				}
 			}
 		}
 

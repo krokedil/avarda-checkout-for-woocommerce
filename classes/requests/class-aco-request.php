@@ -92,7 +92,7 @@ class ACO_Request {
 				'Content-Type' => 'application/json',
 			);
 		} else {
-			$token = aco_maybe_create_token();
+			$token = aco_maybe_create_token( null, $this->client_id );
 			if ( is_wp_error( $token ) ) {
 				wp_die( esc_html( $token ) );
 			}
