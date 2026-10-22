@@ -79,13 +79,20 @@ class ACO_Helper_Order {
 			$product = wc_get_product( $order_item['product_id'] );
 		}
 
+		$item = ACO_Helper_Item_Amount::get_item(
+			self::get_item_name( $order_item ),
+			$order_item->get_total() + $order_item->get_total_tax(),
+			$order_item->get_total_tax(),
+			$order_item->get_quantity()
+		);
+
 		return array(
-			'description' => substr( self::get_item_name( $order_item ), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( self::get_reference( $order_item ), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $order_item ), // Float.
+			'amount'      => $item['amount'], // Float.
 			'taxCode'     => self::get_product_tax_code( $order, $order_item ), // Float.
-			'taxAmount'   => self::get_item_tax_amount( $order_item ), // Float.
-			'quantity'    => $order_item->get_quantity(),
+			'taxAmount'   => $item['taxAmount'], // Float.
+			'quantity'    => $item['quantity'],
 		);
 	}
 
@@ -167,12 +174,20 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public function get_fee( $order, $fee ) {
+		$item = ACO_Helper_Item_Amount::get_item(
+			$fee->get_name(),
+			$fee->get_total() + $fee->get_total_tax(),
+			$fee->get_total_tax(),
+			$fee->get_quantity()
+		);
+
 		return array(
-			'description' => substr( $fee->get_name(), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( $fee->get_id(), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $fee ), // String.
+			'amount'      => $item['amount'], // String.
 			'taxCode'     => self::get_tax_rate( $order, $fee ), // String.
-			'taxAmount'   => self::get_item_tax_amount( $fee ), // String.
+			'taxAmount'   => $item['taxAmount'], // String.
+			'quantity'    => $item['quantity'],
 		);
 	}
 
@@ -184,22 +199,33 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public static function process_order_item_shipping( $order, $order_item ) {
+		$item = ACO_Helper_Item_Amount::get_item(
+			$order_item->get_name(),
+			$order_item->get_total() + $order_item->get_total_tax(),
+			$order_item->get_total_tax(),
+			$order_item->get_quantity()
+		);
+
 		return array(
-			'description' => substr( $order_item->get_name(), 0, 34 ), // String.
+			'description' => $item['description'], // String.
 			'notes'       => substr( __( 'Shipping', 'avarda-checkout-for-woocommerce' ), 0, 34 ), // String.
-			'amount'      => self::get_item_price_incl_vat( $order_item ), // String.
+			'amount'      => $item['amount'], // String.
 			'taxCode'     => self::get_tax_rate( $order, $order_item ), // Float.
-			'taxAmount'   => self::get_item_tax_amount( $order_item ),
+			'taxAmount'   => $item['taxAmount'],
+			'quantity'    => $item['quantity'],
 		);
 	}
 
 	/**
 	 * Gets the item price including vat.
 	 *
+	 * @deprecated 1.17.12 Use ACO_Helper_Item_Amount::get_item() instead.
+	 *
 	 * @param object $order_item The order item.
 	 * @return string
 	 */
 	public static function get_item_price_incl_vat( $order_item ) {
+		_deprecated_function( __METHOD__, '1.17.12', 'ACO_Helper_Item_Amount::get_item' );
 		$items_subtotal = ( ( $order_item->get_total() + $order_item->get_total_tax() ) / $order_item->get_quantity() );
 		return number_format( $items_subtotal, 2, '.', '' );
 	}
@@ -207,10 +233,13 @@ class ACO_Helper_Order {
 	/**
 	 * Gets the item tax amount.
 	 *
+	 * @deprecated 1.17.12 Use ACO_Helper_Item_Amount::get_item() instead.
+	 *
 	 * @param object $order_item The order item.
 	 * @return string
 	 */
 	public static function get_item_tax_amount( $order_item ) {
+		_deprecated_function( __METHOD__, '1.17.12', 'ACO_Helper_Item_Amount::get_item' );
 		return number_format( $order_item->get_total_tax() / $order_item->get_quantity(), 2, '.', '' );
 	}
 
@@ -332,13 +361,20 @@ class ACO_Helper_Order {
 
 			$retrieved_giftcards = $giftcards->get_order_giftcards( $order );
 			foreach ( $retrieved_giftcards as $retrieved_giftcard ) {
+				$giftcard_item = ACO_Helper_Item_Amount::get_item(
+					$retrieved_giftcard->get_name(),
+					$retrieved_giftcard->get_total_amount(),
+					$retrieved_giftcard->get_total_tax_amount(),
+					$retrieved_giftcard->get_quantity()
+				);
+
 				$items[] = array(
 					'note'        => $retrieved_giftcard->get_sku(),
-					'description' => $retrieved_giftcard->get_name(),
-					'quantity'    => $retrieved_giftcard->get_quantity(),
-					'amount'      => $retrieved_giftcard->get_total_amount(),
+					'description' => $giftcard_item['description'],
+					'quantity'    => $giftcard_item['quantity'],
+					'amount'      => $giftcard_item['amount'],
 					'taxCode'     => $retrieved_giftcard->get_tax_rate(),
-					'taxAmount'   => $retrieved_giftcard->get_total_tax_amount(),
+					'taxAmount'   => $giftcard_item['taxAmount'],
 				);
 			}
 		}
