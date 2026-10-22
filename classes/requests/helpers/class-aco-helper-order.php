@@ -199,10 +199,13 @@ class ACO_Helper_Order {
 	 * @return array
 	 */
 	public static function process_order_item_shipping( $order, $order_item ) {
+		$total     = floatval( $order_item->get_total() );
+		$total_tax = floatval( $order_item->get_total_tax() );
+
 		$item = ACO_Helper_Item_Amount::get_item(
 			$order_item->get_name(),
-			$order_item->get_total() + $order_item->get_total_tax(),
-			$order_item->get_total_tax(),
+			$total + $total_tax,
+			$total_tax,
 			$order_item->get_quantity()
 		);
 
