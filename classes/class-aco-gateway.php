@@ -47,7 +47,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Debug mode.
 	 *
-	 * @var boolean
+	 * @var string
 	 */
 	public $debug;
 
@@ -164,7 +164,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Processes the WooCommerce Payment
 	 *
-	 * @param string $order_id The WooCommerce order ID.
+	 * @param int $order_id The WooCommerce order ID.
 	 *
 	 * @return array
 	 */
@@ -230,7 +230,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	 * Handle switching payment method for subscription.
 	 *
 	 * @param  WC_Order $order Woocommerce order.
-	 * @return array.
+	 * @return array
 	 */
 	public function process_subscription_payment_change_handler( $order ) {
 		$pay_url = add_query_arg(
@@ -249,7 +249,7 @@ class ACO_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Process refund request.
 	 *
-	 * @param string $order_id The WooCommerce order ID.
+	 * @param int    $order_id The WooCommerce order ID.
 	 * @param float  $amount The amount to be refunded.
 	 * @param string $reason The reason given for the refund.
 	 */

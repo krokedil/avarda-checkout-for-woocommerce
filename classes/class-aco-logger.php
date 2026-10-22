@@ -16,9 +16,9 @@ use KrokedilAvardaDeps\Krokedil\WpApi\KeyMasker;
  */
 class ACO_Logger {
 	/**
-	 * Log message string
+	 * The WooCommerce logger instance.
 	 *
-	 * @var $log
+	 * @var WC_Logger|null $log
 	 */
 	public static $log;
 
@@ -78,13 +78,13 @@ class ACO_Logger {
 	/**
 	 * Formats the log data to be logged.
 	 *
-	 * @param string $checkout_id The gateway Checkout ID.
-	 * @param string $method The method.
-	 * @param string $title The title for the log.
-	 * @param string $request_url The request url.
-	 * @param array  $request_args The request args.
-	 * @param array  $response The response.
-	 * @param string $code The status code.
+	 * @param string       $checkout_id The gateway Checkout ID.
+	 * @param string       $method The method.
+	 * @param string       $title The title for the log.
+	 * @param string       $request_url The request url.
+	 * @param array        $request_args The request args.
+	 * @param array|string $response The response.
+	 * @param string       $code The status code.
 	 * @return array
 	 */
 	public static function format_log( $checkout_id, $method, $title, $request_url, $request_args, $response, $code ) {

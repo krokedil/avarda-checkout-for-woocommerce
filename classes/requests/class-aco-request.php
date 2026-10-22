@@ -53,7 +53,7 @@ class ACO_Request {
 	/**
 	 * The request environment.
 	 *
-	 * @var $environment
+	 * @var string $environment
 	 */
 	public $environment;
 

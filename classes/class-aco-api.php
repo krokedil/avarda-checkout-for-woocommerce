@@ -42,7 +42,7 @@ class ACO_API {
 	/**
 	 * Initialize an Avarda Checkout payment.
 	 *
-	 * @param int $order_id The WooCommerce Order id.
+	 * @param int|false $order_id The WooCommerce Order id.
 	 *
 	 * @return mixed
 	 */
@@ -94,8 +94,8 @@ class ACO_API {
 	/**
 	 * Updates order reference.
 	 *
-	 * @param string $aco_purchase_id Avarda purchase id.
-	 * @param string $order_id WooCommerce order id.
+	 * @param string     $aco_purchase_id Avarda purchase id.
+	 * @param int|string $order_id WooCommerce order id.
 	 * @return mixed
 	 */
 	public function request_update_order_reference( $aco_purchase_id, $order_id ) {
@@ -107,7 +107,7 @@ class ACO_API {
 	/**
 	 * Activates an Avarda Checkout order.
 	 *
-	 * @param int $order_id WC order id.
+	 * @param int|string $order_id WC order id.
 	 * @return mixed
 	 */
 	public function request_activate_order( $order_id ) {
@@ -119,7 +119,7 @@ class ACO_API {
 	/**
 	 * Cancels an Avarda Checkout order.
 	 *
-	 * @param int $order_id WC order id.
+	 * @param int|string $order_id WC order id.
 	 * @return mixed
 	 */
 	public function request_cancel_order( $order_id ) {
@@ -131,8 +131,9 @@ class ACO_API {
 	/**
 	 * Refund an Avarda Checkout order.
 	 *
-	 * @param int   $order_id WC order id.
-	 * @param array $refunded_items The refunded items.
+	 * @param int|string $order_id WC order id.
+	 * @param float|null $amount The refunded amount.
+	 * @param string     $reason The refund reason.
 	 * @return mixed
 	 */
 	public function request_refund_order( $order_id, $amount, $reason ) {
@@ -144,8 +145,8 @@ class ACO_API {
 	/**
 	 * Return an Avarda Checkout order.
 	 *
-	 * @param int   $order_id WC order id.
-	 * @param array $refunded_items The refunded items.
+	 * @param int|string $order_id WC order id.
+	 * @param array      $refunded_items The refunded items.
 	 * @return mixed
 	 */
 	public function request_return_order( $order_id, $refunded_items ) {

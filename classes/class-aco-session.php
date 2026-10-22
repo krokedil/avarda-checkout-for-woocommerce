@@ -28,7 +28,7 @@ class ACO_Session {
 	/**
 	 * The reference the *Singleton* instance of this class.
 	 *
-	 * @var $instance
+	 * @var ACO_Session $instance
 	 */
 	protected static $instance;
 
@@ -42,7 +42,7 @@ class ACO_Session {
 	/**
 	 * Returns the *Singleton* instance of this class.
 	 *
-	 * @return self::$instance The *Singleton* instance.
+	 * @return self The *Singleton* instance.
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {

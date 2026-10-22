@@ -193,10 +193,10 @@ class ACO_Order_Management {
 	/**
 	 * WooCommerce Refund.
 	 *
-	 * @param string $order_id The WooCommerce order ID.
-	 * @param float  $amount The amount to be refunded.
-	 * @param string $reason The reason given for the refund.
-	 * @return boolean
+	 * @param int|string $order_id The WooCommerce order ID.
+	 * @param float      $amount The amount to be refunded.
+	 * @param string     $reason The reason given for the refund.
+	 * @return bool|void Nothing if the order is not handled by Avarda.
 	 */
 	public function refund_payment( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
