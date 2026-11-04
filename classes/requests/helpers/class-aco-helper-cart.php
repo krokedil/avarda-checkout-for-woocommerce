@@ -37,7 +37,7 @@ class ACO_Helper_Cart {
 
 		// Get cart items.
 		foreach ( $cart as $cart_item ) {
-			$formatted_cart_items[] = $this->get_cart_item( $cart_item );
+			$formatted_cart_items = array_merge( $formatted_cart_items, $this->get_cart_item_lines( $cart_item ) );
 		}
 
 		// Get cart fees.
@@ -86,12 +86,53 @@ class ACO_Helper_Cart {
 	}
 
 	/**
+	 * Gets the formatted rows for a cart item. A line that can't be split evenly per item is sent as several rows.
+	 *
+	 * @param array $cart_item WooCommerce cart item.
+	 * @return array[] Formatted cart item rows.
+	 */
+	public function get_cart_item_lines( $cart_item ) {
+		if ( $cart_item['variation_id'] ) {
+			$product = wc_get_product( $cart_item['variation_id'] );
+		} else {
+			$product = wc_get_product( $cart_item['product_id'] );
+		}
+		$items = ACO_Helper_Item_Amount::get_items(
+			$this->get_product_name( $cart_item ),
+			$cart_item['line_total'] + $cart_item['line_tax'],
+			$cart_item['line_tax'],
+			$cart_item['quantity']
+		);
+
+		$notes              = substr( $this->get_product_sku( $product ), 0, 34 );
+		$tax_code           = $this->get_product_tax_code( $cart_item );
+		$shipping_params    = $this->get_product_shipping_params( $product );
+		$formatted_item_row = array();
+		foreach ( $items as $item ) {
+			$formatted_item_row[] = array(
+				'description'        => $item['description'], // String.
+				'notes'              => $notes, // String.
+				'amount'             => $item['amount'], // Float.
+				'taxCode'            => $tax_code, // String.
+				'taxAmount'          => $item['taxAmount'], // Float.
+				'quantity'           => $item['quantity'],
+				'shippingParameters' => $shipping_params,
+			);
+		}
+
+		return $formatted_item_row;
+	}
+
+	/**
 	 * Gets formatted cart item.
+	 *
+	 * @deprecated 1.17.13 Use get_cart_item_lines() instead.
 	 *
 	 * @param array $cart_item WooCommerce cart item.
 	 * @return array Formatted cart item.
 	 */
 	public function get_cart_item( $cart_item ) {
+		_deprecated_function( __METHOD__, '1.17.13', 'ACO_Helper_Cart::get_cart_item_lines' );
 		if ( $cart_item['variation_id'] ) {
 			$product = wc_get_product( $cart_item['variation_id'] );
 		} else {
