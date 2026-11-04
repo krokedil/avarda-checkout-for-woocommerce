@@ -27,10 +27,7 @@ class ACO_Helper_Order {
 		$order_items = $order->get_items();
 		foreach ( $order_items as $order_item ) {
 			// Regular order item.
-			$formatted_order_item = $this->get_order_item( $order, $order_item );
-			if ( is_array( $formatted_order_item ) ) {
-				$formated_order_items[] = $formatted_order_item;
-			}
+			$formated_order_items = array_merge( $formated_order_items, $this->get_order_item_lines( $order, $order_item ) );
 			// Refunded order item (if Avardas refund endpoint has been used before the order was charged).
 			$formatted_refunded_order_item = $this->get_refunded_order_item( $order, $order_item );
 			if ( is_array( $formatted_refunded_order_item ) ) {
@@ -66,13 +63,48 @@ class ACO_Helper_Order {
 	}
 
 	/**
+	 * Gets the formatted rows for an order item. A line that can't be split evenly per item is sent as several rows.
+	 *
+	 * @param WC_Order $order WC order.
+	 * @param object   $order_item WooCommerce order item object.
+	 * @return array[] Formatted order item rows.
+	 */
+	public function get_order_item_lines( $order, $order_item ) {
+		$items = ACO_Helper_Item_Amount::get_items(
+			self::get_item_name( $order_item ),
+			$order_item->get_total() + $order_item->get_total_tax(),
+			$order_item->get_total_tax(),
+			$order_item->get_quantity()
+		);
+
+		$notes              = substr( self::get_reference( $order_item ), 0, 34 );
+		$tax_code           = self::get_product_tax_code( $order, $order_item );
+		$formatted_item_row = array();
+		foreach ( $items as $item ) {
+			$formatted_item_row[] = array(
+				'description' => $item['description'], // String.
+				'notes'       => $notes, // String.
+				'amount'      => $item['amount'], // Float.
+				'taxCode'     => $tax_code, // Float.
+				'taxAmount'   => $item['taxAmount'], // Float.
+				'quantity'    => $item['quantity'],
+			);
+		}
+
+		return $formatted_item_row;
+	}
+
+	/**
 	 * Gets formated order item.
+	 *
+	 * @deprecated 1.17.13 Use get_order_item_lines() instead.
 	 *
 	 * @param WC_Order $order WC order.
 	 * @param object   $order_item WooCommerce order item object.
 	 * @return array Formated order item.
 	 */
 	public function get_order_item( $order, $order_item ) {
+		_deprecated_function( __METHOD__, '1.17.13', 'ACO_Helper_Order::get_order_item_lines' );
 		if ( $order_item['variation_id'] ) {
 			$product = wc_get_product( $order_item['variation_id'] );
 		} else {
