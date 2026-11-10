@@ -115,7 +115,11 @@ function aco_wc_initialize_payment() {
 	// Remove old payment data if a WooCommerce order already exist.
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
-	if ( $order ) {
+	if ( $order && aco_is_order_paid( $order ) ) {
+		// A paid order must keep its purchase id. Detach it from the session so a new order is created instead.
+		WC()->session->set( 'order_awaiting_payment', null );
+		ACO_Logger::log( 'Order ' . $order_id . ' in order_awaiting_payment is already paid. Removed it from the session instead of deleting its Avarda data during aco_wc_initialize_payment.' );
+	} elseif ( $order ) {
 		aco_delete_avarda_meta_data_from_order( $order );
 		$order->set_transaction_id( '' );
 		$order->save();
@@ -630,6 +634,52 @@ function aco_wc_unset_sessions() {
 	WC()->session->__unset( 'aco_language' );
 	WC()->session->__unset( 'aco_currency' );
 	WC()->session->__unset( 'aco_wc_cart_contains_subscription' );
+}
+
+/**
+ * Check if the payment step is one where the session expiry must be ignored.
+ *
+ * @param string $step The Avarda payment step.
+ *
+ * @return bool
+ */
+function aco_is_payment_step_past_expiry_check( $step ) {
+	$steps = array( 'Completed', 'WaitingForExternalPaymentService' );
+
+	/**
+	 * Filter the Avarda payment steps where the session expiry is not checked.
+	 *
+	 * @since 1.17.13
+	 *
+	 * @param string[] $steps The payment steps.
+	 */
+	$steps = apply_filters( 'aco_payment_steps_ignoring_expiry', $steps );
+
+	return in_array( $step, $steps, true ) || 0 === strpos( $step, 'RedirectedTo' );
+}
+
+/**
+ * Get the Avarda purchase id for order management, falling back to the purchase id meta.
+ *
+ * @param WC_Order $order WooCommerce order.
+ *
+ * @return string
+ */
+function aco_get_order_purchase_id( $order ) {
+	$purchase_id = $order->get_transaction_id();
+
+	return ! empty( $purchase_id ) ? $purchase_id : (string) $order->get_meta( '_wc_avarda_purchase_id', true );
+}
+
+/**
+ * Check if an order has already been paid, so its Avarda data must not be removed.
+ *
+ * @param WC_Order $order WooCommerce order.
+ *
+ * @return bool
+ */
+function aco_is_order_paid( $order ) {
+	return ! empty( $order->get_date_paid() ) || $order->is_paid();
 }
 
 /**

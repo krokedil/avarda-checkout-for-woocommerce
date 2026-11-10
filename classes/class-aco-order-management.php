@@ -83,7 +83,7 @@ class ACO_Order_Management {
 		$subscription = $this->check_if_subscription( $order );
 
 		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true ) ?? $order->get_transaction_id() ?? '';
+		$purchase_id = aco_get_order_purchase_id( $order );
 		if ( empty( $purchase_id ) ) {
 			$note = __( 'Avarda Checkout reservation could not be cancelled. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
 			$order->update_status( 'on-hold', $note );
@@ -155,7 +155,7 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true ) ?? $order->get_transaction_id() ?? '';
+		$purchase_id = aco_get_order_purchase_id( $order );
 		if ( empty( $purchase_id ) ) {
 			$note = __( 'Avarda Checkout reservation could not be activated. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' );
 			$order->update_status( 'on-hold', $note );

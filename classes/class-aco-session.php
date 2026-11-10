@@ -339,6 +339,11 @@ class ACO_Session {
 			return $this;
 		}
 
+		// A completed payment, or one the customer is finishing at an external provider, must not be replaced.
+		if ( aco_is_payment_step_past_expiry_check( $this->get_payment_step() ) ) {
+			return $this;
+		}
+
 		$expired_utc = $this->avarda_payment['expiredUtc'] ?? '0';
 		$has_expired = time() > strtotime( $expired_utc );
 
