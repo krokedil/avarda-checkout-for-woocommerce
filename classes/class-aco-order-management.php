@@ -213,7 +213,7 @@ class ACO_Order_Management {
 		}
 
 		// Check if we have a purchase id.
-		$purchase_id = $order->get_meta( '_wc_avarda_purchase_id', true );
+		$purchase_id = aco_get_order_purchase_id( $order );
 		if ( empty( $purchase_id ) ) {
 			$order->add_order_note( __( 'Avarda Checkout order could not be refunded. Missing Avarda purchase id.', 'avarda-checkout-for-woocommerce' ) );
 			return false;
