@@ -199,7 +199,14 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-	$order          = wc_get_order( $order_id );
+	$order = wc_get_order( $order_id );
+
+	// A paid order must keep its purchase id, so never delete, update or replace its Avarda data.
+	if ( $order && aco_is_order_paid( $order ) ) {
+		ACO_Logger::log( sprintf( 'Order %s is already paid. Skipping initialize or update of the Avarda payment in aco_wc_initialize_or_update_order_from_wc_order.', $order_id ) );
+		return;
+	}
+
 	$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
 	if ( $avarda_payment ) { // If we got a response
 		// Check for a WP_Error.

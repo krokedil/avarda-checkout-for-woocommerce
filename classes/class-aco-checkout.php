@@ -227,12 +227,6 @@ class ACO_Checkout {
 		// Get the Avarda order from Avarda.
 		$avarda_order = ACO_WC()->session()->get_avarda_payment();
 
-		// Keep the session of a completed payment, the reload sends the customer to its confirmation page.
-		if ( is_wp_error( $avarda_order ) && ! empty( ACO_WC()->session()->get_confirmation_url() ) ) {
-			WC()->session->set( 'reload_checkout', true );
-			return;
-		}
-
 		// Check if we got a wp_error.
 		if ( is_wp_error( $avarda_order ) ) {
 			// Unset sessions.
