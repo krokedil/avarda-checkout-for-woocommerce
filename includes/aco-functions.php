@@ -115,7 +115,11 @@ function aco_wc_initialize_payment() {
 	// Remove old payment data if a WooCommerce order already exist.
 	$order_id = absint( WC()->session->get( 'order_awaiting_payment' ) );
 	$order    = $order_id ? wc_get_order( $order_id ) : null;
-	if ( $order ) {
+	if ( $order && aco_is_order_paid( $order ) ) {
+		// A paid order must keep its purchase id. Detach it from the session so a new order is created instead.
+		WC()->session->set( 'order_awaiting_payment', null );
+		ACO_Logger::log( 'Order ' . $order_id . ' in order_awaiting_payment is already paid. Removed it from the session instead of deleting its Avarda data during aco_wc_initialize_payment.' );
+	} elseif ( $order ) {
 		aco_delete_avarda_meta_data_from_order( $order );
 		$order->set_transaction_id( '' );
 		$order->save();
@@ -195,7 +199,14 @@ function aco_wc_initialize_or_update_order() {
  * @return mixed
  */
 function aco_wc_initialize_or_update_order_from_wc_order( $order_id ) {
-	$order          = wc_get_order( $order_id );
+	$order = wc_get_order( $order_id );
+
+	// A paid order must keep its purchase id, so never delete, update or replace its Avarda data.
+	if ( $order && aco_is_order_paid( $order ) ) {
+		ACO_Logger::log( sprintf( 'Order %s is already paid. Skipping initialize or update of the Avarda payment in aco_wc_initialize_or_update_order_from_wc_order.', $order_id ) );
+		return;
+	}
+
 	$avarda_payment = ACO_WC()->session()->get_avarda_payment( $order );
 	if ( $avarda_payment ) { // If we got a response
 		// Check for a WP_Error.
@@ -272,7 +283,28 @@ function aco_wc_save_avarda_session_data_to_order( $order_id, $avarda_order ) {
 }
 
 /**
- * Whether the purchase id is the order's current Avarda session, or one dropped when the customer details changed.
+ * Add a purchase id to the order's dropped Avarda sessions, unless it is already there.
+ *
+ * @param WC_Order $order The WooCommerce order.
+ * @param string   $purchase_id The Avarda purchase id.
+ * @return void
+ */
+function aco_add_dropped_purchase_id( $order, $purchase_id ) {
+	if ( empty( $purchase_id ) ) {
+		return;
+	}
+
+	foreach ( $order->get_meta( '_wc_avarda_dropped_purchase_id', false ) as $meta ) {
+		if ( $meta->value === $purchase_id ) {
+			return;
+		}
+	}
+
+	$order->add_meta_data( '_wc_avarda_dropped_purchase_id', $purchase_id );
+}
+
+/**
+ * Whether the purchase id is the order's current Avarda session, or one dropped when the session was replaced.
  *
  * @param WC_Order $order The WooCommerce order.
  * @param string   $purchase_id The Avarda purchase id.
@@ -347,8 +379,7 @@ function aco_maybe_reset_session_on_customer_change( $order ) {
 	$purchase_id = ACO_WC()->session()->get_purchase_id();
 	ACO_Logger::log( sprintf( 'Customer details changed for order %s (Avarda ID: %s, step %s). Discarding the Avarda session so a new one is created.', $order->get_id(), $purchase_id, $step ) );
 
-	// The old session may still be paid in another tab, so keep it findable for the callback and confirmation.
-	$order->add_meta_data( '_wc_avarda_dropped_purchase_id', $purchase_id );
+	// This keeps the old purchase id as dropped, since it may still be paid in another tab.
 	aco_delete_avarda_meta_data_from_order( $order );
 	ACO_WC()->session()->set_avarda_payment( array() );
 }
@@ -405,12 +436,10 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 			$current_purchase_id = $order->get_meta( '_wc_avarda_purchase_id' );
 			if ( $current_purchase_id !== $avarda_purchase_id && aco_order_has_purchase_id( $order, $avarda_purchase_id ) ) {
 				// Keep the displaced session findable too, in case the customer pays it as well.
-				if ( ! empty( $current_purchase_id ) ) {
-					$order->add_meta_data( '_wc_avarda_dropped_purchase_id', $current_purchase_id );
-				}
+				aco_add_dropped_purchase_id( $order, (string) $current_purchase_id );
 				$order->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
 				// translators: Avarda purchase ID.
-				$order->add_order_note( sprintf( __( 'The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced after their details changed. The order now uses that purchase.', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
+				$order->add_order_note( sprintf( __( 'The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced. The order now uses that purchase.', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
 				$order->save();
 			}
 
@@ -633,6 +662,79 @@ function aco_wc_unset_sessions() {
 }
 
 /**
+ * Check if the payment step is one where the session expiry must be ignored.
+ *
+ * @param string $step The Avarda payment step.
+ *
+ * @return bool
+ */
+function aco_is_payment_step_past_expiry_check( $step ) {
+	$steps = array( 'Completed' );
+
+	/**
+	 * Filter the Avarda payment steps where the session expiry is not checked.
+	 *
+	 * @since 1.17.13
+	 *
+	 * @param string[] $steps The payment steps.
+	 */
+	$steps = apply_filters( 'aco_payment_steps_ignoring_expiry', $steps );
+
+	return in_array( $step, $steps, true );
+}
+
+/**
+ * Check if the payment step means the customer is finishing the payment at an external provider.
+ *
+ * @param string $step The Avarda payment step.
+ *
+ * @return bool
+ */
+function aco_is_external_payment_step( $step ) {
+	return 'WaitingForExternalPaymentService' === $step || 0 === strpos( $step, 'RedirectedTo' );
+}
+
+/**
+ * Get the seconds a session at an external provider is kept after it expires, so the customer can finish paying.
+ *
+ * @return int
+ */
+function aco_get_external_payment_expiry_grace() {
+	/**
+	 * Filter the seconds a session at an external payment provider is kept after its expiry time.
+	 *
+	 * @since 1.17.13
+	 *
+	 * @param int $grace The grace period in seconds.
+	 */
+	return absint( apply_filters( 'aco_external_payment_expiry_grace', HOUR_IN_SECONDS ) );
+}
+
+/**
+ * Get the Avarda purchase id for order management, falling back to the purchase id meta.
+ *
+ * @param WC_Order $order WooCommerce order.
+ *
+ * @return string
+ */
+function aco_get_order_purchase_id( $order ) {
+	$purchase_id = $order->get_transaction_id();
+
+	return ! empty( $purchase_id ) ? $purchase_id : (string) $order->get_meta( '_wc_avarda_purchase_id', true );
+}
+
+/**
+ * Check if an order has already been paid, so its Avarda data must not be removed.
+ *
+ * @param WC_Order $order WooCommerce order.
+ *
+ * @return bool
+ */
+function aco_is_order_paid( $order ) {
+	return ! empty( $order->get_date_paid() ) || $order->is_paid();
+}
+
+/**
  * Delete Avarda meta data from order.
  *
  * @param WC_Order $order WooCommerce order.
@@ -640,6 +742,10 @@ function aco_wc_unset_sessions() {
  * @return void
  */
 function aco_delete_avarda_meta_data_from_order( $order ) {
+	// The replaced session may still be paid, for example in another tab or after a late return from a payment provider.
+	// Keep its purchase id findable for the callback and confirmation.
+	aco_add_dropped_purchase_id( $order, (string) $order->get_meta( '_wc_avarda_purchase_id' ) );
+
 	$order->delete_meta_data( '_wc_avarda_purchase_id' );
 	$order->delete_meta_data( '_wc_avarda_jwt' );
 	$order->delete_meta_data( '_wc_avarda_expiredUtc' );
@@ -723,7 +829,7 @@ function aco_get_order_by_purchase_id( $purchase_id, $date_after = null ) {
 
 	$orders = wc_get_orders( $args );
 
-	// Fall back to sessions dropped when the customer details changed.
+	// Fall back to sessions dropped when they were replaced.
 	if ( empty( $orders ) ) {
 		$args['meta_key'] = '_wc_avarda_dropped_purchase_id'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Same lookup as above, on the key that holds dropped purchase ids.
 		$orders           = wc_get_orders( $args );

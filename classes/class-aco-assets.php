@@ -283,6 +283,12 @@ class ACO_Assets {
 		// Get the order if we have an order id.
 		$order = $order_id ? wc_get_order( $order_id ) : null;
 
+		// A paid order must keep its purchase id, so never reset or start a new payment for it.
+		if ( $order && aco_is_order_paid( $order ) ) {
+			ACO_Logger::log( 'Order ' . $order->get_id() . ' is already paid. Skipping initialize of a new Avarda payment.' );
+			return;
+		}
+
 		if ( $order ) {
 			aco_maybe_reset_session_on_customer_change( $order );
 		}
@@ -323,6 +329,11 @@ class ACO_Assets {
 	 */
 	public function force_new_session( $order = null ) {
 		$is_order = is_a( $order, 'WC_Order' );
+
+		// A paid order must keep its purchase id.
+		if ( $is_order && aco_is_order_paid( $order ) ) {
+			return;
+		}
 
 		if ( $is_order ) {
 			aco_delete_avarda_meta_data_from_order( $order );
