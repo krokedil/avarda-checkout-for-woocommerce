@@ -438,6 +438,7 @@ function aco_confirm_avarda_order( $order_id, $avarda_purchase_id ) {
 				// Keep the displaced session findable too, in case the customer pays it as well.
 				aco_add_dropped_purchase_id( $order, (string) $current_purchase_id );
 				$order->update_meta_data( '_wc_avarda_purchase_id', $avarda_purchase_id );
+				$order->set_transaction_id( $avarda_purchase_id );
 				// translators: Avarda purchase ID.
 				$order->add_order_note( sprintf( __( 'The customer paid in an earlier Avarda session (Purchase ID: %s) that had been replaced. The order now uses that purchase.', 'avarda-checkout-for-woocommerce' ), $avarda_purchase_id ) );
 				$order->save();
