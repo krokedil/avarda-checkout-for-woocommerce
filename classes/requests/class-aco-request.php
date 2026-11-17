@@ -114,10 +114,8 @@ class ACO_Request {
 		$wc_version     = WC()->version;
 		$plugin_version = AVARDA_CHECKOUT_VERSION;
 		$php_version    = phpversion();
-		$user_agent     = "WordPress/{$wp_version}; {$wp_url} - WooCommerce: {$wc_version} - Avarda Checkout: {$plugin_version} - PHP Version: {$php_version} - Krokedil";
 
-		// Core passes the request URL as the second argument, so callbacks may require it. The base URL is the closest we have here.
-		return apply_filters( 'http_headers_useragent', $user_agent, $this->base_url );
+		return "WordPress/{$wp_version}; {$wp_url} - WooCommerce: {$wc_version} - Avarda Checkout: {$plugin_version} - PHP Version: {$php_version} - Krokedil";
 	}
 
 	/**
