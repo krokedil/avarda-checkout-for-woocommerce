@@ -155,6 +155,10 @@ msgstr ""
 msgid "Avarda High Amount Loan"
 msgstr "Avarda Högt Belopp Lån"
 
+#: ../includes/aco-functions.php:566
+msgid "High Amount Loan"
+msgstr "Högt Belopp Lån"
+
 #: ../classes/class-aco-meta-box.php:86
 msgid "Avarda order step"
 msgstr ""

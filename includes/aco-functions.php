@@ -589,8 +589,9 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 	$method_title        = $method_titles[ $aco_payment_method ] ?? $method_titles[ $base_payment_method ] ?? null;
 
 	if ( null === $method_title ) {
-		// Unknown type: use the plain checkout name rather than "Avarda Avarda Checkout".
-		$method_title               = __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
+		// Unknown type: use the gateway title as-is, so the merchant's setting applies.
+		$settings                   = get_option( 'woocommerce_aco_settings', array() );
+		$method_title               = ! empty( $settings['title'] ) ? $settings['title'] : __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
 		$method_title_from_settings = '{PAYMENT_METHOD_TITLE}';
 	} else {
 		$method_title_from_settings = 'Avarda {PAYMENT_METHOD_TITLE}';
