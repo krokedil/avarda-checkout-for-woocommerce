@@ -64,10 +64,11 @@ class ACO_Request_Token extends ACO_Request {
 	 */
 	public function get_request_args() {
 		return array(
-			'headers' => $this->get_headers(),
-			'method'  => 'POST',
-			'body'    => $this->get_body(),
-			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
+			'headers'    => $this->get_headers(),
+			'user-agent' => $this->get_user_agent(),
+			'method'     => 'POST',
+			'body'       => $this->get_body(),
+			'timeout'    => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }
