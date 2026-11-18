@@ -57,10 +57,11 @@ class ACO_Request_Update_Order_Reference extends ACO_Request {
 	 */
 	public function get_request_args( $order_id ) {
 		return array(
-			'headers' => $this->get_headers(),
-			'method'  => 'PUT',
-			'body'    => wp_json_encode( $this->get_body( $order_id ) ),
-			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
+			'headers'    => $this->get_headers(),
+			'user-agent' => $this->get_user_agent(),
+			'method'     => 'PUT',
+			'body'       => wp_json_encode( $this->get_body( $order_id ) ),
+			'timeout'    => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }

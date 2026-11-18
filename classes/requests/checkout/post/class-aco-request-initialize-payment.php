@@ -84,9 +84,10 @@ class ACO_Request_Initialize_Payment extends ACO_Request {
 	 */
 	public function get_request_args( $order_id ) {
 		return array(
-			'headers' => $this->get_headers(),
-			'method'  => 'POST',
-			'body'    => wp_json_encode( apply_filters( 'aco_wc_api_request_args', $this->get_body( $order_id ) ) ),
+			'headers'    => $this->get_headers(),
+			'user-agent' => $this->get_user_agent(),
+			'method'     => 'POST',
+			'body'       => wp_json_encode( apply_filters( 'aco_wc_api_request_args', $this->get_body( $order_id ) ) ),
 		);
 	}
 }

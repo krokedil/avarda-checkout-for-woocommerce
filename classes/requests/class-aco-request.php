@@ -104,6 +104,21 @@ class ACO_Request {
 	}
 
 	/**
+	 * Get the user agent to send with requests to Avarda.
+	 *
+	 * @return string
+	 */
+	public function get_user_agent() {
+		$wp_version     = get_bloginfo( 'version' );
+		$wp_url         = get_bloginfo( 'url' );
+		$wc_version     = WC()->version;
+		$plugin_version = AVARDA_CHECKOUT_VERSION;
+		$php_version    = phpversion();
+
+		return "WordPress/{$wp_version}; {$wp_url} - WooCommerce: {$wc_version} - Avarda Checkout: {$plugin_version} - PHP Version: {$php_version} - Krokedil";
+	}
+
+	/**
 	 * Sets the environment.
 	 *
 	 * @return void

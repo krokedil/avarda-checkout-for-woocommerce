@@ -72,10 +72,11 @@ class ACO_Request_Refund_Order extends ACO_Request {
 	 */
 	public function get_request_args( $order_id, $amount, $reason ) {
 		return array(
-			'headers' => $this->get_headers(),
-			'method'  => 'POST',
-			'body'    => wp_json_encode( $this->get_body( $order_id, $amount, $reason ) ),
-			'timeout' => apply_filters( 'aco_set_timeout', 10 ),
+			'headers'    => $this->get_headers(),
+			'user-agent' => $this->get_user_agent(),
+			'method'     => 'POST',
+			'body'       => wp_json_encode( $this->get_body( $order_id, $amount, $reason ) ),
+			'timeout'    => apply_filters( 'aco_set_timeout', 10 ),
 		);
 	}
 }
