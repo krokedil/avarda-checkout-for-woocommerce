@@ -556,63 +556,53 @@ function aco_set_payment_method_title( $order, $avarda_order ) {
 		$order->save();
 	}
 
-	switch ( $aco_payment_method ) {
-		case 'Invoice':
-			$method_title = __( 'Invoice', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'Loan':
-			$method_title = __( 'Loan', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'Card':
-			$method_title = __( 'Card', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'DirectPayment':
-			$method_title = __( 'Direct Payment', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'PartPayment':
-			$method_title = __( 'Part Payment', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'Swish':
-			$method_title = __( 'Swish', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'HighAmountLoan':
-			$method_title = __( 'Avarda High Amount Loan', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'PayPal':
-			$method_title = __( 'PayPal', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'PayOnDelivery':
-			$method_title = __( 'Pay On Delivery', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'B2BInvoice':
-			$method_title = __( 'B2B Invoice', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'DirectInvoice':
-			$method_title = __( 'Direct Invoice', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'Masterpass':
-			$method_title = __( 'Masterpass', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'MobilePay':
-			$method_title = __( 'MobilePay', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'Vipps':
-			$method_title = __( 'Vipps', 'avarda-checkout-for-woocommerce' );
-			break;
-		case 'ZeroAmount':
-			$method_title = __( 'Zero Amount', 'avarda-checkout-for-woocommerce' );
-			break;
-		default:
-			$method_title = __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
+	$method_titles = array(
+		'Invoice'          => __( 'Invoice', 'avarda-checkout-for-woocommerce' ),
+		'Loan'             => __( 'Loan', 'avarda-checkout-for-woocommerce' ),
+		'Card'             => __( 'Card', 'avarda-checkout-for-woocommerce' ),
+		'DirectPayment'    => __( 'Direct Payment', 'avarda-checkout-for-woocommerce' ),
+		'PartPayment'      => __( 'Part Payment', 'avarda-checkout-for-woocommerce' ),
+		'Swish'            => __( 'Swish', 'avarda-checkout-for-woocommerce' ),
+		'HighAmountLoan'   => __( 'High Amount Loan', 'avarda-checkout-for-woocommerce' ),
+		'PayPal'           => __( 'PayPal', 'avarda-checkout-for-woocommerce' ),
+		'PayOnDelivery'    => __( 'Pay On Delivery', 'avarda-checkout-for-woocommerce' ),
+		'B2BInvoice'       => __( 'B2B Invoice', 'avarda-checkout-for-woocommerce' ),
+		'DirectInvoice'    => __( 'Direct Invoice', 'avarda-checkout-for-woocommerce' ),
+		'Masterpass'       => __( 'Masterpass', 'avarda-checkout-for-woocommerce' ),
+		'MobilePay'        => __( 'MobilePay', 'avarda-checkout-for-woocommerce' ),
+		'Vipps'            => __( 'Vipps', 'avarda-checkout-for-woocommerce' ),
+		'ZeroAmount'       => __( 'Zero Amount', 'avarda-checkout-for-woocommerce' ),
+		'Trustly'          => __( 'Trustly', 'avarda-checkout-for-woocommerce' ),
+		'PostponePayment'  => __( 'Postpone Payment', 'avarda-checkout-for-woocommerce' ),
+		'PayWithAccount'   => __( 'Pay With Account', 'avarda-checkout-for-woocommerce' ),
+		'Amex'             => __( 'American Express', 'avarda-checkout-for-woocommerce' ),
+		'SplitInX'         => __( 'Split Payment', 'avarda-checkout-for-woocommerce' ),
+		'ApplePay'         => __( 'Apple Pay', 'avarda-checkout-for-woocommerce' ),
+		'GooglePay'        => __( 'Google Pay', 'avarda-checkout-for-woocommerce' ),
+		'DirectDebit'      => __( 'Direct Debit', 'avarda-checkout-for-woocommerce' ),
+		'TwoB2BInvoice'    => __( 'B2B Invoice', 'avarda-checkout-for-woocommerce' ),
+		'TwoB2bInstalment' => __( 'B2B Instalment', 'avarda-checkout-for-woocommerce' ),
+	);
+
+	// Avarda names provider-specific variants "<Type>Via<Provider>", e.g. CardViaCheckoutCom.
+	$base_payment_method = preg_replace( '/Via[A-Z][A-Za-z]*$/', '', $aco_payment_method );
+	$method_title        = $method_titles[ $aco_payment_method ] ?? $method_titles[ $base_payment_method ] ?? null;
+
+	if ( null === $method_title ) {
+		// Unknown type: use the gateway title as-is, so the merchant's setting applies.
+		$settings                   = get_option( 'woocommerce_aco_settings', array() );
+		$method_title               = ! empty( $settings['title'] ) ? $settings['title'] : __( 'Avarda Checkout', 'avarda-checkout-for-woocommerce' );
+		$method_title_from_settings = '{PAYMENT_METHOD_TITLE}';
+	} else {
+		$method_title_from_settings = 'Avarda {PAYMENT_METHOD_TITLE}';
 	}
 
 	// pattern substitution.
-	$replacements               = array(
+	$replacements          = array(
 		'{PAYMENT_METHOD_TITLE}' => $method_title,
 	);
-	$method_title_from_settings = 'Avarda {PAYMENT_METHOD_TITLE}';
-	$method_title_filtered      = str_replace( array_keys( $replacements ), $replacements, $method_title_from_settings );
-	$method_title_filtered      = apply_filters( 'aco_order_set_payment_method_title', $method_title_filtered, $method_title, $order->get_id() );
+	$method_title_filtered = str_replace( array_keys( $replacements ), $replacements, $method_title_from_settings );
+	$method_title_filtered = apply_filters( 'aco_order_set_payment_method_title', $method_title_filtered, $method_title, $order->get_id() );
 
 	$order->set_payment_method_title( $method_title_filtered );
 	$order->save();
