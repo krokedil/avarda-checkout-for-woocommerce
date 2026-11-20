@@ -339,8 +339,22 @@ class ACO_Session {
 			return $this;
 		}
 
+		$step = $this->get_payment_step();
+
+		// A completed payment must not be replaced.
+		if ( aco_is_payment_step_past_expiry_check( $step ) ) {
+			return $this;
+		}
+
 		$expired_utc = $this->avarda_payment['expiredUtc'] ?? '0';
-		$has_expired = time() > strtotime( $expired_utc );
+		$expires_at  = (int) strtotime( $expired_utc );
+
+		// Give a customer at an external provider time to finish paying before the session is replaced.
+		if ( $expires_at > 0 && aco_is_external_payment_step( $step ) ) {
+			$expires_at += aco_get_external_payment_expiry_grace();
+		}
+
+		$has_expired = time() > $expires_at;
 
 		if ( $has_expired ) {
 			throw new Exception( __( 'Avarda Checkout payment has expired.', 'avarda-checkout-for-woocommerce' ) ); // phpcs:ignore

@@ -22,7 +22,7 @@ class ACO_Request_Activate_Order extends ACO_Request {
 	 */
 	public function request( $order_id ) {
 		$order           = wc_get_order( $order_id );
-		$aco_purchase_id = $order->get_transaction_id();
+		$aco_purchase_id = aco_get_order_purchase_id( $order );
 
 		$request_url  = $this->base_url . '/api/partner/payments/' . $aco_purchase_id . '/order';
 		$request_args = apply_filters( 'aco_activate_order_args', $this->get_request_args( $order_id ) );
